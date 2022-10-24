@@ -3,8 +3,7 @@
     "rootNamespace": "",
     "references": [
         "UniTask",
-        "MaCommon",
-        "MaPlay"
+        "MaCommon"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
