@@ -226,24 +226,16 @@ namespace MaTech.Track3D {
             trackOriginPosition = new CachedValueByFrame<Vector3>(() => locatorTrackOrigin.position);
             trackFarEndPosition = new CachedValueByFrame<Vector3>(() => locatorTrackFarEnd.position);
 
-            trackOriginDistanceToCamera = new CachedValueByFrame<float>(() =>
-                Vector3.Distance(trackOriginPosition, cameraPosition));
-            trackOriginPositionOnCameraAxis = new CachedValueByFrame<float>(() =>
-                Vector3.Dot(locatorTrackOrigin.position - cameraPosition, cameraDirection));
-            trackOriginViewDirToCompensatedDirAngle = new CachedValueByFrame<float>(() =>
-                (1 - compensationOnDistance) * trackAngle + 90 - referenceCamera.fieldOfView / 2);
+            trackOriginDistanceToCamera = new CachedValueByFrame<float>(() => Vector3.Distance(trackOriginPosition, cameraPosition));
+            trackOriginPositionOnCameraAxis = new CachedValueByFrame<float>(() => Vector3.Dot(locatorTrackOrigin.position - cameraPosition, cameraDirection));
+            trackOriginViewDirToCompensatedDirAngle = new CachedValueByFrame<float>(() => (1 - compensationOnDistance) * trackAngle + 90 - referenceCamera.fieldOfView / 2);
 
             // The key ingredient for 3D compensation magics
-            compensationDistanceFactor = new CachedValueByFrame<float>(() =>
-                MathUtil.RatioFromSinDegrees(compensationOnDistance * trackAngle,
-                    trackOriginViewDirToCompensatedDirAngle) /
-                trackOriginDistanceToCamera * Vector3.Distance(trackFarEndPosition, trackOriginPosition) /
-                distanceFarEnd);
+            compensationDistanceFactor = new CachedValueByFrame<float>(() => MathUtil.RatioFromSinDegrees(compensationOnDistance * trackAngle,
+                trackOriginViewDirToCompensatedDirAngle) / trackOriginDistanceToCamera * Vector3.Distance(trackFarEndPosition, trackOriginPosition) / distanceFarEnd);
 
             scaleAtJudgeLine = new CachedValueByFrame<float>(() => GetHeightScaleFromPosition(trackOriginPosition));
-
-            scaleOfOffset = new CachedValueByFrame<float>(() =>
-                distanceScaleByDistanceInView.Evaluate(GetOffsetFromRatio2D(1.0f)));
+            scaleOfOffset = new CachedValueByFrame<float>(() => distanceScaleByDistanceInView.Evaluate(GetOffsetFromRatio2D(1.0f)));
         }
     }
 }
