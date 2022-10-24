@@ -7,6 +7,10 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
+// disable warning for async interfaces
+// (need to write async there to indicate the usage)
+#pragma warning disable 1998
+
 namespace MaTech.Play {
     /// <summary>
     /// 继承这个类的组件，可以实现以上接口以接受Play广播信息。
