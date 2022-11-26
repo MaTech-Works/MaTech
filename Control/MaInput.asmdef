@@ -1,5 +1,5 @@
 {
-    "name": "MaInput",
+    "name": "MaControl",
     "rootNamespace": "",
     "references": [
         "UniTask",

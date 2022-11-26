@@ -6,7 +6,7 @@
         "MaCommon",
         "MaAudio",
         "MaChart",
-        "MaInput"
+        "MaControl"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
