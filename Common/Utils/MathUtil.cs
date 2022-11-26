@@ -121,12 +121,5 @@ namespace MaTech.Common.Utils {
         public static float RatioFromSinRadians(float angleNumer, float angleDenom) {
             return Mathf.Sin(angleNumer) / Mathf.Sin(angleDenom);
         }
-
-        public static int MaxBit(int x) =>
-            ((x & 0xffff0000) == 0 ? 0 : 16) +
-            ((x & 0xff00ff00) == 0 ? 0 : 8) +
-            ((x & 0xf0f0f0f0) == 0 ? 0 : 4) +
-            ((x & 0xcccccccc) == 0 ? 0 : 2) +
-            ((x & 0xaaaaaaaa) == 0 ? 0 : 1);
     }
 }
