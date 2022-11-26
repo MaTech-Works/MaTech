@@ -121,5 +121,12 @@ namespace MaTech.Common.Utils {
         public static float RatioFromSinRadians(float angleNumer, float angleDenom) {
             return Mathf.Sin(angleNumer) / Mathf.Sin(angleDenom);
         }
+        
+        /// 将角度转换为>=lowerBound的最小等价角度（角度制）
+        public static float LowerBoundAngle(float degrees, float lowerBound) {
+            float delta = Mathf.DeltaAngle(lowerBound, degrees); // delta in [-180, 180]
+            return lowerBound + delta + (delta < 0 ? 360 : 0);
+        }
+        
     }
 }
