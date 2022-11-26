@@ -18,7 +18,7 @@ using Object = UnityEngine.Object;
 using UnityScene = UnityEngine.SceneManagement.Scene;
 
 namespace MaTech.Common.Utils {
-    public static class UnityExtend {
+    public static class UnityUtil {
         [Serializable] public class UnityEventInt : UnityEvent<int> { }
         [Serializable] public class UnityEventBool : UnityEvent<bool> { }
         [Serializable] public class UnityEventFloat : UnityEvent<float> { }
