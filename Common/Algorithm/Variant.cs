@@ -10,31 +10,29 @@ using Newtonsoft.Json;
 
 namespace MaTech.Common.Algorithm {
     public enum VariantType {
-        Null = 0, Bool, Int, Float, Double, Fraction, FractionSimple, String, Object
+        None = 0, Bool, Int, Float, Double, Fraction, FractionSimple, String, Object
     }
 
     /// <summary>
-    /// A boolean, an integer, a float-point, a fraction, a string, an object, or nothing.
+    /// A boolean, an integer, a float-point, a fraction, a string, an object, or nothing ("None" type).
     /// 
     /// Numeral types can be casted between each other.
     /// Every type can convert to string.
-    /// There are no null string or null object states.
-    ///
-    /// All methods should be robust and free of common exceptions.
-    ///
+    /// 
+    /// String and Object values are non-null; a None value
     /// The equality method compares the data strictly, including float-point values.
     ///
-    /// todo: make values of this type immutable; change all setters to private, and use conversion operators instead
+    /// todo: implement IConvertible and conversion operators
     /// </summary>
     [JsonConverter(typeof(VariantJsonConverter))]
-    public struct Variant : IEquatable<Variant> {
+    public readonly struct Variant : IEquatable<Variant> {
         public VariantType Type { get; }
 
         private readonly FractionSimple f;
         private readonly double d;
         private readonly object o;
 
-        public static Variant Null => new Variant();
+        public static Variant None => new Variant();
 
         public Variant(bool value) {
             Type = VariantType.Bool;
@@ -79,14 +77,17 @@ namespace MaTech.Common.Algorithm {
         }
 
         public Variant(string value) {
-            Type = VariantType.String;
-            f = FractionSimple.invalid;
-            d = Double.NaN;
-            o = value ?? "";
+            if (value == null) this = None;
+            else {
+                Type = VariantType.String;
+                f = FractionSimple.invalid;
+                d = Double.NaN;
+                o = value;
+            }
         }
 
         public Variant(object value) {
-            if (value == null) this = Null;
+            if (value == null) this = None;
             else {
                 Type = VariantType.Object;
                 f = FractionSimple.invalid;
@@ -130,23 +131,23 @@ namespace MaTech.Common.Algorithm {
         public T GetObject<T>() where T : class => Object as T;
         public static Variant FromObject<T>(T value) => new Variant(value);
 
-        public bool IsNothing => Type == VariantType.Null;
+        public bool IsNothing => Type == VariantType.None;
         public bool IsBoolean => Type == VariantType.Bool;
         public bool IsInteger => Type == VariantType.Int;
         public bool IsFloatPoint => Type == VariantType.Float || Type == VariantType.Double;
         public bool IsFraction => Type == VariantType.Fraction || Type == VariantType.FractionSimple;
         public bool IsNumeral => IsInteger || IsFloatPoint || IsFraction;
         public bool IsNumeralOrBoolean => IsNumeral || IsBoolean;
-        public bool IsNull => Type == VariantType.Null;
+        public bool IsNone => Type == VariantType.None;
         public bool IsString => Type == VariantType.String;
-        public bool IsStringEmpty => IsString && string.IsNullOrEmpty(o as string);
-        public bool IsStringWhiteSpace => IsString && string.IsNullOrWhiteSpace(o as string);
+        public bool IsStringEmpty => IsString && string.IsNullOrEmpty((string)o);
+        public bool IsStringWhiteSpace => IsString && string.IsNullOrWhiteSpace((string)o);
 
         public bool CanConvertTo(VariantType targetType) {
             if (Type == targetType) return true;
-            if (Type == VariantType.Null) return true; // false, 0, 0.0, "<Nothing>", null
+            if (Type == VariantType.None) return true; // false, 0, 0.0, "<None Variant>", null
             switch (targetType) {
-            case VariantType.Null: return false;
+            case VariantType.None: return false;
             case VariantType.Bool: return true; // != 0, != null
             case VariantType.Int:
             case VariantType.Float:
@@ -161,15 +162,15 @@ namespace MaTech.Common.Algorithm {
 
         public override string ToString() {
             switch (Type) {
-            case VariantType.Null: return "<Nothing>";
+            case VariantType.None: return "<None Variant>";
             case VariantType.Bool: return Bool ? "True" : "False";
             case VariantType.Int: return Int.ToString(CultureInfo.InvariantCulture);
             case VariantType.Float: return Float.ToString(CultureInfo.InvariantCulture);
             case VariantType.Double: return Double.ToString(CultureInfo.InvariantCulture);
             case VariantType.Fraction: return Fraction.ToString();
             case VariantType.FractionSimple: return FractionSimple.ToString();
-            case VariantType.String: return o as string ?? "<Null String>";
-            case VariantType.Object: return o?.ToString() ?? "<Null Object>";
+            case VariantType.String: return (string)o;
+            case VariantType.Object: return o.ToString();
             default: return "<Unknown Variant>";
             }
         }
@@ -177,7 +178,7 @@ namespace MaTech.Common.Algorithm {
         public bool Equals(Variant other) {
             if (Type != other.Type) return false;
             switch (Type) {
-            case VariantType.Null: return true;
+            case VariantType.None: return true;
             case VariantType.Bool: return Bool.Equals(other.Bool);
             case VariantType.Int: return Int.Equals(other.Int);
             case VariantType.Float: return Float.Equals(other.Float);
@@ -198,7 +199,7 @@ namespace MaTech.Common.Algorithm {
             unchecked {
                 int hashCode;
                 switch (Type) {
-                case VariantType.Null:
+                case VariantType.None:
                     hashCode = 0;
                     break;
                 case VariantType.Bool:
@@ -220,15 +221,12 @@ namespace MaTech.Common.Algorithm {
                     hashCode = FractionSimple.GetHashCode();
                     break;
                 case VariantType.String:
-                    hashCode = String?.GetHashCode() ?? 0;
-                    break;
                 case VariantType.Object:
-                    hashCode = o?.GetHashCode() ?? 0;
+                    hashCode = o.GetHashCode();
                     break;
                 default: return 0;
                 }
-                hashCode = (hashCode * 397) ^ Type.GetHashCode();
-                return hashCode;
+                return  HashCode.Combine(hashCode, Type.GetHashCode());
             }
         }
 
@@ -247,7 +245,7 @@ namespace MaTech.Common.Algorithm {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
             var variant = (Variant)value;
             switch (variant.Type) {
-            case VariantType.Null:
+            case VariantType.None:
                 writer.WriteNull();
                 break;
             case VariantType.Bool:
@@ -281,7 +279,7 @@ namespace MaTech.Common.Algorithm {
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
-            var variant = (Variant?)existingValue ?? Variant.Null;
+            var variant = (Variant?)existingValue ?? Variant.None;
             switch (reader.TokenType) {
             case JsonToken.Boolean:
                 variant = serializer.Deserialize<bool>(reader);
@@ -312,7 +310,7 @@ namespace MaTech.Common.Algorithm {
                     variant = new Fraction(arr[0], arr[1], arr[2]);
                     break;
                 default:
-                    variant = Variant.Null;
+                    variant = Variant.None;
                     break;
                 }
                 break;
