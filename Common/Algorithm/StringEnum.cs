@@ -7,6 +7,8 @@
 using System;
 
 namespace MaTech.Common.Algorithm {
+    /// 数据驱动的Enum类，仅比较string的hashcode，需要避免大规模长字符串上的使用，以避免碰撞。
+    /// 需要容忍hash碰撞的场合请使用StringKey类。
     public struct StringEnum : IEquatable<StringEnum> {
         public string Name { get; }
         public int Hash { get; }
@@ -16,15 +18,9 @@ namespace MaTech.Common.Algorithm {
             Hash = name.GetHashCode();
         }
 
-        public StringEnum(int value) {
-            Name = null;
-            Hash = value;
-        }
-
         public static implicit operator StringEnum(string name) => new StringEnum(name);
-        public static implicit operator StringEnum(int hash) => new StringEnum(hash);
-        public static implicit operator string(StringEnum se) => se.Name;
-        public static implicit operator int(StringEnum se) => se.Hash;
+        public static explicit operator string(StringEnum se) => se.Name;
+        public static explicit operator int(StringEnum se) => se.Hash;
 
         public bool Equals(StringEnum other) => Hash == other.Hash;
         public override bool Equals(object obj) => obj is StringEnum other && Equals(other);
