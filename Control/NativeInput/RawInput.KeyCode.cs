@@ -5,7 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 // This code is adapted from UnityRawInput plugin without major modifications.
-// Original license below:
+// Original license (MIT) below:
 
 /*
  * MIT License
