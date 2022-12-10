@@ -22,6 +22,9 @@ namespace MaTech.Common.Algorithm {
     /// A generic wrapper of System.Convert, boxless for value types.
     /// Ideas from https://stackoverflow.com/a/45508419 and https://stackoverflow.com/a/60395130
     public static partial class BoxlessConvert {
+        // todo: support nullable source types (not only a nullable value), since nullable is a value type as well
+        //       see https://stackoverflow.com/questions/3531318/convert-changetype-fails-on-nullable-types
+
         public static class From<TSource> {
             /// Convert to the same type, useful for generic types.
             public static class ToIdentity<TResult> {
