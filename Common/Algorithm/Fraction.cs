@@ -201,7 +201,7 @@ namespace MaTech.Common.Algorithm {
             return new Fraction(arr[0], arr[1], arr[2]);
         }
 
-        public override string ToString() => $"{_int}:{_num}/{_den}";
+        public override string ToString() => $"{_int} {_num}/{_den}";
         public int[] ToArray() => new[] { _int, _num, _den };
     }
 
