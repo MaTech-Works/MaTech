@@ -17,7 +17,7 @@ namespace MaTech.Common.Algorithm {
     public static partial class BoxlessConvert {
         private static class BoxlessConvertibleCasterFactory<TSource> where TSource : IBoxlessConvertible {
             [Preserve]
-            public static Caster<TSource, TResult>? Create<TResult>() {
+            public static Caster<TSource, TResult> Create<TResult>() {
                 return delegate (in TSource source, IFormatProvider? provider) { return source.ToType<TResult>(provider); };
             }
         }

@@ -22,7 +22,10 @@ namespace MaTech.Common.Algorithm {
             return delegate (in TSource source, IFormatProvider? provider) { throw new InvalidCastException(message); };
         }
 
-        private static TResult? InvokeCaster<TSource, TResult>(Caster<TSource, TResult>? caster, in TSource source, IFormatProvider? provider = null) {
+        private static TResult InvokeCaster<TSource, TResult>(Caster<TSource, TResult> caster, in TSource source, IFormatProvider? provider = null) {
+            return caster.Invoke(source, provider);
+        }
+        private static TResult? InvokeCasterNullable<TSource, TResult>(Caster<TSource, TResult>? caster, in TSource source, IFormatProvider? provider = null) {
             return caster is null ? default : caster.Invoke(source, provider);
         }
 
@@ -39,7 +42,7 @@ namespace MaTech.Common.Algorithm {
         }
 
         private static class BoxlessConvertibleCast<TSource, TResult> where TSource : IBoxlessConvertible {
-            public static readonly Caster<TSource, TResult>? caster = IdentityCast<TSource, TResult>.caster ?? BoxlessConvertibleCasterFactory<TSource>.Create<TResult>();
+            public static readonly Caster<TSource, TResult> caster = IdentityCast<TSource, TResult>.caster ?? BoxlessConvertibleCasterFactory<TSource>.Create<TResult>();
         }
     }
 }
