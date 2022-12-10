@@ -9,6 +9,10 @@ using System.Linq.Expressions;
 
 namespace MaTech.Common.Algorithm {
     // Code from https://stackoverflow.com/questions/1189144/c-sharp-non-boxing-conversion-of-generic-enum-to-int
+    
+    // Note: this will not work for value types on Unity, deprecate for now
+    // https://forum.unity.com/threads/are-c-expression-trees-or-ilgenerator-allowed-on-ios.489498/
+    [Obsolete("Broken for value types. Please use class BoxlessConvert instead.")]
 
     /// <summary>
     /// Class to cast to type <see cref="TTarget"/>
