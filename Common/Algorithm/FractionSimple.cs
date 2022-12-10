@@ -196,7 +196,7 @@ namespace MaTech.Common.Algorithm {
             var x = this;
             x.Normalize();
             x.Reduce();
-            return x._num * 31 + x._den;
+            return HashCode.Combine(x._num, x._den);
         }
 
         private static ThreadLocal<List<int>> cacheLists = new ThreadLocal<List<int>>(() => new List<int>());
