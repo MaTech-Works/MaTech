@@ -12,9 +12,9 @@ using UnityEngine.Scripting;
 #nullable enable
 
 namespace MaTech.Common.Algorithm {
-    /// A generic wrapper of System.Convert, boxless for primitive types.
-    /// Ideas from https://stackoverflow.com/a/45508419 and https://stackoverflow.com/a/60395130
     public static partial class BoxlessConvert {
+        // Here we implement factories of casting delegates.
+
         private static class BoxlessConvertibleCasterFactory<TSource> where TSource : IBoxlessConvertible {
             [Preserve]
             public static Caster<TSource, TResult> Create<TResult>() {
@@ -65,8 +65,9 @@ namespace MaTech.Common.Algorithm {
             }
         }
 
-        /// To allow calling the generic method "Create" with a stricter constraint.
-        /// "dynamic" keyword is not viable, so we need to do it with reflections.
+        /// Magic.
+        /// Allow calling the generic method "Create" with a stricter constraint.
+        /// Done with reflections since il2cpp does not support "dynamic" keyword.
         /// MakeGenericType/MakeGenericMethod still checks against the constraints, but dynamically, which we assume with IsAssignableFrom.
         private readonly struct ReflectedFactory<TSource> {
             private readonly MethodInfo? methodCreate;

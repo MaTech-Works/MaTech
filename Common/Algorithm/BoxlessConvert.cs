@@ -19,7 +19,8 @@ namespace MaTech.Common.Algorithm {
         TResult ToType<TResult>(IFormatProvider? provider);
     }
     
-    /// A generic wrapper of System.Convert, boxless for value types.
+    /// A generic wrapper of System.Convert.ChangeType, boxless for value types.
+    /// Also supports passthrough conversions between two same generic types.
     /// Ideas from https://stackoverflow.com/a/45508419 and https://stackoverflow.com/a/60395130
     public static partial class BoxlessConvert {
         // todo: support nullable source types (not only a nullable value), since nullable is a value type as well
@@ -51,7 +52,7 @@ namespace MaTech.Common.Algorithm {
             }
         }
 
-        /// Method similar to Convert.ChangeType.
+        /// Method similar to System.Convert.ChangeType.
         ///
         /// Firstly, a specific ToXXX method in IConvertible is called if matching the type,
         /// then invokes IBoxlessConvertible if implemented.
