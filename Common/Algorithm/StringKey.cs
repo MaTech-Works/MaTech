@@ -7,8 +7,7 @@
 using System;
 
 namespace MaTech.Common.Algorithm {
-    /// 一个缓存了hashcode的string包装，会优先使用hashcode判断相等。
-    /// 无需在意碰撞的场合可以使用StringEnum类。
+    /// <summary> 缓存了hashcode的string包装，会优先使用hashcode判断相等。 </summary>
     public struct StringKey : IEquatable<StringKey> {
         public string Name { get; }
         public int Hash { get; }
