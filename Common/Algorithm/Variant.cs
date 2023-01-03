@@ -5,7 +5,6 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using System.Globalization;
 using Newtonsoft.Json;
 
 namespace MaTech.Common.Algorithm {
@@ -25,6 +24,7 @@ namespace MaTech.Common.Algorithm {
     /// todo: getter for array type, also allowing fraction and array of int variant to exist simultaneously
     /// todo: getter for table type
     /// todo: do we infer VariantType from boxed objects?
+    /// todo: unsafe pointer to extend more types?
     [JsonConverter(typeof(VariantJsonConverter))]
     public readonly struct Variant : IEquatable<Variant>, IBoxlessConvertible, IFormattable {
         public VariantType Type { get; }

@@ -16,21 +16,24 @@ namespace MaTech.Common.Algorithm {
     [Serializable]
     [JsonConverter(typeof(FractionJsonConverter))]
     public struct FractionSimple : IComparable<FractionSimple>, IEquatable<FractionSimple> {
+        // todo: make immutable? readonly struct cannot be serializable
+        // todo: normalize on construct by default
+
         public static readonly FractionSimple invalid = new FractionSimple();
         public static readonly FractionSimple zero = new FractionSimple(0);
         public static readonly FractionSimple maxValue = new FractionSimple(int.MaxValue);
         public static readonly FractionSimple minValue = new FractionSimple(int.MinValue);
+
+        // ReSharper disable InconsistentNaming
+        [SerializeField]
+        private int _num, _den;
+        // ReSharper restore InconsistentNaming
 
         #if UNITY_EDITOR
         static FractionSimple() {
             Assert.IsFalse(default(FractionSimple).IsValid);
         }
         #endif
-
-        // ReSharper disable InconsistentNaming
-        [SerializeField]
-        private int _num, _den;
-        // ReSharper restore InconsistentNaming
 
         public FractionSimple(int value) {
             _num = value;
@@ -52,8 +55,10 @@ namespace MaTech.Common.Algorithm {
 
         public float Float => (float)_num / _den;
         public double Double => (double)_num / _den;
-        public float Float01 => ((Fraction)this).Float01;
-        public double Double01 => ((Fraction)this).Double01;
+
+        public FractionSimple Decimal => ((Fraction)this).Decimal;
+        public float DecimalFloat => Decimal.Float;
+        public double DecimalDouble => Decimal.Double;
 
         public int Rounded => _den == 0 ? 0 : (_num + _den / 2) / _den;
 
@@ -199,7 +204,7 @@ namespace MaTech.Common.Algorithm {
             return HashCode.Combine(x._num, x._den);
         }
 
-        private static ThreadLocal<List<int>> cacheLists = new ThreadLocal<List<int>>(() => new List<int>());
+        private static readonly ThreadLocal<List<int>> threadLocalCachedList = new ThreadLocal<List<int>>(() => new List<int>());
 
         /// <summary>
         /// 用连分数法寻找分母在 maxDenom 以内离 value 最近的分数
@@ -219,7 +224,7 @@ namespace MaTech.Common.Algorithm {
                     return new FractionSimple(Math.Sign(remain), maxDenom); // 0 与 1/maxDenom 比起来，1/maxDenom 更优的情况
                 }
 
-                List<int> arr = cacheLists.Value;
+                List<int> arr = threadLocalCachedList.Value;
                 arr.Clear();
                 arr.Add(a0);
 
@@ -246,13 +251,11 @@ namespace MaTech.Common.Algorithm {
         /// </summary>
         /// <param name="value"> The float-point value </param>
         /// <param name="denom"> Denominator for rounding </param>
-        public static FractionSimple FromFloatRounded(double value, int denom) {
-            try {
-                int numer = (int)Math.Round(value * denom);
-                return new FractionSimple(numer, denom);
-            } catch (OverflowException) {
-                return new FractionSimple();
-            }
+        public static FractionSimple FromFloatRounded(double value, int denom, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
+            int numer = MathUtil.RoundToInt(value * denom, mode);
+            var result = new FractionSimple(numer, denom);
+            result.Normalize();
+            return result;
         }
 
         /// <summary>

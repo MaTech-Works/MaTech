@@ -16,10 +16,18 @@ namespace MaTech.Common.Algorithm {
     [Serializable]
     [JsonConverter(typeof(FractionJsonConverter))]
     public struct Fraction : IComparable<Fraction>, IEquatable<Fraction> {
+        // todo: make immutable? readonly struct cannot be serializable
+        // todo: normalize on construct by default
+
         public static readonly Fraction invalid = new Fraction();
         public static readonly Fraction zero = new Fraction(0);
         public static readonly Fraction maxValue = new Fraction(int.MaxValue);
         public static readonly Fraction minValue = new Fraction(int.MinValue);
+
+        // ReSharper disable InconsistentNaming
+        [SerializeField]
+        private int _int, _num, _den;
+        // ReSharper restore InconsistentNaming
 
         #if UNITY_EDITOR
         static Fraction() {
@@ -27,15 +35,16 @@ namespace MaTech.Common.Algorithm {
         }
         #endif
 
-        // ReSharper disable InconsistentNaming
-        [SerializeField]
-        private int _int, _num, _den;
-        // ReSharper restore InconsistentNaming
-
         public Fraction(int value) {
             _int = value;
             _num = 0;
             _den = 1;
+        }
+
+        public Fraction(int integer, FractionSimple decimalPart) {
+            _int = integer;
+            _num = decimalPart.Numer;
+            _den = decimalPart.Denom;
         }
 
         public Fraction(int integer, int numer, int denom) {
@@ -62,13 +71,15 @@ namespace MaTech.Common.Algorithm {
 
         public float Float => _int + (float)_num / _den;
         public double Double => _int + (double)_num / _den;
-        public float Float01 => (float)_num / _den;
-        public double Double01 => (double)_num / _den;
 
-        public static explicit operator float(Fraction frac) { return frac.Float; }
-        public static explicit operator double(Fraction frac) { return frac.Double; }
+        public FractionSimple Decimal => new FractionSimple(_num, _den);
+        public float DecimalFloat => (float)_num / _den;
+        public double DecimalDouble => (double)_num / _den;
 
-        public static implicit operator FractionSimple(Fraction frac) { return new FractionSimple(frac._num + frac._int * frac._den, frac._den); }
+        public static explicit operator float(Fraction frac) => frac.Float;
+        public static explicit operator double(Fraction frac) => frac.Double;
+
+        public static implicit operator FractionSimple(Fraction frac) => new FractionSimple(frac._num + frac._int * frac._den, frac._den);
         public static implicit operator Fraction(FractionSimple frac) {
             var result = new Fraction(0, frac.Numer, frac.Denom);
             result.Normalize();
@@ -166,7 +177,7 @@ namespace MaTech.Common.Algorithm {
         public override int GetHashCode() => ((FractionSimple)this).GetHashCode();
 
         /// <summary>
-        /// 用连分数法寻找分母在 maxDenom 以内离 value 最近的分数
+        /// 用连分数法寻找分母在含 maxDenom 以内离 value 最近的分数
         /// </summary>
         /// <param name="value"> The float-point value </param>
         /// <param name="maxDenom"> Maximum denominator that can be produced </param>
@@ -179,22 +190,18 @@ namespace MaTech.Common.Algorithm {
         /// <param name="denom"> Denominator for rounding </param>
         /// <param name="mode"> Rounding mode as used in MathUtil.RoundToInt </param>
         public static Fraction FromFloatRounded(double value, int denom, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
-            int i = MathUtil.RoundToInt(value, mode);
-            int numer = MathUtil.RoundToInt((value - i) * denom, mode);
-            return numer < 0 ? new Fraction(i - 1, numer + denom, denom) : new Fraction(i, numer, denom);
+            return FractionSimple.FromFloatRounded(value, denom, mode);
         }
 
         /// <summary>
-        /// Get a normalized fraction as the sum of a integer and a float-point values rounded to the denominator.
-        /// By keeping the float value in [0, 1), this keeps the consistency of precisions of the fraction part of the value.
+        /// Get a normalized fraction from float-point values rounded to the denominator, with integer and decimal parts separated.
         /// </summary>
-        /// <param name="valueInt"> The integer value in the sum </param>
-        /// <param name="valueFloat"> The float-point value in the sum </param>
+        /// <param name="integerPart"> The integer part of the sum </param>
+        /// <param name="decimalPart"> The decimal part of the sum </param>
         /// <param name="denom"> Denominator for rounding </param>
-        public static Fraction FromIntFloatRounded(int valueInt, double valueFloat, int denom) {
-            int i = (int)Math.Round(valueFloat);
-            int numer = (int)Math.Round((valueFloat - i) * denom);
-            return numer < 0 ? new Fraction(valueInt + i - 1, numer + denom, denom) : new Fraction(valueInt + i, numer, denom);
+        /// <param name="mode"> Rounding mode as used in MathUtil.RoundToInt </param>
+        public static Fraction FromFloatRounded(int integerPart, float decimalPart, int denom, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
+            return FromFloatRounded(decimalPart, denom, mode) + new Fraction(integerPart);
         }
 
         public static Fraction FromIntArray(int[] arr) {
