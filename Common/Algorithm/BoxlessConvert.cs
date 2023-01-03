@@ -27,22 +27,20 @@ namespace MaTech.Common.Algorithm {
         //       see https://stackoverflow.com/questions/3531318/convert-changetype-fails-on-nullable-types
 
         public static class To<TResult> {
-            /// Convert to the same or a different type;
-            ///
-            /// Firstly, a specific ToXXX method in IConvertible is called if matching the type,
-            /// then invokes IBoxlessConvertible if implemented.
+            /// Convert to the same or a different type.
+            /// A matching ToXXX method in IConvertible is called if exists, otherwise invokes IBoxlessConvertible if implemented.
             /// Returns null if TSource does not implement IConvertible or IBoxlessConvertible.
-            public static TResult? From<TSource>(in TSource source, IFormatProvider? provider) {
-                return InvokeCasterNullable(MaybeConvertibleCast<TSource, TResult>.caster, source, provider);
+            public static TResult? From<TSource>(in TSource source, IFormatProvider? provider = null) {
+                return InvokeCasterNullable(Cast<TSource, TResult>.caster, source, provider);
             }
             
             /// Constrain TSource to be a IConvertible
-            public static TResult? FromConvertible<TSource>(in TSource source, IFormatProvider? provider) where TSource : IConvertible {
+            public static TResult? FromConvertible<TSource>(in TSource source, IFormatProvider? provider = null) where TSource : IConvertible {
                 return InvokeCasterNullable(ConvertibleCast<TSource, TResult>.caster, source, provider);
             }
 
             /// Constrain TSource to be a IBoxlessConvertible
-            public static TResult FromBoxlessConvertible<TSource>(in TSource source, IFormatProvider? provider) where TSource : IBoxlessConvertible {
+            public static TResult FromBoxlessConvertible<TSource>(in TSource source, IFormatProvider? provider = null) where TSource : IBoxlessConvertible {
                 return InvokeCaster(BoxlessConvertibleCast<TSource, TResult>.caster, source, provider);
             }
 

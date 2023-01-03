@@ -32,8 +32,13 @@ namespace MaTech.Common.Algorithm {
         private static class IdentityCast<TSource, TResult> {
             public static readonly Caster<TSource, TResult>? caster = typeof(TSource) == typeof(TResult) ? CreateIdentityCaster<TSource, TResult>() : null;
         }
-        private static class MaybeConvertibleCast<TSource, TResult> {
-            public static readonly Caster<TSource, TResult>? caster = IdentityCast<TSource, TResult>.caster ?? MaybeConvertibleCasterFactory<TSource>.Create<TResult>();
+
+        private static class Cast<TSource, TResult> {
+            public static readonly Caster<TSource, TResult>? caster = IdentityCast<TSource, TResult>.caster ?? CasterFactory<TSource>.Create<TResult>();
+        }
+        
+        private static class SimpleTypeCast<TSource, TResult> where TSource : IConvertible {
+            public static readonly Caster<TSource, TResult>? caster = IdentityCast<TSource, TResult>.caster ?? SimpleTypeCasterFactory<TSource>.Create<TResult>();
         }
         private static class ConvertibleCast<TSource, TResult> where TSource : IConvertible {
             public static readonly Caster<TSource, TResult>? caster = IdentityCast<TSource, TResult>.caster ?? ConvertibleCasterFactory<TSource>.Create<TResult>();
