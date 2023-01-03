@@ -6,23 +6,27 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
+#nullable enable
 
 namespace MaTech.Common.Algorithm {
     public static class CollectionsExtension {
         public static void OrderedInsert<T>(this List<T> list, T item, bool afterEqual = false) where T : IComparable<T> {
             int index = list.BinarySearch(item);
             if (index < 0) index = ~index;
-            else if (afterEqual)
+            else if (afterEqual) {
                 for (int n = list.Count; index < n && list[index].CompareTo(item) == 0; ++index) { }
+            }
             list.Insert(index, item);
         }
 
-        public static void Resize<T>(this List<T> list, int size) {
+        public static void Resize<T>(this List<T?> list, int size) {
+            // note: by language specification, T? means defaultable rather than nullable, since the generic T is unconstrained
             if (size < list.Count) list.RemoveRange(size, list.Count - size);
-            else
-                while (size > list.Count) {
-                    list.Add(default);
-                }
+            else while (size > list.Count) {
+                list.Add(default);
+            }
         }
 
         public static void RemoveAndFillWithLast<T>(this List<T> list, int index) {
@@ -51,7 +55,7 @@ namespace MaTech.Common.Algorithm {
             dict.Clear();
         }
 
-        public static TValue GetOrNew<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, Func<TKey, TValue> create) {
+        public static TValue GetOrCreate<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, Func<TKey, TValue> create) {
             if (!dict.TryGetValue(key, out var value))
                 dict.Add(key, value = create(key));
             return value;
@@ -62,5 +66,25 @@ namespace MaTech.Common.Algorithm {
                 dict.Add(key, value = new TValue());
             return value;
         }
+
+        public static TValue? GetOrDefault<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) {
+            // note: by language specification, TValue? means defaultable rather than nullable, since TValue is unconstrained
+            if (dict.TryGetValue(key, out var value))
+                return value;
+            return default;
+        }
+
+        public static TValue? GetNullable<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : struct {
+            if (dict.TryGetValue(key, out var value))
+                return value;
+            return default;
+        }
+
+        public static TValue? GetNullable<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, object? _ = null) where TValue : class {
+            if (dict.TryGetValue(key, out var value))
+                return value;
+            return null;
+        }
+
     }
 }
