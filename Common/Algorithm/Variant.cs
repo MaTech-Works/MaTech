@@ -123,8 +123,8 @@ namespace MaTech.Common.Algorithm {
         public static implicit operator Variant(FractionSimple value) => new Variant(value);
         public static implicit operator Variant(string value) => new Variant(value);
 
-        private static Type cachedFractionType = typeof(Fraction);
-        private static Type cachedFractionSimpleType = typeof(FractionSimple);
+        private static readonly Type typeFraction = typeof(Fraction);
+        private static readonly Type typeFractionSimple = typeof(FractionSimple);
 
         bool IConvertible.ToBoolean(IFormatProvider provider) => Bool;
 
@@ -148,16 +148,16 @@ namespace MaTech.Common.Algorithm {
         DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException("Variant: Conversion to DateTime is undefined. Try a string or a numeric timecode; choose wisely.");
 
         object IConvertible.ToType(Type type, IFormatProvider provider) {
-            if (type == cachedFractionType) return Fraction;
-            if (type == cachedFractionSimpleType) return FractionSimple;
+            if (type == typeFraction) return Fraction;
+            if (type == typeFractionSimple) return FractionSimple;
             if (IsObject) Convert.ChangeType(o, type, provider);
             throw new InvalidCastException($"Variant: Conversion to type {type} is undefined.");
         }
 
         T IBoxlessConvertible.ToType<T>(IFormatProvider provider) {
             var type = typeof(T);
-            if (type == cachedFractionType) return BoxlessConvert.Identity<Fraction, T>(Fraction);
-            if (type == cachedFractionSimpleType) return BoxlessConvert.Identity<FractionSimple, T>(FractionSimple);
+            if (type == typeFraction) return BoxlessConvert.Identity<Fraction, T>(Fraction);
+            if (type == typeFractionSimple) return BoxlessConvert.Identity<FractionSimple, T>(FractionSimple);
             throw new InvalidCastException($"Variant: Boxless conversion to type {type} is undefined.");
         }
 
