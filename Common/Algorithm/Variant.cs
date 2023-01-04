@@ -266,13 +266,8 @@ namespace MaTech.Common.Algorithm {
             }
         }
 
-        public static bool operator==(Variant left, Variant right) {
-            return left.Equals(right);
-        }
-
-        public static bool operator!=(Variant left, Variant right) {
-            return !left.Equals(right);
-        }
+        public static bool operator==(Variant left, Variant right) => left.Equals(right);
+        public static bool operator!=(Variant left, Variant right) => !left.Equals(right);
     }
 
     public class VariantJsonConverter : JsonConverter {

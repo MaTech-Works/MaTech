@@ -13,13 +13,11 @@ using System.Threading;
 namespace MaTech.Common.Algorithm {
     public readonly partial struct EnumEx<T> where T : struct, Enum, IConvertible {
         public T Value { get; }
-        public EnumEx(T x) { Value = x; }
-
-        public override string ToString() => ToString(null, null);
         
         public static implicit operator T(EnumEx<T> x) => x.Value;
-        public static implicit operator EnumEx<T>(T x) => new(x);
+        public static implicit operator EnumEx<T>(T x) => new EnumEx<T>(x);
         
+        public EnumEx(T x) { Value = x; }
         public EnumEx(string name) {
             using (var lockRAII = ReaderLockRAII.Read()) {
                 if (mapNameToEnum.TryGetValue(name, out var x)) {

@@ -16,13 +16,7 @@ namespace MaTech.Common.Algorithm {
         , IEquatable<EnumEx<T>>, IEquatable<T>
         , IBoxlessConvertible, IFormattable {
         
-        public string ToString(string? format, IFormatProvider? formatProvider) {
-            if (predefinedEnums.Contains(Value)) return Value.ToString(format);
-            using (var lockRAII = ReaderLockRAII.Read()) {
-                return mapEnumToName.GetValueOrDefault(Value) ?? Value.ToString(format);
-            }
-        }
-
+        public override string ToString() => ToString(null, null);
         public override int GetHashCode() => Value.GetHashCode();
 
         public override bool Equals(object? obj) {
@@ -45,8 +39,8 @@ namespace MaTech.Common.Algorithm {
             }
         }
 
-        public int CompareTo(EnumEx<T> other) => Value.CompareTo(other.Value);
-        public int CompareTo(T other) => Value.CompareTo(other);
+        public int CompareTo(EnumEx<T> other) => Comparer<T>.Default.Compare(Value, other.Value);
+        public int CompareTo(T other) => Comparer<T>.Default.Compare(Value, other);
 
         TypeCode IConvertible.GetTypeCode() => Value.GetTypeCode(); // this will match the underlying type
 
@@ -69,14 +63,19 @@ namespace MaTech.Common.Algorithm {
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => Value.ToType(conversionType, provider);
         TResult IBoxlessConvertible.ToType<TResult>(IFormatProvider? provider) => BoxlessConvert.To<TResult>.From(Value, provider) ?? throw new InvalidCastException($"EnumEx: Boxless conversion to type {typeof(TResult)} is undefined.");
 
-        public static bool operator<(EnumEx<T> left, T right) => left.CompareTo(right) < 0;
-        public static bool operator<=(EnumEx<T> left, T right) => left.CompareTo(right) <= 0;
-        public static bool operator>(EnumEx<T> left, T right) => left.CompareTo(right) > 0;
-        public static bool operator>=(EnumEx<T> left, T right) => left.CompareTo(right) >= 0;
+        public string ToString(string? format, IFormatProvider? formatProvider) {
+            if (predefinedEnums.Contains(Value)) return Value.ToString(format);
+            using (var lockRAII = ReaderLockRAII.Read()) {
+                return mapEnumToName.GetValueOrDefault(Value) ?? Value.ToString(format);
+            }
+        }
 
         public static bool operator<(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) < 0;
         public static bool operator<=(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) <= 0;
         public static bool operator>(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) > 0;
         public static bool operator>=(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) >= 0;
+
+        public static bool operator==(EnumEx<T> left, EnumEx<T> right) => left.Equals(right);
+        public static bool operator!=(EnumEx<T> left, EnumEx<T> right) => !left.Equals(right);
     }
 }
