@@ -102,6 +102,7 @@ dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggest
 # Roslyn C# 8.0+ Suggestions
 dotnet_diagnostic.IDE0007.severity = none  # var instead of type name
 dotnet_diagnostic.IDE0049.severity = none  # name can be simplified (like Int32 --> int)
+dotnet_diagnostic.IDE0063.severity = none  # using() can be simplified
 dotnet_diagnostic.IDE0066.severity = none  # switch match pattern
 dotnet_diagnostic.IDE0090.severity = none  # new without type name
 dotnet_diagnostic.IDE1006.severity = none  # static public member naming
