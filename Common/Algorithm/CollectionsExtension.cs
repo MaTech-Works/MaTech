@@ -67,13 +67,6 @@ namespace MaTech.Common.Algorithm {
             return value;
         }
 
-        public static TValue? GetOrDefault<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) {
-            // note: by language specification, TValue? means defaultable rather than nullable, since TValue is unconstrained
-            if (dict.TryGetValue(key, out var value))
-                return value;
-            return default;
-        }
-
         public static TValue? GetNullable<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : struct {
             if (dict.TryGetValue(key, out var value))
                 return value;
