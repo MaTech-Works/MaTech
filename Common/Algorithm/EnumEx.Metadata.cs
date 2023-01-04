@@ -8,34 +8,36 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
+#nullable enable
+
 namespace MaTech.Common.Algorithm {
-    public readonly partial struct EnumEx<T> where T : struct, Enum, IConvertible {
+    public readonly partial struct EnumEx<T> {
         private static readonly Type typeEnum = typeof(T);
         
-        private static readonly Dictionary<string, T> mapNameToEnum = new Dictionary<string, T>();
-        private static readonly Dictionary<T, string> mapEnumToName = new Dictionary<T, string>();
+        private static readonly HashSet<T> predefinedEnums;
+        private static readonly Dictionary<string, T> mapNameToEnum;
+        private static readonly Dictionary<T, string> mapEnumToName;
+
         private static ulong maxEnumIndex;
 
-        private static readonly ReaderWriterLockSlim lockMetadata = new ReaderWriterLockSlim();
-        
-        private struct LockRAII : IDisposable {
-            private bool read;
-            private bool write;
+        static EnumEx() {
+            var values = (T[])Enum.GetValues(typeEnum);
+            var length = values.Length;
+            
+            predefinedEnums = new HashSet<T>(length);
+            mapNameToEnum = new Dictionary<string, T>(length);
+            mapEnumToName = new Dictionary<T, string>(length);
 
-            public static LockRAII UpgradeableReadLock() {
-                lockMetadata.EnterUpgradeableReadLock();
-                return new LockRAII { read = true };
-            }
+            foreach (var value in values) {
+                var name = Enum.GetName(typeEnum, value);
+                if (string.IsNullOrEmpty(name))
+                    continue;
 
-            public void UpgradeToWriteLock() {
-                if (write) return;
-                lockMetadata.EnterWriteLock();
-                write = true;
-            }
+                predefinedEnums.Add(value);
+                mapNameToEnum.Add(name, value);
+                mapEnumToName.Add(value, name);
 
-            public void Dispose() {
-                if (write) lockMetadata.ExitWriteLock();
-                if (read) lockMetadata.ExitUpgradeableReadLock();
+                maxEnumIndex = Math.Max(maxEnumIndex, BoxlessConvert.To<ulong>.From(value));
             }
         }
     }

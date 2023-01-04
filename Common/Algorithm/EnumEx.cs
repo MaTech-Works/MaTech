@@ -8,33 +8,30 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
+#nullable enable
+
 namespace MaTech.Common.Algorithm {
     public readonly partial struct EnumEx<T> where T : struct, Enum, IConvertible {
         public T Value { get; }
         public EnumEx(T x) { Value = x; }
 
-        public override string ToString() => mapEnumToName.GetValueOrDefault(Value, Value.ToString());
+        public override string ToString() => ToString(null, null);
         
         public static implicit operator T(EnumEx<T> x) => x.Value;
         public static implicit operator EnumEx<T>(T x) => new(x);
-
-        static EnumEx() {
-            foreach (var value in (T[])Enum.GetValues(typeEnum)) {
-                var name = Enum.GetName(typeEnum, value);
-                if (string.IsNullOrEmpty(name))
-                    continue;
-                mapNameToEnum.Add(name, value);
-                mapEnumToName.Add(value, name);
-                maxEnumIndex = Math.Max(maxEnumIndex, value.ToUInt64(null)); // todo: boxless conversion?
-            }
-        }
         
         public EnumEx(string name) {
-            using (var lockRAII = LockRAII.UpgradeableReadLock()) {
+            using (var lockRAII = ReaderLockRAII.Read()) {
                 if (mapNameToEnum.TryGetValue(name, out var x)) {
                     Value = x;
+                    return;
+                }
+            }
+            using (var lockRAII = WriterLockRAII.Read()) {
+                if (mapNameToEnum.TryGetValue(name, out var x)) { // check again for race condition
+                    Value = x;
                 } else {
-                    lockRAII.UpgradeToWriteLock();
+                    lockRAII.Write();
                     Value = BoxlessConvert.To<T>.From(++maxEnumIndex);
                     mapNameToEnum.Add(name, Value);
                     mapEnumToName.Add(Value, name);
