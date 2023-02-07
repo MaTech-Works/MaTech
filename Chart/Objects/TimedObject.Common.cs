@@ -6,6 +6,7 @@ using MaTech.Common.Algorithm;
 
 namespace MaTech.Chart.Objects {
     // todo: move all classes into separate files with corresponding containers
+    // todo: replace malody related wording in comments
 
     public class TempoChange : TimedObjectStartOnly {
         public double beatLength = 500; // milliseconds per beat
