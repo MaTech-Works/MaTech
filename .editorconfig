@@ -99,9 +99,10 @@ dotnet_style_qualification_for_method = false:suggestion
 dotnet_style_qualification_for_property = false:suggestion
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
 
-# Roslyn C# 8.0+ Suggestions
+# Roslyn Suggestions (mostly for C# 8.0+)
+dotnet_diagnostic.IDE0003.severity = none  # name can be simplified (this.x --> x)
 dotnet_diagnostic.IDE0007.severity = none  # var instead of type name
-dotnet_diagnostic.IDE0049.severity = none  # name can be simplified (like Int32 --> int)
+dotnet_diagnostic.IDE0049.severity = none  # name can be simplified (Int32 --> int)
 dotnet_diagnostic.IDE0063.severity = none  # using() can be simplified
 dotnet_diagnostic.IDE0066.severity = none  # switch match pattern
 dotnet_diagnostic.IDE0090.severity = none  # new without type name
