@@ -6,7 +6,7 @@
 
 using System;
 
-namespace MaTech.Common.Algorithm {
+namespace MaTech.Common.Unity {
     /// <summary>
     /// 一个根据元素指定的延时苏醒时刻，在外部传入某个时刻，超过这个苏醒时刻值时，对元素调用回调的调度器。
     /// </summary>
