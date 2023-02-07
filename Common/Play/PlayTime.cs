@@ -8,7 +8,8 @@ using MaTech.Common.Algorithm;
 using MaTech.Common.Utils;
 
 namespace MaTech.Common.Play {
-    // TODO: make this class non-static (find a different paradigm that allows non-global time)
+    /// <summary> Time of local musical gameplay </summary>
+    // TODO: make this class non-static or allow querying from TimeManager
     public static class PlayTime {
         public static bool IsPlaying { get; private set; }
 
