@@ -29,7 +29,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
  */
 
-namespace MaTech.Common.Algorithm {
+namespace MaTech.Common.Data {
     /// 一个允许最高32位的按位读写二进制压缩bool状态
     /// 从 Findstr 的版本整理而来
     public struct BitStates {

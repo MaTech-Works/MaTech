@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace MaTech.Common.Algorithm {
+namespace MaTech.Common.Data {
     [Serializable]
     [JsonConverter(typeof(FractionJsonConverter))]
     public struct Fraction : IComparable<Fraction>, IEquatable<Fraction> {

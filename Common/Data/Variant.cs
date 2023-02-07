@@ -7,7 +7,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace MaTech.Common.Algorithm {
+namespace MaTech.Common.Data {
     public enum VariantType {
         None = 0, Bool, Int, Float, Double, Fraction, FractionSimple, String, Object
     }

@@ -10,7 +10,7 @@ using System.Threading;
 
 #nullable enable
 
-namespace MaTech.Common.Algorithm {
+namespace MaTech.Common.Data {
     public readonly partial struct EnumEx<T>
         : IComparable, IComparable<EnumEx<T>>, IComparable<T>
         , IEquatable<EnumEx<T>>, IEquatable<T>

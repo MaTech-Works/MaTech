@@ -6,7 +6,7 @@
 
 using System;
 
-namespace MaTech.Common.Algorithm {
+namespace MaTech.Common.Data {
     /// <summary> 缓存了hashcode的string包装，会优先使用hashcode判断相等。 </summary>
     public struct StringKey : IEquatable<StringKey> {
         public string Name { get; }
