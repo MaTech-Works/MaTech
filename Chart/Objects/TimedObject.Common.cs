@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using MaTech.Common.Algorithm;
+using MaTech.Common.Data;
 
 #nullable enable
 

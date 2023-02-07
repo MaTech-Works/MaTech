@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using MaTech.Common.Algorithm;
 
 namespace MaTech.Common.Unity {
     /// <summary>
