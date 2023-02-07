@@ -5,7 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using MaTech.Common.Algorithm;
+using MaTech.Common.Data;
 using MaTech.Common.Utils;
 
 #nullable enable

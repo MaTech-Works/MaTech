@@ -5,8 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System.Collections.Generic;
-using MaTech.Common.Algorithm;
-using UnityEngine;
+using MaTech.Common.Data;
 
 namespace MaTech.Control {
     // 把finger转换为index的部分
