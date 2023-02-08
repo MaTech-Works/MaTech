@@ -43,7 +43,7 @@ namespace MaTech.Play {
 
                 public bool MoveNext() {
                     while (inner.MoveNext()) {
-                        if (inner.Current is PlayBehavior b)
+                        if (inner.Current is PlayBehavior)
                             return true;
                     }
                     return false;

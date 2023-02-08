@@ -80,47 +80,30 @@ namespace MaTech.Common.Data {
         public static explicit operator double(Fraction frac) => frac.Double;
 
         public static implicit operator FractionSimple(Fraction frac) => new FractionSimple(frac._num + frac._int * frac._den, frac._den);
-        public static implicit operator Fraction(FractionSimple frac) {
-            var result = new Fraction(0, frac.Numer, frac.Denom);
-            result.Normalize();
-            return result;
-        }
-
-        public void Normalize() {
-            if (_den == 0) {
-                this = invalid;
-                return;
-            }
-            _int += _num / _den;
-            _num %= _den;
-            if (_num < 0) {
-                _int--;
-                _num += _den;
-            }
-        }
-
-        public void Reduce() {
-            if (_den == 0) {
-                this = invalid;
-                return;
-            }
-            int t = MathUtil.GCD(_num, _den);
-            _num /= t;
-            _den /= t;
-        }
+        public static implicit operator Fraction(FractionSimple frac) => new Fraction(0, frac.Numer, frac.Denom).Normalized;
 
         public Fraction Normalized {
             get {
+                if (_den == 0) {
+                    return invalid;
+                }
                 Fraction result = this;
-                result.Normalize();
+                result._int += _num / _den;
+                result._num %= _den;
+                if (result._num < 0) {
+                    result._int--;
+                    result._num += _den;
+                }
                 return result;
             }
         }
         public Fraction Reduced {
             get {
-                Fraction result = this;
-                result.Reduce();
-                return result;
+                if (_den == 0) {
+                    return invalid;
+                }
+                int t = MathUtil.GCD(_num, _den);
+                return new Fraction(_int, _num / t, _den / t);
             }
         }
 
@@ -141,16 +124,12 @@ namespace MaTech.Common.Data {
 
         public static Fraction operator*(Fraction x, int scale) {
             if (x._den == 0) return invalid;
-            Fraction result = new Fraction(x._int * scale, x._num * scale, x._den);
-            result.Normalize();
-            return result;
+            return new Fraction(x._int * scale, x._num * scale, x._den).Normalized;
         }
 
         public static Fraction operator/(Fraction x, int denom) {
             if (x._den == 0) return invalid;
-            Fraction result = new Fraction(0, x._int * x._den + x._num, x._den * denom);
-            result.Normalize();
-            return result;
+            return new Fraction(0, x._int * x._den + x._num, x._den * denom).Normalized;
         }
 
         public static Fraction Max(Fraction x, Fraction y) => x > y ? x : y;

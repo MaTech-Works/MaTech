@@ -13,10 +13,10 @@ namespace MaTech.Common.Algorithm {
     /// If a constructor function is given, Get() will automatically make new objects with the constructor function.
     /// </summary>
     public class ObjectPool<T> where T : class {
-        private Stack<T> spare;
-        private Func<T> factory;
-        private Action<T> init;
-        private Action<T> reset;
+        private readonly Stack<T> spare;
+        private readonly Func<T> factory;
+        private readonly Action<T> init;
+        private readonly Action<T> reset;
 
         public ObjectPool(Func<T> factory = null, int initialCapacity = 0) {
             this.spare = new Stack<T>(initialCapacity);

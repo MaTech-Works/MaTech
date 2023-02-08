@@ -126,7 +126,7 @@ namespace MaTech.Control {
             var ray = touchReferenceCamera.ScreenPointToRay(screenPosition);
 
             var surface = TouchSurfaceBase.ActiveTouchSurface;
-            var coord = surface?.GetInputCoordFromRay(ray) ?? TouchSurfaceBase.invalidCoord;
+            var coord = surface != null ? surface.GetInputCoordFromRay(ray) : TouchSurfaceBase.invalidCoord;
             
             var finger = fingers.GetFinger(id, phase);
             finger.ray = ray;

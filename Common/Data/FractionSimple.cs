@@ -64,52 +64,24 @@ namespace MaTech.Common.Data {
 
         public static explicit operator float(FractionSimple frac) { return frac.Float; }
         public static explicit operator double(FractionSimple frac) { return frac.Double; }
-
-        public void Normalize() {
-            switch (_den) {
-            case 0:
-                this = invalid;
-                break;
-            case < 0:
-                _den = -_den;
-                _num = -_num;
-                break;
-            }
-        }
-
-        public void Reduce() {
-            if (_den == 0) {
-                this = invalid;
-                return;
-            }
-            int t = MathUtil.GCD(_num, _den);
-            _num /= t;
-            _den /= t;
-        }
-
-        public void Inverse() {
-            (_num, _den) = (_den, _num);
-        }
+        
+        public FractionSimple Inversed => new FractionSimple(_den, _num);
 
         public FractionSimple Normalized {
             get {
-                var result = this;
-                result.Normalize();
-                return result;
+                if (_den == 0) {
+                    return invalid;
+                }
+                return _den < 0 ? new FractionSimple(-_num, -_den) : this;
             }
         }
         public FractionSimple Reduced {
             get {
-                var result = this;
-                result.Reduce();
-                return result;
-            }
-        }
-        public FractionSimple Inversed {
-            get {
-                var result = this;
-                result.Inverse();
-                return result;
+                if (_den == 0) {
+                    return invalid;
+                }
+                int t = MathUtil.GCD(_num, _den);
+                return new FractionSimple(_num / t, _den / t);
             }
         }
 
@@ -137,18 +109,12 @@ namespace MaTech.Common.Data {
 
         public static FractionSimple operator*(FractionSimple x, FractionSimple y) {
             if (x._den == 0 || y._den == 0) return invalid;
-            var result = new FractionSimple(x._num * y._num, x._den * y._den);
-            result.Normalize();
-            result.Reduce();
-            return result;
+            return new FractionSimple(x._num * y._num, x._den * y._den).Normalized.Reduced;
         }
 
         public static FractionSimple operator/(FractionSimple x, FractionSimple y) {
             if (x._den == 0 || y._den == 0) return invalid;
-            var result = new FractionSimple(x._num * y._den, x._den * y._num);
-            result.Normalize();
-            result.Reduce();
-            return result;
+            return new FractionSimple(x._num * y._den, x._den * y._num).Normalized.Reduced;
         }
 
         public static FractionSimple operator+(FractionSimple x, int value) {
@@ -163,16 +129,12 @@ namespace MaTech.Common.Data {
 
         public static FractionSimple operator*(FractionSimple x, int scale) {
             if (x._den == 0) return invalid;
-            var result = new FractionSimple(x._num * scale, x._den);
-            result.Reduce();
-            return result;
+            return new FractionSimple(x._num * scale, x._den).Reduced;
         }
 
         public static FractionSimple operator/(FractionSimple x, int denom) {
             if (x._den == 0) return invalid;
-            var result = new FractionSimple(x._num, x._den * denom);
-            result.Reduce();
-            return result;
+            return new FractionSimple(x._num, x._den * denom).Reduced;
         }
 
         public static FractionSimple Max(FractionSimple x, FractionSimple y) => x > y ? x : y;
@@ -198,9 +160,7 @@ namespace MaTech.Common.Data {
         public override bool Equals(object obj) => obj is FractionSimple other && Equals(other);
 
         public override int GetHashCode() {
-            var x = this;
-            x.Normalize();
-            x.Reduce();
+            var x = this.Normalized.Reduced;
             return HashCode.Combine(x._num, x._den);
         }
 
@@ -239,8 +199,7 @@ namespace MaTech.Common.Data {
                     result = next;
                 }
 
-                result.Normalize();
-                return result;
+                return result.Normalized;
             } catch (OverflowException) {
                 return new FractionSimple();
             }
@@ -253,9 +212,7 @@ namespace MaTech.Common.Data {
         /// <param name="denom"> Denominator for rounding </param>
         public static FractionSimple FromFloatRounded(double value, int denom, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
             int numer = MathUtil.RoundToInt(value * denom, mode);
-            var result = new FractionSimple(numer, denom);
-            result.Normalize();
-            return result;
+            return new FractionSimple(numer, denom).Normalized;
         }
 
         /// <summary>
@@ -265,7 +222,7 @@ namespace MaTech.Common.Data {
             var result = zero;
             for (int i = values.Count - 1; i >= 0; --i) {
                 result += values[i];
-                if (i != 0) result.Inverse();
+                if (i != 0) result = result.Inversed;
             }
             return result;
         }

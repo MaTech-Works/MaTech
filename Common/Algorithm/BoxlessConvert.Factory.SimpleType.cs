@@ -15,21 +15,21 @@ namespace MaTech.Common.Algorithm {
     public static partial class BoxlessConvert {
         // Here we implement factories of casting delegates for simple value types
 
-        private static Type typeBoolean = typeof(Boolean);
-        private static Type typeChar = typeof(Char);
-        private static Type typeSByte = typeof(SByte);
-        private static Type typeByte = typeof(Byte);
-        private static Type typeInt16 = typeof(Int16);
-        private static Type typeUInt16 = typeof(UInt16);
-        private static Type typeInt32 = typeof(Int32);
-        private static Type typeUInt32 = typeof(UInt32);
-        private static Type typeInt64 = typeof(Int64);
-        private static Type typeUInt64 = typeof(UInt64);
-        private static Type typeSingle = typeof(Single);
-        private static Type typeDouble = typeof(Double);
-        private static Type typeDecimal = typeof(Decimal);
-        private static Type typeDateTime = typeof(DateTime); // unsupported here, use IdentityCast instead
-        private static Type typeString = typeof(String); // unsupported here, use ConvertibleCast instead
+        private static readonly Type typeBoolean = typeof(Boolean);
+        private static readonly Type typeChar = typeof(Char);
+        private static readonly Type typeSByte = typeof(SByte);
+        private static readonly Type typeByte = typeof(Byte);
+        private static readonly Type typeInt16 = typeof(Int16);
+        private static readonly Type typeUInt16 = typeof(UInt16);
+        private static readonly Type typeInt32 = typeof(Int32);
+        private static readonly Type typeUInt32 = typeof(UInt32);
+        private static readonly Type typeInt64 = typeof(Int64);
+        private static readonly Type typeUInt64 = typeof(UInt64);
+        private static readonly Type typeSingle = typeof(Single);
+        private static readonly Type typeDouble = typeof(Double);
+        private static readonly Type typeDecimal = typeof(Decimal);
+        private static readonly Type typeDateTime = typeof(DateTime); // unsupported here, use IdentityCast instead
+        private static readonly Type typeString = typeof(String); // unsupported here, use ConvertibleCast instead
 
         // Comments from https://referencesource.microsoft.com/#mscorlib/system/convert.cs
         //

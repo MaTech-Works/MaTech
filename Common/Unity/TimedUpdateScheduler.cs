@@ -18,10 +18,10 @@ namespace MaTech.Common.Unity {
             public int CompareTo(TimeInfo info) => wakeTime.CompareTo(info.wakeTime);
         }
 
-        private Action<T> awake;
-        private PriorityQueue<TimeInfo> queue;
-        private ObjectPool<TimeInfo> pool;
-
+        private readonly Action<T> awake;
+        private readonly PriorityQueue<TimeInfo> queue;
+        private readonly ObjectPool<TimeInfo> pool;
+        
         public TimedUpdateScheduler(Action<T> onAwake, int initCapacity = 0) {
             awake = onAwake;
             queue = new PriorityQueue<TimeInfo>(initCapacity);

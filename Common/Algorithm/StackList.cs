@@ -30,7 +30,7 @@ namespace MaTech.Common.Algorithm {
 
         public bool TryPop(out T result) {
             if (Empty) {
-                result = default(T);
+                result = default;
                 return false;
             }
             int indexLast = Count - 1;

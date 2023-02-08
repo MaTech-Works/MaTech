@@ -11,9 +11,9 @@ namespace MaTech.Control.NativeInput {
     /// API design similar to UnityRawInput plugin, windows only
     public static partial class RawInput {
         public static event Action<RawKey, bool> OnKey;
-
         public static bool IsRunning { get; private set; }
-        private static object mutex = new object();
+
+        private static readonly object mutex = new object();
 
         public static bool Start() {
             lock (mutex) {

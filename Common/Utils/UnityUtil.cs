@@ -141,6 +141,7 @@ namespace MaTech.Common.Utils {
             return (mask & (1 << layer)) != 0;
         }
 
+#pragma warning disable IDE0041
 #if UNITY_EDITOR
         /// <summary> Checks if the object is literally null. In build, this will not check Unity's object lifecycle. </summary>
         public static bool IsNull(Object obj) => ReferenceEquals(obj, null) || !obj;
@@ -152,6 +153,7 @@ namespace MaTech.Common.Utils {
         /// <summary> Checks if the object is literally not null, without checking Unity's object lifecycle. </summary>
         public static bool IsNotNull(Object obj) => !ReferenceEquals(obj, null);
 #endif
+#pragma warning restore IDE0041
 
         private static readonly List<GameObject> reusedGameObjectList = new List<GameObject>(); // 仅在主线程使用
         private static readonly List<Component> reusedComponentList = new List<Component>(); // 仅在主线程使用
@@ -220,7 +222,7 @@ namespace MaTech.Common.Utils {
 
         public static void GetComponentsInAllScenes<T>([NotNull] List<T> result, bool clearResult = true) {
             Assert.IsNotNull(result);
-            result.Clear();
+            if (clearResult) result.Clear();
 
             for (var i = 0; i < SceneManager.sceneCount; i++) {
                 SceneManager.GetSceneAt(i).GetComponentsInScene(result, false);

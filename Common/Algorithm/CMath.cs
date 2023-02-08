@@ -4,6 +4,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#pragma warning disable IDE0054
+
 // This code is adapted from C.math.NET (https://github.com/MachineCognitis/C.math.NET, #65647c6) with no editing of the class definition.
 // For this purpose, unsafe is enabled for this subassembly.
 // Original license (MIT) below:

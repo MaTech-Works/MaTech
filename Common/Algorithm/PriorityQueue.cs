@@ -12,11 +12,14 @@ namespace MaTech.Common.Algorithm {
     /// 一个基于小根二叉堆的优先队列实现，要求模板参数T实现IComparable&lt;T&gt;
     /// </summary>
     public class PriorityQueue<T> where T : IComparable<T> {
-        private List<T> heap;
+        private readonly List<T> heap;
 
         public PriorityQueue() {
-            heap = new List<T>(1);
-            heap.Add(default(T));
+            heap = new List<T>(1) { default };
+        }
+
+        public PriorityQueue(int capacity) {
+            heap = new List<T>(capacity + 1) { default };
         }
 
         public PriorityQueue(IEnumerable<T> collection) : this() {
@@ -24,10 +27,6 @@ namespace MaTech.Common.Algorithm {
             for (int i = 1, n = heap.Count; i < n; ++i) {
                 Float(i);
             }
-        }
-
-        public PriorityQueue(int capacity) {
-            heap = new List<T>(capacity + 1);
         }
 
         public int Count {
@@ -53,7 +52,7 @@ namespace MaTech.Common.Algorithm {
 
         public void Clear() {
             heap.Clear();
-            heap.Add(default(T));
+            heap.Add(default);
         }
 
         public T Pop() {
@@ -104,7 +103,7 @@ namespace MaTech.Common.Algorithm {
             int j, n = heap.Count;
             T t = heap[i];
             while ((j = i << 1) < n) { // while i has the left child
-                if (j + 1 < n && heap[j].CompareTo(heap[j + 1]) > 0) j = j + 1; // targets the right child if it exists and smaller than the left
+                if (j + 1 < n && heap[j].CompareTo(heap[j + 1]) > 0) ++j; // targets the right child if it exists and smaller than the left
                 if (heap[j].CompareTo(t) >= 0) break; // cannot sink anymore, get out of here
                 heap[i] = heap[j]; // float the child
                 i = j; // sink i

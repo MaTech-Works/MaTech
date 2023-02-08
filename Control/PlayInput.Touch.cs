@@ -94,10 +94,7 @@ namespace MaTech.Control {
                 touchesPressing.Clear();
             }
 
-            var emptyList = touchesPressing;
-            touchesPressing = touchesToPress;
-            touchesToPress = emptyList;
-            
+            (touchesToPress, touchesPressing) = (touchesPressing, touchesToPress);
             firstUpdateAfterEnable = false;
         }
         

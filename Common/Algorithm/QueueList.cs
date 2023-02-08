@@ -46,12 +46,12 @@ namespace MaTech.Common.Algorithm {
             Clear();
         }
 
-        public T GetNextOrDefault(T defaultValue = default(T)) {
+        public T GetNextOrDefault(T defaultValue = default) {
             if (HasNext) return Next();
             return defaultValue;
         }
 
-        public T PeekOrDefault(T defaultValue = default(T)) {
+        public T PeekOrDefault(T defaultValue = default) {
             if (HasNext) return Peek();
             return defaultValue;
         }

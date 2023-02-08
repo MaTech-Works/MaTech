@@ -13,8 +13,7 @@ namespace MaTech.Common.Algorithm {
         private static T instance;
         public static T G {
             get {
-                if (instance == null)
-                    instance = new T();
+                instance ??= new T();
                 return instance;
             }
         }
