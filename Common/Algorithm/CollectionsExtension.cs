@@ -60,6 +60,12 @@ namespace MaTech.Common.Algorithm {
                 dict.Add(key, value = create(key));
             return value;
         }
+        
+        public static TValue GetOrCreate<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, Func<TValue> create) {
+            if (!dict.TryGetValue(key, out var value))
+                dict.Add(key, value = create());
+            return value;
+        }
 
         public static TValue GetOrNew<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : new() {
             if (!dict.TryGetValue(key, out var value))
@@ -67,17 +73,12 @@ namespace MaTech.Common.Algorithm {
             return value;
         }
 
-        public static TValue? GetNullable<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : struct {
-            if (dict.TryGetValue(key, out var value))
-                return value;
-            return default;
+        public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, TValue value) {
+            return dict.TryAdd(key, value) ? value : dict[key];
         }
 
-        public static TValue? GetNullable<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, object? _ = null) where TValue : class {
-            if (dict.TryGetValue(key, out var value))
-                return value;
-            return null;
+        public static TValue? GetNullable<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) {
+            return dict.TryGetValue(key, out var value) ? value : default;
         }
-
     }
 }
