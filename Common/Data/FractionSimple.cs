@@ -210,6 +210,7 @@ namespace MaTech.Common.Data {
         /// </summary>
         /// <param name="value"> The float-point value </param>
         /// <param name="denominator"> Denominator for rounding </param>
+        /// <param name="mode"> Rounding mode as specified for <see cref="MathUtil.RoundToInt"/> </param>
         public static FractionSimple FromFloatRounded(double value, int denominator, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
             int numerator = MathUtil.RoundToInt(value * denominator, mode);
             return new FractionSimple(numerator, denominator).Normalized;
