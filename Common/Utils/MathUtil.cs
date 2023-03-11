@@ -24,7 +24,8 @@ namespace MaTech.Common.Utils {
 
         public enum RoundingMode { Round, Floor, Ceiling }
 
-        public static int RoundToInt(double value, RoundingMode mode = RoundingMode.Round) {
+        public static int RoundToInt(double value) => (int)Math.Round(value);
+        public static int RoundToInt(double value, RoundingMode mode) {
             switch (mode) {
             case RoundingMode.Round: return (int)Math.Round(value);
             case RoundingMode.Floor: return (int)Math.Floor(value);
@@ -32,8 +33,9 @@ namespace MaTech.Common.Utils {
             }
             return 0;
         }
-
-        public static int RoundToInt(float value, RoundingMode mode = RoundingMode.Round) {
+        
+        public static int RoundToInt(float value) => (int)Math.Round(value);
+        public static int RoundToInt(float value, RoundingMode mode) {
             switch (mode) {
             case RoundingMode.Round: return (int)Math.Round(value);
             case RoundingMode.Floor: return (int)Math.Floor(value);
