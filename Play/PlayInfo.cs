@@ -9,7 +9,7 @@ using MaTech.Common;
 using MaTech.Common.Play;
 
 namespace MaTech.Play {
-    public class PlayInfo {
+    public struct PlayInfo {
         public static PlayInfo Current { get; set; }
 
         // TODO: 把这三个类搬运到MaChart库
@@ -18,16 +18,9 @@ namespace MaTech.Play {
         private Song song;
         private ReplayFile replay;
         */
-
-        public PlayModeType playMode;
-        public PlayByType playBy;
-        public PlayFrom playFrom;
-
-        public ModMask Mod { get; set; }
-        public ModMask ModForPlay { get; private set; }
-
-        public JudgeLevel level;
-        public bool proJudge;
+        
+        // TODO: 定义一个meta接口，放置具体数据与方法的实现
+        // public IPlayMeta meta;
 
         public int randomSeed;
 
@@ -78,24 +71,6 @@ namespace MaTech.Play {
             }
             */
 
-            ModForPlay = PlayUtil.ValidatedMod(Mod, playMode);
-
-            // 如果是来自watch的mp场景，主播端的validate会把mod设置为正确值，这里不用再验
-            if (playFrom == PlayFrom.MP) {
-                ModForPlay &= ~(ModMask.Auto | ModMask.Luck | ModMask.Death);
-            } else {
-                ModForPlay &= ~ModMask.Fair;
-            }
-
-            // 观众不能有死亡模式
-            if (playFrom == PlayFrom.Watch) {
-                ModForPlay &= ~ModMask.Death;
-            }
-
-            if (IsAuto) {
-                playBy = PlayByType.Marlo;
-            }
-
             // seed的唯一生成处
             // TODO: 将清洁后的helper移动到common库，再启用seed生成代码
             /*
@@ -107,59 +82,11 @@ namespace MaTech.Play {
                 }
             }
             */
+            
+            // TODO: 为IPlayMeta实现相应的接口
+            // meta.Validate(this);
 
             return true;
         }
-
-        public ModMask TurnOnMod(ModMask mod) {
-            var turnoff = PlayUtil.ConflictedMod(mod);
-            if (turnoff != ModMask.None) {
-                Mod &= ~turnoff;
-            }
-
-            Mod |= mod;
-            return Mod;
-        }
-
-        public ModMask TurnOffMod(ModMask mod) {
-            Mod &= ~mod;
-
-            return Mod;
-        }
-
-        public bool IsAuto => ModForPlay.HasAnyFlag(ModMask.Auto);
-        public bool IsOrigin => ModForPlay.HasAnyFlag(ModMask.Origin);
-
-        public void TurnOffAllMods() { Mod = ModMask.None; }
-
-        public void Reset() {
-            playBy = PlayByType.Player;
-            playFrom = PlayFrom.Normal;
-            Mod = ModMask.None;
-            startOffset = null;
-            endOffset = null;
-            //replay = null;
-            //replayLegacy = null;
-        }
-
-        /// <summary>
-        /// 用于固化play信息的场合
-        /// </summary>
-        /// <returns></returns>
-        public PlayInfo Dump() => new PlayInfo {
-            //chart = chart,
-            //song = song,
-            level = level,
-            playMode = playMode,
-            playFrom = playFrom,
-            playBy = playBy,
-            Mod = Mod,
-            ModForPlay = ModForPlay,
-            startOffset = startOffset,
-            //replay = replay,
-            //replayLegacy = replayLegacy,
-            proJudge = proJudge,
-            randomSeed = randomSeed,
-        };
     }
 }
