@@ -43,31 +43,31 @@ namespace MaTech.Common.Data {
 
         public Fraction(int integer, FractionSimple decimalPart) {
             _int = integer;
-            _num = decimalPart.Numer;
-            _den = decimalPart.Denom;
+            _num = decimalPart.Numerator;
+            _den = decimalPart.Denominator;
         }
 
-        public Fraction(int integer, int numer, int denom) {
+        public Fraction(int integer, int numerator, int denominator) {
             _int = integer;
-            _num = numer;
-            _den = denom;
+            _num = numerator;
+            _den = denominator;
         }
 
-        public void Set(int integer, int numer, int denom) {
+        public void Set(int integer, int numerator, int denominator) {
             _int = integer;
-            _num = numer;
-            _den = denom;
+            _num = numerator;
+            _den = denominator;
         }
 
-        public void SetSigned(int integer, int numer, int denom) {
+        public void SetSigned(int integer, int numerator, int denominator) {
             _int = integer;
-            _num = Math.Sign(denom) * numer;
-            _den = Math.Abs(denom);
+            _num = Math.Sign(denominator) * numerator;
+            _den = Math.Abs(denominator);
         }
 
-        public int Int { get => _int; set => _int = value; }
-        public int Numer { get => _num; set => _num = value; }
-        public int Denom { get => _den; set => _den = value; }
+        public int Integer { get => _int; set => _int = value; }
+        public int Numerator { get => _num; set => _num = value; }
+        public int Denominator { get => _den; set => _den = value; }
 
         public float Float => _int + (float)_num / _den;
         public double Double => _int + (double)_num / _den;
@@ -76,11 +76,11 @@ namespace MaTech.Common.Data {
         public float DecimalFloat => (float)_num / _den;
         public double DecimalDouble => (double)_num / _den;
 
-        public static explicit operator float(Fraction frac) => frac.Float;
-        public static explicit operator double(Fraction frac) => frac.Double;
+        public static explicit operator float(Fraction fraction) => fraction.Float;
+        public static explicit operator double(Fraction fraction) => fraction.Double;
 
-        public static implicit operator FractionSimple(Fraction frac) => new FractionSimple(frac._num + frac._int * frac._den, frac._den);
-        public static implicit operator Fraction(FractionSimple frac) => new Fraction(0, frac.Numer, frac.Denom).Normalized;
+        public static implicit operator FractionSimple(Fraction fraction) => new FractionSimple(fraction._num + fraction._int * fraction._den, fraction._den);
+        public static implicit operator Fraction(FractionSimple fraction) => new Fraction(0, fraction.Numerator, fraction.Denominator).Normalized;
 
         public Fraction Normalized {
             get {
@@ -127,9 +127,9 @@ namespace MaTech.Common.Data {
             return new Fraction(x._int * scale, x._num * scale, x._den).Normalized;
         }
 
-        public static Fraction operator/(Fraction x, int denom) {
+        public static Fraction operator/(Fraction x, int denominator) {
             if (x._den == 0) return invalid;
-            return new Fraction(0, x._int * x._den + x._num, x._den * denom).Normalized;
+            return new Fraction(0, x._int * x._den + x._num, x._den * denominator).Normalized;
         }
 
         public static Fraction Max(Fraction x, Fraction y) => x > y ? x : y;
@@ -156,20 +156,20 @@ namespace MaTech.Common.Data {
         public override int GetHashCode() => ((FractionSimple)this).GetHashCode();
 
         /// <summary>
-        /// 用连分数法寻找分母在含 maxDenom 以内离 value 最近的分数
+        /// 用连分数法寻找分母在含 maxDenominator 以内离 value 最近的分数
         /// </summary>
         /// <param name="value"> The float-point value </param>
-        /// <param name="maxDenom"> Maximum denominator that can be produced </param>
-        public static Fraction FromFloat(double value, int maxDenom = 1000) => FractionSimple.FromFloat(value, maxDenom);
+        /// <param name="maxDenominator"> Maximum denominator that can be produced </param>
+        public static Fraction FromFloat(double value, int maxDenominator = 1000) => FractionSimple.FromFloat(value, maxDenominator);
 
         /// <summary>
         /// Get a normalized fraction from float-point values rounded to the denominator.
         /// </summary>
         /// <param name="value"> The float-point value </param>
-        /// <param name="denom"> Denominator for rounding </param>
+        /// <param name="denominator"> Denominator for rounding </param>
         /// <param name="mode"> Rounding mode as used in MathUtil.RoundToInt </param>
-        public static Fraction FromFloatRounded(double value, int denom, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
-            return FractionSimple.FromFloatRounded(value, denom, mode);
+        public static Fraction FromFloatRounded(double value, int denominator, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
+            return FractionSimple.FromFloatRounded(value, denominator, mode);
         }
 
         /// <summary>
@@ -177,10 +177,10 @@ namespace MaTech.Common.Data {
         /// </summary>
         /// <param name="integerPart"> The integer part of the sum </param>
         /// <param name="decimalPart"> The decimal part of the sum </param>
-        /// <param name="denom"> Denominator for rounding </param>
+        /// <param name="denominator"> Denominator for rounding </param>
         /// <param name="mode"> Rounding mode as used in MathUtil.RoundToInt </param>
-        public static Fraction FromFloatRounded(int integerPart, float decimalPart, int denom, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
-            return FromFloatRounded(decimalPart, denom, mode) + new Fraction(integerPart);
+        public static Fraction FromFloatRounded(int integerPart, float decimalPart, int denominator, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
+            return FromFloatRounded(decimalPart, denominator, mode) + new Fraction(integerPart);
         }
 
         public static Fraction FromIntArray(int[] arr) {

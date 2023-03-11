@@ -39,14 +39,14 @@ namespace MaTech.Common.Data {
         public Variant(bool value) {
             Type = VariantType.Bool;
             f = new FractionSimple(value ? 1 : 0);
-            d = f.Numer;
+            d = f.Numerator;
             o = null;
         }
 
         public Variant(int value) {
             Type = VariantType.Int;
             f = new FractionSimple(value);
-            d = f.Numer;
+            d = f.Numerator;
             o = null;
         }
 

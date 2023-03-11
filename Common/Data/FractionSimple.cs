@@ -40,18 +40,18 @@ namespace MaTech.Common.Data {
             _den = 1;
         }
 
-        public FractionSimple(int numer, int denom) {
-            _num = numer;
-            _den = denom;
+        public FractionSimple(int numerator, int denominator) {
+            _num = numerator;
+            _den = denominator;
         }
 
-        public void Set(int numer, int denom) {
-            _num = numer;
-            _den = denom;
+        public void Set(int numerator, int denominator) {
+            _num = numerator;
+            _den = denominator;
         }
 
-        public int Numer { get => _num; set => _num = value; }
-        public int Denom { get => _den; set => _den = value; }
+        public int Numerator { get => _num; set => _num = value; }
+        public int Denominator { get => _den; set => _den = value; }
 
         public float Float => (float)_num / _den;
         public double Double => (double)_num / _den;
@@ -62,8 +62,8 @@ namespace MaTech.Common.Data {
 
         public int Rounded => _den == 0 ? 0 : (_num + _den / 2) / _den;
 
-        public static explicit operator float(FractionSimple frac) { return frac.Float; }
-        public static explicit operator double(FractionSimple frac) { return frac.Double; }
+        public static explicit operator float(FractionSimple fraction) { return fraction.Float; }
+        public static explicit operator double(FractionSimple fraction) { return fraction.Double; }
         
         public FractionSimple Inversed => new FractionSimple(_den, _num);
 
@@ -132,9 +132,9 @@ namespace MaTech.Common.Data {
             return new FractionSimple(x._num * scale, x._den).Reduced;
         }
 
-        public static FractionSimple operator/(FractionSimple x, int denom) {
+        public static FractionSimple operator/(FractionSimple x, int denominator) {
             if (x._den == 0) return invalid;
-            return new FractionSimple(x._num, x._den * denom).Reduced;
+            return new FractionSimple(x._num, x._den * denominator).Reduced;
         }
 
         public static FractionSimple Max(FractionSimple x, FractionSimple y) => x > y ? x : y;
@@ -167,35 +167,35 @@ namespace MaTech.Common.Data {
         private static readonly ThreadLocal<List<int>> threadLocalCachedList = new ThreadLocal<List<int>>(() => new List<int>());
 
         /// <summary>
-        /// 用连分数法寻找分母在 maxDenom 以内离 value 最近的分数
+        /// 用连分数法寻找分母在 maxDenominator 以内离 value 最近的分数
         /// </summary>
         /// <param name="value"> The float-point value </param>
-        /// <param name="maxDenom"> Maximum denominator that can be produced </param>
-        public static FractionSimple FromFloat(double value, int maxDenom = 1000) {
+        /// <param name="maxDenominator"> Maximum denominator that can be produced </param>
+        public static FractionSimple FromFloat(double value, int maxDenominator = 1000) {
             try {
                 int a0 = (int)Math.Round(value);
                 FractionSimple result = new FractionSimple(a0);
 
                 // 连分数 a[0]+1/(a[1]+1/(a[2]+1/(...+1/(a[n] + 1/r)))) 中的剩余展开值 r
                 double remain = value - a0;
-                double invMaxDenom = 1.0 / maxDenom;
-                if (Math.Abs(remain) < invMaxDenom) { // 做一个浮点数比较，如果 remain * 2 小于 1/maxDenom 了，那分母势必大于 maxDenom，而且有可能爆int
-                    if (Math.Abs(remain) * 2 < invMaxDenom) return result; // 分母太小，不忍直视
-                    return new FractionSimple(Math.Sign(remain), maxDenom); // 0 与 1/maxDenom 比起来，1/maxDenom 更优的情况
+                double invMaxDenominator = 1.0 / maxDenominator;
+                if (Math.Abs(remain) < invMaxDenominator) { // 做一个浮点数比较，如果 remain * 2 小于 1/maxDenominator 了，那分母势必大于 maxDenominator，而且有可能爆int
+                    if (Math.Abs(remain) * 2 < invMaxDenominator) return result; // 分母太小，不忍直视
+                    return new FractionSimple(Math.Sign(remain), maxDenominator); // 0 与 1/maxDenominator 比起来，1/maxDenominator 更优的情况
                 }
 
                 List<int> arr = threadLocalCachedList.Value;
                 arr.Clear();
                 arr.Add(a0);
 
-                while (Math.Abs(remain) * 2 >= invMaxDenom) { // 先为 remain 判断，避免爆int
+                while (Math.Abs(remain) * 2 >= invMaxDenominator) { // 先为 remain 判断，避免爆int
                     double invRemain = 1 / remain;
                     int a = (int)Math.Round(invRemain);
                     remain = invRemain - a;
                     arr.Add(a);
 
                     FractionSimple next = FromContinuousFraction(arr);
-                    if (Math.Abs(next._den) > maxDenom) break;
+                    if (Math.Abs(next._den) > maxDenominator) break;
                     result = next;
                 }
 
@@ -209,10 +209,10 @@ namespace MaTech.Common.Data {
         /// Get a normalized fraction from float-point values rounded to the denominator.
         /// </summary>
         /// <param name="value"> The float-point value </param>
-        /// <param name="denom"> Denominator for rounding </param>
-        public static FractionSimple FromFloatRounded(double value, int denom, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
-            int numer = MathUtil.RoundToInt(value * denom, mode);
-            return new FractionSimple(numer, denom).Normalized;
+        /// <param name="denominator"> Denominator for rounding </param>
+        public static FractionSimple FromFloatRounded(double value, int denominator, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
+            int numerator = MathUtil.RoundToInt(value * denominator, mode);
+            return new FractionSimple(numerator, denominator).Normalized;
         }
 
         /// <summary>
