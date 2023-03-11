@@ -1,6 +1,6 @@
 {
     "name": "MaAudio",
-    "rootNamespace": "",
+    "rootNamespace": "MaTech.Audio",
     "references": [
         "UniTask",
         "MaCommon"

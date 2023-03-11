@@ -1,6 +1,6 @@
 {
     "name": "MaChart",
-    "rootNamespace": "",
+    "rootNamespace": "MaTech.Chart",
     "references": [
         "UniTask",
         "MaCommon"

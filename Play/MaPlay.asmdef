@@ -1,6 +1,6 @@
 {
     "name": "MaPlay",
-    "rootNamespace": "",
+    "rootNamespace": "MaTech.Play",
     "references": [
         "UniTask",
         "MaCommon",

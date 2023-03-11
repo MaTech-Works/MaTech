@@ -1,6 +1,6 @@
 {
     "name": "MaTrack3D",
-    "rootNamespace": "",
+    "rootNamespace": "MaTech.Track3D",
     "references": [
         "UniTask",
         "MaCommon"
