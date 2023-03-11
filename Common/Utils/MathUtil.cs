@@ -117,11 +117,11 @@ namespace MaTech.Common.Utils {
                 : Mathf.Sign(y) * Mathf.PI / 2 - FastAtanRaw(x / y);
         }
 
-        public static float RatioFromSinDegrees(float angleNumer, float angleDenom) {
-            return Mathf.Sin(Mathf.Deg2Rad * angleNumer) / Mathf.Sin(Mathf.Deg2Rad * angleDenom);
+        public static float RatioFromSinDegrees(float angleDividend, float angleDivisor) {
+            return Mathf.Sin(Mathf.Deg2Rad * angleDividend) / Mathf.Sin(Mathf.Deg2Rad * angleDivisor);
         }
-        public static float RatioFromSinRadians(float angleNumer, float angleDenom) {
-            return Mathf.Sin(angleNumer) / Mathf.Sin(angleDenom);
+        public static float RatioFromSinRadians(float angleDividend, float angleDivisor) {
+            return Mathf.Sin(angleDividend) / Mathf.Sin(angleDivisor);
         }
         
         /// 将角度转换为>=lowerBound的最小等价角度（角度制）
