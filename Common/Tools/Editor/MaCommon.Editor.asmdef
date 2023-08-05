@@ -1,0 +1,18 @@
+{
+    "name": "MaCommon.Editor",
+    "rootNamespace": "MaTech.Common.Editor",
+    "references": [
+        "MaCommon"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
