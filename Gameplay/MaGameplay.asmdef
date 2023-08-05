@@ -1,0 +1,18 @@
+{
+    "name": "MaGameplay",
+    "rootNamespace": "MaTech.Gameplay",
+    "references": [
+        "UniTask",
+        "MaCommon",
+        "MaAudio"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
