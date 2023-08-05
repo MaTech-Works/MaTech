@@ -1,21 +1,23 @@
-// Copyright (c) 2022, LuiCat (as MaTech)
+// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine.Assertions;
 using UnityEngine.Scripting;
 
-#nullable enable
-
 namespace MaTech.Common.Algorithm {
     public static partial class BoxlessConvert {
+        // Here we implement factories of casting delegates for enum types
+
         private static class EnumCasterFactory<TEnum> where TEnum : unmanaged, Enum, IConvertible {
-            private static Dictionary<Type, (Func<Delegate?>, Func<Delegate?>)> dict; // T --> (Func<Caster<TEnum, T>>, Func<Caster<T, TEnum>>)
+            // ReSharper disable once StaticMemberInGenericType
+            private static Dictionary<Type, (Func<Delegate?>, Func<Delegate?>)> dict = null!; // T --> (Func<Caster<TEnum, T>>, Func<Caster<T, TEnum>>)
 
             private static unsafe TResult ReinterpretCast<TSource, TResult>(TSource value) where TSource : unmanaged where TResult : unmanaged {
                 Assert.AreEqual(sizeof(TSource), sizeof(TResult));
@@ -50,14 +52,14 @@ namespace MaTech.Common.Algorithm {
             static EnumCasterFactory() {
                 var underlyingType = Enum.GetUnderlyingType(typeof(TEnum));
                 if (underlyingType == typeSByte) InitializeDictForUnderlyingType<SByte>();
-                if (underlyingType == typeByte) InitializeDictForUnderlyingType<Byte>();
-                if (underlyingType == typeInt16) InitializeDictForUnderlyingType<Int16>();
-                if (underlyingType == typeUInt16) InitializeDictForUnderlyingType<UInt16>();
-                if (underlyingType == typeInt32) InitializeDictForUnderlyingType<Int32>();
-                if (underlyingType == typeUInt32) InitializeDictForUnderlyingType<UInt32>();
-                if (underlyingType == typeInt64) InitializeDictForUnderlyingType<Int64>();
-                if (underlyingType == typeUInt64) InitializeDictForUnderlyingType<UInt64>();
-                throw new NotSupportedException($"[BoxlessConvert] The underlying type of enum is {underlyingType}, which is not supported. Is this something new in C#?");
+                else if (underlyingType == typeByte) InitializeDictForUnderlyingType<Byte>();
+                else if (underlyingType == typeInt16) InitializeDictForUnderlyingType<Int16>();
+                else if (underlyingType == typeUInt16) InitializeDictForUnderlyingType<UInt16>();
+                else if (underlyingType == typeInt32) InitializeDictForUnderlyingType<Int32>();
+                else if (underlyingType == typeUInt32) InitializeDictForUnderlyingType<UInt32>();
+                else if (underlyingType == typeInt64) InitializeDictForUnderlyingType<Int64>();
+                else if (underlyingType == typeUInt64) InitializeDictForUnderlyingType<UInt64>();
+                else throw new NotSupportedException($"[BoxlessConvert] The underlying type of enum is {underlyingType}, test {typeInt32}, which is not supported. Is this something new in C#?");
             }
 
             [Preserve]
@@ -73,6 +75,31 @@ namespace MaTech.Common.Algorithm {
                     return (Caster<TSource, TEnum>?)factory.Item2();
                 return null;
             }
+
+            [Preserve]
+            internal static void PreserveMethods() {
+                Create<SByte>();
+                Create<Byte>();
+                Create<Int16>();
+                Create<UInt16>();
+                Create<Int32>();
+                Create<UInt32>();
+                Create<Int64>();
+                Create<UInt64>();
+                CreateReversed<SByte>();
+                CreateReversed<Byte>();
+                CreateReversed<Int16>();
+                CreateReversed<UInt16>();
+                CreateReversed<Int32>();
+                CreateReversed<UInt32>();
+                CreateReversed<Int64>();
+                CreateReversed<UInt64>();
+            }
+        }
+        
+        [Preserve]
+        public static void PreserveForEnum<TEnum>() where TEnum : unmanaged, Enum, IConvertible {
+            EnumCasterFactory<TEnum>.PreserveMethods();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022, LuiCat (as MaTech)
+﻿// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -11,7 +11,7 @@ using UnityEngine.Assertions;
 using UnityScene = UnityEngine.SceneManagement.Scene;
 
 namespace MaTech.Common.Unity {
-    // todo: replace this with an aggregated struct that registers single per scene info manually and doesn't require inheritance
+    // TODO: 替换成无需继承的实现，要求手动调用AddInstance等方法缓存自身引用（也相当于允许自定义有效生命周期，以及提供可选而充分的错误处理）
     [DefaultExecutionOrder(-800)]
     public abstract class SinglePerSceneBehaviour<TDerive> : MonoBehaviour where TDerive : SinglePerSceneBehaviour<TDerive> {
         private static readonly Dictionary<UnityScene, TDerive> instances = new Dictionary<UnityScene, TDerive>();

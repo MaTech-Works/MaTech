@@ -1,15 +1,14 @@
-// Copyright (c) 2022, LuiCat (as MaTech)
+// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#nullable enable
+
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine.Scripting;
-
-#nullable enable
 
 namespace MaTech.Common.Algorithm {
     public static partial class BoxlessConvert {

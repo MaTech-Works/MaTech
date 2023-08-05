@@ -1,8 +1,10 @@
-// Copyright (c) 2022, LuiCat (as MaTech)
+// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+using System.Threading;
 
 namespace MaTech.Common.Algorithm {
     /// Think thrice before using this type.
@@ -11,9 +13,28 @@ namespace MaTech.Common.Algorithm {
     /// Almost in all times, it's better to have the non-static class to be owned by a instance-managing mechanism or a instance of the game/level/world.
     public class Singleton<T> where T : Singleton<T>, new() {
         private static T instance;
-        public static T G {
+        
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly object syncRoot = new object();
+        
+        public static T SingletonInstance { // ugly name for your second thoughts
             get {
                 instance ??= new T();
+                return instance;
+            }
+        }
+        
+        public static T SingletonInstanceThreadSafe { // even uglier name for your second thoughts
+            get {
+                if (instance != null)
+                    return instance;
+                lock (syncRoot) {
+                    if (instance != null)
+                        return instance;
+                    var t = new T();
+                    Thread.MemoryBarrier(); // force assignment to happen after new and lock
+                    instance = t;
+                }
                 return instance;
             }
         }

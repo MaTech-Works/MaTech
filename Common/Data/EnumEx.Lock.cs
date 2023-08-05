@@ -1,28 +1,28 @@
-﻿// Copyright (c) 2022, LuiCat (as MaTech)
+﻿// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#nullable enable
+
 using System;
 using System.Threading;
 
-#nullable enable
-
 namespace MaTech.Common.Data {
-    public readonly partial struct EnumEx<T> {
+    public partial struct EnumEx<T> {
         private static readonly ReaderWriterLockSlim lockMetadata = new ReaderWriterLockSlim();
         
         private struct ReaderLockRAII : IDisposable {
             private bool read;
 
-            public static ReaderLockRAII Read() {
+            public static ReaderLockRAII EnterRead() {
                 lockMetadata.EnterReadLock();
                 return new ReaderLockRAII { read = true };
             }
 
             public void Dispose() {
-                if (read) lockMetadata.ExitUpgradeableReadLock();
+                if (read) lockMetadata.ExitReadLock();
             }
         }
 
@@ -30,12 +30,12 @@ namespace MaTech.Common.Data {
             private bool read;
             private bool write;
 
-            public static WriterLockRAII Read() {
+            public static WriterLockRAII EnterRead() {
                 lockMetadata.EnterUpgradeableReadLock();
                 return new WriterLockRAII { read = true };
             }
 
-            public void Write() {
+            public void EnterWrite() {
                 if (write) return;
                 lockMetadata.EnterWriteLock();
                 write = true;

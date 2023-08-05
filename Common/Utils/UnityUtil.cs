@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022, LuiCat (as MaTech)
+﻿// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,8 +6,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
-using MaTech.Common.Algorithm;
 using MaTech.Common.Unity;
 using UnityEditor;
 using UnityEngine;
@@ -55,12 +56,11 @@ namespace MaTech.Common.Utils {
             transform.localPosition = new Vector3(v.x, v.y, transform.localPosition.z);
         }
 
-        public static void ResetLocally(this RectTransform rectTransform, float minX = 0, float maxX = 1,
-            float minY = 0, float maxY = 1) {
+        public static void ResetLocally(this RectTransform rectTransform, float minAnchorX = 0, float maxAnchorX = 1, float minAnchorY = 0, float maxAnchorY = 1) {
             rectTransform.localScale = Vector3.one;
             rectTransform.localRotation = Quaternion.identity;
-            rectTransform.anchorMin = new Vector2(minX, minY);
-            rectTransform.anchorMax = new Vector2(maxX, maxY);
+            rectTransform.anchorMin = new Vector2(minAnchorX, minAnchorY);
+            rectTransform.anchorMax = new Vector2(maxAnchorX, maxAnchorY);
             rectTransform.anchoredPosition3D = Vector3.zero;
             rectTransform.offsetMax = Vector2.zero;
             rectTransform.offsetMin = Vector2.zero;
@@ -75,6 +75,16 @@ namespace MaTech.Common.Utils {
             target.anchoredPosition3D = source.anchoredPosition3D;
             target.offsetMax = source.offsetMax;
             target.offsetMin = source.offsetMin;
+        }
+
+        public static void SetAnchor(this RectTransform rectTransform, float x, float y) {
+            rectTransform.anchorMin = new Vector2(x, y);
+            rectTransform.anchorMax = new Vector2(x, y);
+        }
+        
+        public static void SetAnchor(this RectTransform rectTransform, float minX, float maxX, float minY, float maxY) {
+            rectTransform.anchorMin = new Vector2(minX, minY);
+            rectTransform.anchorMax = new Vector2(maxX, maxY);
         }
 
         public static void SetAnchorX(this RectTransform rectTransform, float value) {
@@ -96,6 +106,16 @@ namespace MaTech.Common.Utils {
             rectTransform.anchorMin = new Vector2(rectTransform.anchorMin.x, min);
             rectTransform.anchorMax = new Vector2(rectTransform.anchorMax.x, max);
         }
+        
+        public static void SetOffset(this RectTransform rectTransform, float x, float y) {
+            rectTransform.offsetMin = new Vector2(x, y);
+            rectTransform.offsetMax = new Vector2(x, y);
+        }
+        
+        public static void SetOffset(this RectTransform rectTransform, float minX, float maxX, float minY, float maxY) {
+            rectTransform.offsetMin = new Vector2(minX, minY);
+            rectTransform.offsetMax = new Vector2(maxX, maxY);
+        }
 
         public static void SetOffsetX(this RectTransform rectTransform, float value) {
             rectTransform.offsetMin = new Vector2(value, rectTransform.offsetMin.y);
@@ -116,20 +136,13 @@ namespace MaTech.Common.Utils {
             rectTransform.offsetMin = new Vector2(rectTransform.offsetMin.x, min);
             rectTransform.offsetMax = new Vector2(rectTransform.offsetMax.x, max);
         }
-
-        /// <summary>
-        /// 避免重复计算sizeDelta和anchoredPosition
-        /// </summary>
-        public static void SetOffset(this RectTransform rectTransform, Vector2 min, Vector2 max) {
-            var anchoredPosition = rectTransform.anchoredPosition;
-            var sizeDelta = rectTransform.sizeDelta;
-            var pivot = rectTransform.pivot;
-            var pivotReversed = Vector2.one - pivot;
-
-            var a = min - (anchoredPosition - Vector2.Scale(sizeDelta, pivot));
-            var b = max - (anchoredPosition + Vector2.Scale(sizeDelta, pivotReversed));
-            rectTransform.sizeDelta += b - a;
-            rectTransform.anchoredPosition += Vector2.Scale(a, pivotReversed) + Vector2.Scale(a, pivot);
+        
+        public static Vector3 GetAnchoredLocalPosition(this RectTransform rectTransform, Vector2 ratio) {
+            return rectTransform.rect.NormalizedToPointUnclamped(ratio);
+        }
+        
+        public static Vector3 GetAnchoredWorldPosition(this RectTransform rectTransform, Vector2 ratio) {
+            return rectTransform.localToWorldMatrix.MultiplyPoint(rectTransform.GetAnchoredLocalPosition(ratio));
         }
 
         public static Vector4 ToVector(this Rect rect) {
@@ -141,19 +154,10 @@ namespace MaTech.Common.Utils {
             return (mask & (1 << layer)) != 0;
         }
 
-#pragma warning disable IDE0041
-#if UNITY_EDITOR
-        /// <summary> Checks if the object is literally null. In build, this will not check Unity's object lifecycle. </summary>
-        public static bool IsNull(Object obj) => ReferenceEquals(obj, null) || !obj;
-        /// <summary> Checks if the object is literally not null. In build, this will not check Unity's object lifecycle. </summary>
-        public static bool IsNotNull(Object obj) => !ReferenceEquals(obj, null) && obj;
-#else
-        /// <summary> Checks if the object is literally null, without checking Unity's object lifecycle. </summary>
-        public static bool IsNull(Object obj) => ReferenceEquals(obj, null);
-        /// <summary> Checks if the object is literally not null, without checking Unity's object lifecycle. </summary>
-        public static bool IsNotNull(Object obj) => !ReferenceEquals(obj, null);
-#endif
-#pragma warning restore IDE0041
+        /// <summary> Checks if the object is literally null. Missing references are treated as assigned. </summary>
+        public static bool IsUnassigned(Object obj) => ReferenceEquals(obj, null) || obj.GetHashCode() == 0;
+        /// <summary> Checks if the object is literally not null. Missing references are treated as assigned. </summary>
+        public static bool IsAssigned(Object obj) => !ReferenceEquals(obj, null) && obj.GetHashCode() != 0;
 
         private static readonly List<GameObject> reusedGameObjectList = new List<GameObject>(); // 仅在主线程使用
         private static readonly List<Component> reusedComponentList = new List<Component>(); // 仅在主线程使用
@@ -305,5 +309,90 @@ namespace MaTech.Common.Utils {
         public static Vector2 NormalizedToPointUnclamped(in this Rect rect, Vector2 point) {
             return point.LerpUnclamped(rect.min, rect.max);
         }
+
+        public static float GetBeginTime(this AnimationCurve curve) => curve.keys.FirstOrDefault().time;
+        public static float GetEndTime(this AnimationCurve curve) => curve.keys.LastOrDefault().time;
+
+        #if UNITY_EDITOR
+        // Reference: https://forum.unity.com/threads/get-a-general-object-value-from-serializedproperty.327098/#post-7508561
+        public static object GetBoxedValue(this SerializedProperty property) {
+            #if UNITY_2022_2_OR_NEWER
+            return property.boxedValue;
+            #else
+            object target = property.serializedObject.targetObject;
+            
+            string[] tokens = property.propertyPath.Replace(".Array.data[",".").Replace("]", "").Split('.'); // x.Array.data[i] --> x.i
+            foreach (var token in tokens) {
+                if (target == null) return null;
+                if (int.TryParse(token, out int index)) {
+                    if (target is not object[] array) return null;
+                    target = array[index];
+                } else {
+                    target = GetBoxedValue_GetField(target, token);
+                }
+            }
+            
+            return target;
+            #endif
+        }
+
+        private static object GetBoxedValue_GetField(object target, string token) {
+            var targetType = target.GetType();
+            while (targetType != null) {
+                var field = targetType.GetField(token, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (field != null) return field.GetValue(target);
+                targetType = targetType.BaseType;
+            }
+            return null;
+        }
+        
+        public static bool SetBoxedValue(this SerializedProperty property, object value) {
+            #if UNITY_2022_2_OR_NEWER
+            property.boxedValue = value;
+            #else
+            object target = property.serializedObject.targetObject;
+            
+            string[] tokens = property.propertyPath.Replace(".Array.data[",".").Trim(']').Split('.'); // x.Array.data[i] --> x.i
+            var lastToken = tokens.Last();
+            foreach (var token in tokens) {
+                if (target == null) return false;
+                if (int.TryParse(token, out int index)) {
+                    var array = target as object[];
+                    if (array == null) return false;
+                    if (token == lastToken) {
+                        array[index] = value;
+                    } else {
+                        target = array?[index];
+                    }
+                } else {
+                    if (token == lastToken) {
+                        return SetBoxedValue_SetField(target, token, value);
+                    } else {
+                        target = GetBoxedValue_GetField(target, token);
+                    }
+                }
+            }
+            
+            return true;
+            #endif
+        }
+
+        private static bool SetBoxedValue_SetField(object target, string token, object value) {
+            var targetType = target.GetType();
+            while (targetType != null) {
+                var field = targetType.GetField(token, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (field != null) {
+                    if (field.FieldType.IsInstanceOfType(value)) {
+                        field.SetValue(target, value);
+                        return true;
+                    }
+                    return false;
+                }
+                targetType = targetType.BaseType;
+            }
+            return false;
+        }
+
+        #endif
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022, LuiCat (as MaTech)
+﻿// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -111,7 +111,7 @@ namespace MaTech.Common.Data {
         public static Fraction operator-(Fraction x, Fraction y) => (FractionSimple)x - (FractionSimple)y;
         public static Fraction operator*(Fraction x, Fraction y) => (FractionSimple)x * (FractionSimple)y;
         public static Fraction operator/(Fraction x, Fraction y) => (FractionSimple)x / (FractionSimple)y;
-
+        
         public static Fraction operator+(Fraction x, int value) {
             if (x._den == 0) return invalid;
             return new Fraction(x._int + value, x._num, x._den);

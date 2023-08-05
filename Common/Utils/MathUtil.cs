@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022, LuiCat (as MaTech)
+﻿// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -46,28 +46,32 @@ namespace MaTech.Common.Utils {
 
         public static int Clamp(int value, int min, int max) => value < min ? min : value > max ? max : value;
         public static long Clamp(long value, long min, long max) => value < min ? min : value > max ? max : value;
+        public static float Clamp(float value, float min, float max) => value < min ? min : value > max ? max : value;
         public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
 
+        public static float Saturate(float value) => value < 0 ? 0 : value > 1 ? 1 : value;
+        public static double Saturate(double value) => value < 0 ? 0 : value > 1 ? 1 : value;
+
         /// <summary>
-        /// 两个无符号整数间的的有符号差距，返回数学意义上的(to-from)。（函数实现仅在参数不超有符号整数范围时有效）
+        /// 两个无符号整数间的的有符号差距，返回数学意义上的(to-from)。（仅在差距不超有符号整数范围时有效）
         /// </summary>
         public static long OffsetBetween(ulong from, ulong to) {
             return (long)to - (long)from;
         }
 
         /// <summary>
-        /// 两个无符号整数间的的有符号差距，返回数学意义上的(to-from)。（函数实现仅在参数不超有符号整数范围时有效）
+        /// 两个无符号整数间的的有符号差距，返回数学意义上的(to-from)。（仅在差距不超有符号整数范围时有效）
         /// </summary>
         public static int OffsetBetween(uint from, uint to) {
             return (int)to - (int)from;
         }
 
         /// <summary> 用法同UnityEngine.Mathf.Lerp </summary>
-        public static double Lerp(double a, double b, double k) => LerpUnclamped(a, b, Clamp(k, 0, 1));
+        public static double Lerp(double a, double b, double k) => LerpUnclamped(a, b, Saturate(k));
         /// <summary> 用法同UnityEngine.Mathf.LerpUnclamped </summary>
         public static double LerpUnclamped(double a, double b, double k) => (1 - k) * a + k * b;
         /// <summary> 用法同UnityEngine.Mathf.InverseLerp </summary>
-        public static double InverseLerp(double a, double b, double value) => Clamp(InverseLerpUnclamped(a, b, value), 0, 1);
+        public static double InverseLerp(double a, double b, double value) => Saturate(InverseLerpUnclamped(a, b, value));
 
         public static float InverseLerpUnclamped(float a, float b, float value) => (value - a) / (b - a);
         public static double InverseLerpUnclamped(double a, double b, double value) => (value - a) / (b - a);
@@ -79,7 +83,23 @@ namespace MaTech.Common.Utils {
             return Lerp(destA, destB, InverseLerpUnclamped(sourceA, sourceB, value));
         }
 
-        /// <summary> 用法同cg的step函数 </summary>
+        public static double LerpExp(double a, double b, double k) => LerpExpUnclamped(a, b, Saturate(k));
+        public static double LerpExpUnclamped(double a, double b, double k) {
+            double logA = Math.Log(Math.Abs(a));
+            double logB = Math.Log(Math.Abs(b));
+            double sign = (Math.Sign(a) + Math.Sign(b)) >> 1; // different sign -> 0, same sign -> passthrough
+            return sign * Math.Exp(LerpUnclamped(logA, logB, k));
+        }
+        
+        public static float LerpExp(float a, float b, float k) => LerpExpUnclamped(a, b, Saturate(k));
+        public static float LerpExpUnclamped(float a, float b, float k) {
+            float logA = Mathf.Log(Mathf.Abs(a));
+            float logB = Mathf.Log(Mathf.Abs(b));
+            float sign = (Math.Sign(a) + Math.Sign(b)) >> 1; // different sign -> 0, same sign -> passthrough
+            return sign * Mathf.Exp(Mathf.LerpUnclamped(logA, logB, k));
+        }
+
+        /// <summary> 用法同hlsl的step函数 </summary>
         public static float Step(float a, float x) {
             return x >= a ? 1 : 0;
         }

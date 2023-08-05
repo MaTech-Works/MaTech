@@ -1,23 +1,23 @@
-﻿// Copyright (c) 2022, LuiCat (as MaTech)
+﻿// Copyright (c) 2023, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using MaTech.Common.Algorithm;
 
-#nullable enable
-
 namespace MaTech.Common.Data {
-    public readonly partial struct EnumEx<T>
+    public partial struct EnumEx<T>
         : IComparable, IComparable<EnumEx<T>>, IComparable<T>
         , IEquatable<EnumEx<T>>, IEquatable<T>
         , IBoxlessConvertible, IFormattable {
         
         public override string ToString() => ToString(null, null);
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => EqualityComparer<T>.Default.GetHashCode(Value);
 
         public override bool Equals(object? obj) {
             switch (obj) {
@@ -65,7 +65,7 @@ namespace MaTech.Common.Data {
 
         public string ToString(string? format, IFormatProvider? formatProvider) {
             if (predefinedEnums.Contains(Value)) return Value.ToString(format);
-            using (var lockRAII = ReaderLockRAII.Read()) {
+            using (var lockRAII = ReaderLockRAII.EnterRead()) {
                 return mapEnumToName.GetValueOrDefault(Value) ?? Value.ToString(format);
             }
         }
