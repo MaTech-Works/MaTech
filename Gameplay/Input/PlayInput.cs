@@ -29,7 +29,7 @@ namespace MaTech.Gameplay.Input {
         public bool simulateTouchWithMouse;
         public int mouseStartTouchID = 100;
 
-        public Exception lastException;
+        public Exception LastException { get; private set; }
         private Exception activeException;
 
         public void ResetInput() {
@@ -44,8 +44,8 @@ namespace MaTech.Gameplay.Input {
             Profiler.EndSample();
             
             if (activeException != null) {
-                lastException = activeException;
-                Debug.LogException(lastException);
+                LastException = activeException;
+                Debug.LogException(activeException);
             }
         }
 
