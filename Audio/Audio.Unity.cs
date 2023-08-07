@@ -45,17 +45,27 @@ namespace MaTech.Audio {
             return LoadForUnity();
         }
 
+        private static bool isFocusLost = false;
+        private static bool isEditorPaused = false;
+        
         #if MAAUDIO_LOAD_ON_STARTUP
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitializeOnLoad() {
             ReloadForUnity();
+            isFocusLost = !Application.isFocused;
             Application.quitting += UnloadForUnity;
-            Application.focusChanged += focused => Paused = !focused;
+            Application.focusChanged += focused => {
+                isFocusLost = !focused;
+                Paused = isFocusLost || isEditorPaused;
+            };
         }
         #endif
-
+        
         #if UNITY_EDITOR
-        private static readonly Action<PauseState> onEditorPause = (state) => Paused = (state == PauseState.Paused);
+        private static readonly Action<PauseState> onEditorPause = (state) => {
+            isEditorPaused = (state == PauseState.Paused);
+            Paused = isFocusLost || isEditorPaused;
+        };
         #endif
     }
 }
