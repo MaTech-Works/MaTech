@@ -22,10 +22,8 @@ namespace MaTech.Common.Data {
     ///
     /// The equality method compares the type and value strictly, not tolerant to float-point errors.
     ///
-    /// todo: getter for array type, also allowing fraction and array of int variant to exist simultaneously
-    /// todo: getter for table type
-    /// todo: do we infer VariantType from boxed objects?
-    /// todo: unsafe pointer to extend more types?
+    /// TODO: 重构成Number类，并移除对于string和object的支持
+    /// todo: 分裂出新Variant类，并以内存块的形式支持任意类型的struct
     [JsonConverter(typeof(VariantJsonConverter))]
     public readonly struct Variant : IEquatable<Variant>, IBoxlessConvertible, IFormattable {
         public VariantType Type { get; }
