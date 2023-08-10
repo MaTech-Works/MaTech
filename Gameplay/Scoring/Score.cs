@@ -17,10 +17,9 @@ namespace MaTech.Gameplay.Scoring {
     
     public interface IScore {
         void Init(PlayInfo info);
-        void Reset();
+        void Finish();
         
-        void HandleScoreResult(HitResult type, TimeUnit judgeTime);
-        void HandleFinish();
+        void HandleScoreResult(HitResult result, TimeUnit judgeTime);
         
         void GetSnapshot(MetaTable<ScoreType> outScoreSnapshot);
         Variant GetValue(EnumEx<ScoreType> scoreType);

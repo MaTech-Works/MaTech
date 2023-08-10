@@ -37,7 +37,7 @@ namespace MaTech.Gameplay.Scoring {
         protected virtual TimeUnit ActiveNoteLateWindow => Timing.WindowLate.OffsetBy(activeNoteWindowOffset);
 
         protected abstract void ResetJudge(PlayInfo playInfo);
-        protected abstract void UpdateJudge(TimeUnit judgeTimeBeforeInput, TimeUnit judgeTimeAfterInput);
+        protected abstract void UpdateJudge(TimeUnit judgeTimeStart, TimeUnit judgeTimeEnd);
 
         public override bool IsFinished => (pendingNotes == null || !pendingNotes.HasNext) && activeNotes.Count == 0;
         public override bool IsDied => Score.GetValue(ScoreType.HP).Float <= 0;
