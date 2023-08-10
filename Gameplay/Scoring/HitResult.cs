@@ -26,8 +26,10 @@ namespace MaTech.Gameplay.Scoring {
         Late = 1 << 5,
         Early = 1 << 6,
 
-        Combo = 1 << 8, //只加combo
-        ComboBreak = 1 << 9, //只断combo
+        MaskCombo = Combo | ComboBreak,
+        Combo = 1 << 7,
+        ComboBreak = 1 << 8,
+        
         Wipe = 1 << 10,
         Catch = 1 << 11,
         Flick = 1 << 12,
@@ -36,12 +38,13 @@ namespace MaTech.Gameplay.Scoring {
         Linked = 1 << 15,
 
         // 按住操作
-        Hold_Start = 1 << 17,
-        Hold_End = 1 << 18,
-        Hold_Tick = 1 << 19, // 中途节点
-        Hold_Progress = 1 << 20, // 保持有效，更新进度
-        Hold_Break = 1 << 21, // 断判
-        Hold_Continue = 1 << 22, // 重新接上
+        Hold_Start = 1 << 16,
+        Hold_End = 1 << 17,
+        Hold_Tick = 1 << 18, // 中途节点
+        Hold_Progress = 1 << 19, // 保持有效，更新进度
+        Hold_Break = 1 << 20, // 断判
+        Hold_Continue = 1 << 21, // 重新接上
+        Hold_Bonus = 1 << 22, // 按住时的额外成绩
         
         Activate = 1 << 24,
         Deactivate = 1 << 25,
@@ -64,9 +67,9 @@ namespace MaTech.Gameplay.Scoring {
 
         private static string[] overriddenNames;
         private static readonly string[] internalNames = {
-            /*  0 --  7 */ "Miss", "Score1", "Score2", "Score3", "Score4", "Late", "Early", null,
-            /*  8 -- 15 */ "Combo", "Combo Break", "Wipe", "Catch", "Flick", "Bomb", "Pass", "Linked",
-            /* 16 -- 23 */ null, "Hold Start", "Hold End", "Hold Tick", "Hold Progress", "Hold Break", "Hold Continue", null,
+            /*  0 --  7 */ "Miss", "Score1", "Score2", "Score3", "Score4", "Late", "Early", "Combo Up",
+            /*  8 -- 15 */ "Combo Break", null, "Wipe", "Catch", "Flick", "Bomb", "Pass", "Linked",
+            /* 16 -- 23 */ "Hold Start", "Hold End", "Hold Tick", "Hold Progress", "Hold Break", "Hold Continue", "Hold Bonus", null,
             /* 24 -- 30 */ "Activate", "Deactivate", "Mute", "Delay", "Finish", "Repeat", "Ignore",
         };
     }
