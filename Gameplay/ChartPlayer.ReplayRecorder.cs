@@ -15,8 +15,8 @@ namespace MaTech.Gameplay {
 
         public interface IReplayFileSource {
             ReplayFile ReplayFile { get; }
-            void StartRecording(PlayInfo playInfo);
-            void FinishRecording(PlayInfo playInfo, IScore score);
+            void StartRecording(IPlayInfo playInfo);
+            void FinishRecording(IPlayInfo playInfo, IScore score);
         }
         
         public interface IReplayRecordInput {
@@ -194,8 +194,8 @@ namespace MaTech.Gameplay {
         private class DummyReplayRecorder : IReplayRecorder {
             public ReplayFile ReplayFile => null;
 
-            public void StartRecording(PlayInfo playInfo) {}
-            public void FinishRecording(PlayInfo playInfo, IScore score) {}
+            public void StartRecording(IPlayInfo playInfo) {}
+            public void FinishRecording(IPlayInfo playInfo, IScore score) {}
 
             public void FlushRecords() {}
 

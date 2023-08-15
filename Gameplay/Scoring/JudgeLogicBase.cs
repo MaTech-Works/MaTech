@@ -55,7 +55,7 @@ namespace MaTech.Gameplay.Scoring {
         /// </summary>
         /// <param name="playInfo">目前正在处理的游玩信息，包含已经加载完成的谱面</param>
         /// <param name="processor">已经完成处理的processor，可以取得处理结果</param>
-        public abstract void OnLoadChart(PlayInfo playInfo, Processor.Processor processor);
+        public abstract void OnLoadChart(IPlayInfo playInfo, Processor.Processor processor);
 
         /// <summary>
         /// 每帧游戏逻辑更新时被调用，与帧率关联的回调。

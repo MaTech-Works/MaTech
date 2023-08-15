@@ -20,7 +20,7 @@ namespace MaTech.Gameplay.Processor {
     /// TODO: 把processor细分成不同的用途，如TimeProcessor、NoteProcessor等，并且允许每个ObjectLayer使用不同的processor
     /// </summary>
     public abstract class Processor : MonoBehaviour {
-        public PlayInfo PlayInfo { get; set; }
+        public IPlayInfo PlayInfo { get; set; }
         
         public Chart Chart => PlayInfo.Chart;
         public List<TempoChange> Tempos => Chart.tempos;

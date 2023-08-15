@@ -9,7 +9,7 @@ using MaTech.Gameplay.Time;
 namespace MaTech.Gameplay.Scoring {
     // TODO: 合并进JudgeLogic，不在核心层面定义判定数据接口
     public interface IJudgeTiming {
-        void Init(PlayInfo playInfo);
+        void Init(IPlayInfo playInfo);
         
         /// <summary> 判定逻辑的起始生效范围，返回正的绝对值（返回负数会让起始位置比音符更晚）。 </summary>
         TimeUnit WindowEarly { get; }

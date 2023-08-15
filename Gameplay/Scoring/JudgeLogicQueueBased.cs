@@ -28,21 +28,21 @@ namespace MaTech.Gameplay.Scoring {
         private readonly TimeUnit activeNoteWindowOffset = TimeUnit.FromMilliseconds(100);
         
         // todo: 这些应该移动到一个专用的ModeRule工厂类中，从外部inject进来这些实例依赖（现在这样写只是为了方便重构）
-        protected abstract IJudgeTiming CreateJudgeTiming(PlayInfo playInfo);
-        protected abstract IScore CreateScore(PlayInfo playInfo);
+        protected abstract IJudgeTiming CreateJudgeTiming(IPlayInfo playInfo);
+        protected abstract IScore CreateScore(IPlayInfo playInfo);
 
         /// 将NoteCarrier加入activeList的时机（相对于PlayTime.JudgeTime）
         protected virtual TimeUnit ActiveNoteEarlyWindow => Timing.WindowEarly.OffsetBy(activeNoteWindowOffset);
         /// 将NoteCarrier移除出activeList的时机（相对于PlayTime.JudgeTime）
         protected virtual TimeUnit ActiveNoteLateWindow => Timing.WindowLate.OffsetBy(activeNoteWindowOffset);
 
-        protected abstract void ResetJudge(PlayInfo playInfo);
+        protected abstract void ResetJudge(IPlayInfo playInfo);
         protected abstract void UpdateJudge(TimeUnit judgeTimeStart, TimeUnit judgeTimeEnd);
 
         public override bool IsFinished => (pendingNotes == null || !pendingNotes.HasNext) && activeNotes.Count == 0;
         public override bool IsDied => Score.GetValue(ScoreType.HP).Float <= 0;
 
-        public sealed override void OnLoadChart(PlayInfo playInfo, Processor.Processor processor) {
+        public sealed override void OnLoadChart(IPlayInfo playInfo, Processor.Processor processor) {
             // TODO: 从外部inject Score和Timing对象（如实现一个抽象工厂GameRule类），而不是令派生类自行构建
             
             Score = CreateScore(playInfo);

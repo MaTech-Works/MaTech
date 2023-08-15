@@ -17,7 +17,7 @@ using UnityEngine.Events;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer : MonoBehaviour {
-        public PlayInfo SourcePlayInfo { get; private set; }
+        public IPlayInfo SourcePlayInfo { get; private set; }
         public Chart LoadedChart { get; private set; }
 
         public IScore Score => judgeLogic.Score;
@@ -128,7 +128,7 @@ namespace MaTech.Gameplay {
         }
         #endif
 
-        public async UniTask<bool> Load(PlayInfo playInfo, bool fullReload = true) {
+        public async UniTask<bool> Load(IPlayInfo playInfo, bool fullReload = true) {
             Assert.IsFalse(playing);
             loaded = false;
 
@@ -182,8 +182,8 @@ namespace MaTech.Gameplay {
                 return false;
             }
 
-            timeTrackStart = playInfo.StartTime.Seconds + offsetTrackStart;
-            timeFinishCheck = playInfo.EndTime.Seconds + offsetFinishCheck;
+            timeTrackStart = (playInfo.TrackStartTime?.Seconds ?? 0) + offsetTrackStart;
+            timeFinishCheck = (playInfo.FinishCheckTime?.Seconds ?? 0) + offsetFinishCheck;
 
             LoadedChart = chart;
 
@@ -204,7 +204,7 @@ namespace MaTech.Gameplay {
                     } else {
                         Debug.LogError("<b>[ChartPlayer]</b> Replay is requested without a replay file.");
                     }
-                } else */ if (playInfo.IsAuto) {
+                } else */ if (playInfo.NeedAutoPlay) {
                     if (judgeLogic.AutoPlayController != null) {
                         Controller = judgeLogic.AutoPlayController;
                     } else {

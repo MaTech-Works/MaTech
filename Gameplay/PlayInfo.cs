@@ -9,29 +9,16 @@ using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay {
     // TODO: 考虑一下PlayInfo结构是否从继承改为组合
-    public abstract class PlayInfo {
-        public abstract Chart Chart { get; }
-
-        public virtual TimeUnit StartTime => TimeUnit.FromMinutes(0);
-        public virtual TimeUnit EndTime => TimeUnit.FromMinutes(2);
+    public interface IPlayInfo {
+        Chart Chart { get; }
         
-        public virtual int? RandomSeed => null;
-
-        public virtual bool IsAuto => false;
-        public virtual ReplayFile Replay => null;
+        // TODO: 根据ChartPlayer需要内部处理的信息，多加几个默认的时间定义
+        TimeUnit? TrackStartTime { get; }
+        TimeUnit? FinishCheckTime { get; }
         
-        public bool Validate() {
-            if (Chart == null) {
-                return false;
-            }
-            
-            /*
-            if (RandomSeed != null && Replay != null && RandomSeed != Replay.Seed) {
-                return false;
-            }
-            */
-            
-            return true;
-        }
+        int? RandomSeed { get; }
+
+        bool NeedAutoPlay { get; }
+        ReplayFile Replay { get; }
     }
 }

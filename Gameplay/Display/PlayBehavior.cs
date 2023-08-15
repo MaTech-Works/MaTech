@@ -24,7 +24,7 @@ namespace MaTech.Gameplay.Display {
     /// 其他可选接口请参考interface注释。
     /// </summary>
     public abstract partial class PlayBehavior : MonoBehaviour {
-        public virtual async UniTask OnLoad(PlayInfo playInfo) { }
+        public virtual async UniTask OnLoad(IPlayInfo playInfo) { }
         public virtual async UniTask OnStart(bool isRetry) { }
         public virtual async UniTask OnExit(bool isPlayFinished) { }
         public virtual async UniTask OnPause() { }

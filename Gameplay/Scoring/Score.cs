@@ -16,7 +16,7 @@ namespace MaTech.Gameplay.Scoring {
     }
     
     public interface IScore {
-        void Init(PlayInfo info);
+        void Init(IPlayInfo info);
         void Finish();
         
         void HandleScoreResult(HitResult result, TimeUnit judgeTime);
