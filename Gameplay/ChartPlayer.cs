@@ -291,6 +291,7 @@ namespace MaTech.Gameplay {
             await sequencer.Track.Unload();
             
             Controller = null;
+            loaded = false;
         }
 
         public void Play() {
