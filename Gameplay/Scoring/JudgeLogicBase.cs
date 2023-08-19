@@ -54,7 +54,7 @@ namespace MaTech.Gameplay.Scoring {
         /// <summary> 游玩是否结束，告诉业务代码是否已经无note可打。如果始终未返回true，游戏将无法结束。 </summary>
         public abstract bool IsFinished { get; }
         
-        public abstract bool IsDied { get; }
+        public abstract bool IsFailed { get; }
         
         /// <summary>
         /// 当 ChartPlayer 加载并处理谱面后这个方法会被调用。

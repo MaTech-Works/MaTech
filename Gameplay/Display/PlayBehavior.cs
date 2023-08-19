@@ -43,7 +43,7 @@ namespace MaTech.Gameplay.Display {
         public virtual async UniTask OnError(Exception exception) { }
         
         public virtual void OnStart(bool isRetry) { }
-        public virtual void OnFinish(bool isDied) { }
+        public virtual void OnFinish(bool isFailed) { }
         
         public virtual void OnPause() { }
         public virtual void OnResume() { }

@@ -14,6 +14,7 @@ using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Scoring;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer : MonoBehaviour {
@@ -69,8 +70,8 @@ namespace MaTech.Gameplay {
         [Header("Misc Options")]
         
         public bool finishByJudgeLogic = true;
-        public bool finishWhenDied = true;
-        public bool pauseWhenDied = true;
+        public bool finishWhenFailed = true;
+        public bool pauseWhenFailed = true;
         public bool pauseOnError = true;
         public bool unloadOnError = true;
 
@@ -387,18 +388,18 @@ namespace MaTech.Gameplay {
             sequencer.Resume();
         }
 
-        private void Finish(bool isDied) {
-            if (isDied && pauseWhenDied) Pause();
+        private void Finish(bool isFailed) {
+            if (isFailed && pauseWhenFailed) Pause();
 
             if (UnityUtil.IsAssigned(judgeLogic)) {
                 using var listLock = PlayBehavior.ListScoreResult.LockRAII();
                 if (!PlayBehavior.ListScoreResult.IsEmpty) {
                     var scoreSnapshot = judgeLogic.UpdateScoreSnapshot();
-                    PlayBehavior.ListScoreResult.ForEach(behavior => behavior.OnFinishWithScore(isDied, scoreSnapshot));
+                    PlayBehavior.ListScoreResult.ForEach(behavior => behavior.OnFinishWithScore(isFailed, scoreSnapshot));
                 }
             }
             
-            PlayBehavior.ListAll.ForEach(behavior => behavior.OnFinish(isDied));
+            PlayBehavior.ListAll.ForEach(behavior => behavior.OnFinish(isFailed));
         }
         
         private async UniTaskVoid HandleError(Exception ex) {

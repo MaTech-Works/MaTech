@@ -58,7 +58,7 @@ namespace MaTech.Gameplay.Display {
         
         /// 在即将触发PlayBehavior.OnFinish前调用。
         public interface IScoreResult {
-            void OnFinishWithScore(bool isDied, MetaTable<ScoreType> scoreSnapshot);
+            void OnFinishWithScore(bool isFailed, MetaTable<ScoreType> scoreSnapshot);
         }
     }
 }

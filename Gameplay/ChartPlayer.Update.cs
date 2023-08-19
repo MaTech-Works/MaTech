@@ -101,7 +101,7 @@ namespace MaTech.Gameplay {
                     }
                 }
 
-                if (finishWhenDied && judgeLogic.IsDied) {
+                if (finishWhenFailed && judgeLogic.IsFailed) {
                     Finish(true);
                 }
 

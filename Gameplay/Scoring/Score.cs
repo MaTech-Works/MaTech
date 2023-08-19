@@ -11,7 +11,7 @@ using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay.Scoring {
     public enum ScoreType {
-        Score, Combo, Accuracy, HP, IsFullCombo, IsAllPerfect
+        Score, Combo, Accuracy, HP, IsFailed, IsFullCombo, IsAllPerfect
         // Tips: 可以使用 EnumEx 来扩展额外的 ScoreType
     }
     

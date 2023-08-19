@@ -40,7 +40,13 @@ namespace MaTech.Gameplay.Scoring {
         protected abstract void UpdateJudge(TimeUnit judgeTimeStart, TimeUnit judgeTimeEnd);
 
         public override bool IsFinished => (pendingNotes == null || !pendingNotes.HasNext) && activeNotes.Count == 0;
-        public override bool IsDied => Score.GetValue(ScoreType.HP).Float <= 0;
+        public override bool IsFailed {
+            get {
+                var failed = Score.GetValue(ScoreType.IsFailed);
+                var hp = Score.GetValue(ScoreType.HP);
+                return failed.IsBoolean ? failed.Bool : hp.Double <= 0;
+            }
+        }
 
         public sealed override void OnLoadChart(IPlayInfo playInfo, Processor.Processor processor) {
             // TODO: 从外部inject Score和Timing对象（如实现一个抽象工厂GameRule类），而不是令派生类自行构建
