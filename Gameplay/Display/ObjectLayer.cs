@@ -225,6 +225,11 @@ namespace MaTech.Gameplay.Display {
             // TODO: 改为继承自PlayBehavior，并且将ChartPlayer中的Processor依赖移至这里
             
             Assert.IsNotNull(carriers);
+            
+            await UniTask.SwitchToMainThread();
+            foreach (var tuple in listObjectRealized) {
+                VirtualizeObject(tuple);
+            }
 
             await UniTask.SwitchToThreadPool();
             
@@ -254,9 +259,6 @@ namespace MaTech.Gameplay.Display {
             
             // Pool
             
-            foreach (var tuple in listObjectRealized) {
-                VirtualizeObject(tuple);
-            }
             hashsetCarrierRealized.Clear();
             listObjectRealized.Clear();
 
