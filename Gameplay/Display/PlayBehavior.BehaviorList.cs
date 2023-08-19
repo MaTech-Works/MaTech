@@ -22,9 +22,13 @@ namespace MaTech.Gameplay.Display {
             public Enumerator GetEnumerator() => new Enumerator(this);
 
             public async UniTask WhenAll(Func<T, UniTask> callback) => await UniTask.WhenAll(Enumerable.Select(this, callback));
-            public void ForEach(Action<T> callback) {
-                foreach (var t in this) callback(t);
-            }
+            public void ForEach(Action<T> callback) { foreach (var t in this) callback(t); }
+            
+            public abstract int ActiveCount { get; }
+            public bool IsEmpty => ActiveCount == 0;
+
+            /// <summary> 适用于using语句，在尚未发起枚举的情况下使用 </summary>
+            public DisposableLock LockRAII() => new DisposableLock(this);
 
             public struct Enumerator : IEnumerator<T>, IDisposable, IEnumerator {
                 private readonly BehaviorList<T> self;
@@ -51,6 +55,22 @@ namespace MaTech.Gameplay.Display {
                 public void Reset() => ((IEnumerator)inner).Reset();
             }
 
+            public struct DisposableLock : IDisposable {
+                private BehaviorList<T> self;
+                
+                public DisposableLock(BehaviorList<T> self) {
+                    self?.LockList();
+                    this.self = self;
+                }
+
+                public void Unlock() {
+                    self?.UnlockList();
+                    self = null;
+                }
+                
+                public void Dispose() => Unlock();
+            }
+
             IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -67,14 +87,14 @@ namespace MaTech.Gameplay.Display {
             private int readerCount = 0;
 
             private readonly Predicate<T> conditionRemove;
+            
+            public override int ActiveCount => behaviors.Count;
 
             public MainThreadBehaviorList(ICollection<IBehaviorListMemberOperation> targetOperationList, int initCapacity = 32) {
                 behaviors.Capacity = initCapacity;
                 targetOperationList.Add(this);
                 conditionRemove = item => item == null || cacheRemoveList.Contains(item);
             }
-
-            protected override List<T>.Enumerator EnumeratorFromList => behaviors.GetEnumerator();
 
             public virtual void TryAdd(PlayBehavior behavior) {
                 if (!(behavior is T t)) return;
@@ -94,6 +114,8 @@ namespace MaTech.Gameplay.Display {
                     cacheRemoveList.Add(t);
                 }
             }
+
+            protected override List<T>.Enumerator EnumeratorFromList => behaviors.GetEnumerator();
 
             protected override void LockList() {
                 Assert.IsTrue(readerCount >= 0);
@@ -131,6 +153,14 @@ namespace MaTech.Gameplay.Display {
             public override void TryRemove(PlayBehavior behavior) {
                 lock (mutexReaderCount) {
                     base.TryRemove(behavior);
+                }
+            }
+
+            public override int ActiveCount {
+                get {
+                    lock (mutexReaderCount) {
+                        return base.ActiveCount;
+                    }
                 }
             }
 
