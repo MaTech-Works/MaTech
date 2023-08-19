@@ -60,8 +60,6 @@ namespace MaTech.Common.Data {
         public float DecimalFloat => Decimal.Float;
         public double DecimalDouble => Decimal.Double;
 
-        public int Rounded => _den == 0 ? 0 : (_num + _den / 2) / _den;
-
         public static explicit operator float(FractionSimple fraction) { return fraction.Float; }
         public static explicit operator double(FractionSimple fraction) { return fraction.Double; }
         
@@ -84,6 +82,9 @@ namespace MaTech.Common.Data {
                 return new FractionSimple(_num / t, _den / t);
             }
         }
+
+        public int Rounded => _den == 0 ? 0 : (_num + _den / 2) / _den;
+        public int Ceiling => _den == 0 ? 0 : (_num + _den - 1) / _den;
 
         public static FractionSimple operator+(FractionSimple x, FractionSimple y) {
             if (x._den == 0 || y._den == 0) return invalid;

@@ -107,6 +107,9 @@ namespace MaTech.Common.Data {
             }
         }
 
+        public int Rounded => _den == 0 ? 0 : ((FractionSimple)this).Rounded;
+        public int Ceiling => _den == 0 ? 0 : ((FractionSimple)this).Ceiling;
+
         public static Fraction operator+(Fraction x, Fraction y) => (FractionSimple)x + (FractionSimple)y;
         public static Fraction operator-(Fraction x, Fraction y) => (FractionSimple)x - (FractionSimple)y;
         public static Fraction operator*(Fraction x, Fraction y) => (FractionSimple)x * (FractionSimple)y;
