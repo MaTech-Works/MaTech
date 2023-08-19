@@ -7,6 +7,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using MaTech.Common.Utils;
+using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Processor;
 using MaTech.Gameplay.Time;
 using UnityEngine;
@@ -68,10 +69,7 @@ namespace MaTech.Gameplay {
                 }
 
             } catch (Exception ex) {
-                Debug.LogException(ex);
-                onError.Invoke();
-                Unload().Forget();
-                throw;
+                HandleError(ex).Forget();
             } finally {
                 Profiler.EndSample();
             }
@@ -94,27 +92,21 @@ namespace MaTech.Gameplay {
                         layer.UpdateGraphics();
                 }
 
-                onUpdate.Invoke();
-
                 if (!finishing && PlayTime.ChartTime > timeFinishCheck) {
                     // ReSharper disable once SimplifyConditionalTernaryExpression  <-- if in doubt, try it yourself
-                    finishing = finishAfterJudgeLogic && UnityUtil.IsAssigned(judgeLogic) ? judgeLogic.IsFinished : true;
+                    finishing = finishByJudgeLogic && UnityUtil.IsAssigned(judgeLogic) ? judgeLogic.IsFinished : true;
                     if (finishing) {
                         replayFileSource.FinishRecording(SourcePlayInfo, Score);
-                        onFinish.Invoke();
+                        Finish(false);
                     }
                 }
 
                 if (finishWhenDied && judgeLogic.IsDied) {
-                    Pause();
-                    onFail.Invoke();
+                    Finish(true);
                 }
 
             } catch (Exception ex) {
-                Debug.LogException(ex);
-                onError.Invoke();
-                Unload().Forget();
-                throw;
+                HandleError(ex).Forget();
             } finally {
                 Profiler.EndSample();
             }

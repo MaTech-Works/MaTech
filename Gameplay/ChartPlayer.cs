@@ -4,16 +4,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using System;
 using Cysharp.Threading.Tasks;
 using MaTech.Audio;
 using MaTech.Common.Algorithm;
+using MaTech.Common.Utils;
 using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Scoring;
 using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.Events;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer : MonoBehaviour {
@@ -65,23 +65,28 @@ namespace MaTech.Gameplay {
         public double offsetTrackStart = -2;
         public double offsetFinishCheck = 2;
         
-        public bool finishAfterJudgeLogic = true;
-        public bool finishWhenDied = true;
-
         [Space]
-        [Header("Event Callbacks")]
+        [Header("Misc Options")]
         
-        public UnityEvent onChartLoaded = new UnityEvent();
-        public UnityEvent onPlayStart = new UnityEvent();
-        public UnityEvent onUpdate = new UnityEvent();
-        public UnityEvent onFinish = new UnityEvent();
-        public UnityEvent onError = new UnityEvent();
-        public UnityEvent onFail = new UnityEvent();
+        public bool finishByJudgeLogic = true;
+        public bool finishWhenDied = true;
+        public bool pauseWhenDied = true;
+        public bool pauseOnError = true;
+        public bool unloadOnError = true;
+
+        public bool IsLoaded => loaded;
+        public bool IsPlaying => playing;
+        public bool IsFinished => judgeLogic.IsFinished;
+        public bool IsResumeRewinding => rewinding;
+        public bool AllowPause => playing && PlayTime.JudgeTime.Seconds >= timeNextAllowedPause;
+        public int PlayCount => playCount;
 
         private bool loaded;
         private bool playing;
         private bool finishing;
         private bool rewinding;
+        
+        private int playCount;
 
         private QueueList<TimeCarrier> timeList;
 
@@ -100,11 +105,6 @@ namespace MaTech.Gameplay {
         private double audioTimeLastResume;  // 对应ChartAudioPlayer的时间
         
         private double timeNextAllowedPause = double.MinValue;
-        
-        public bool IsPlaying => playing;
-        public bool IsFinished => judgeLogic.IsFinished;
-        public bool IsResumeRewinding => rewinding;
-        public bool AllowPause => playing && PlayTime.JudgeTime.Seconds >= timeNextAllowedPause;
 
         //设置开始的时刻
         public double TimeStart {
@@ -129,8 +129,21 @@ namespace MaTech.Gameplay {
         #endif
 
         public async UniTask<bool> Load(IPlayInfo playInfo, bool fullReload = true) {
-            Assert.IsFalse(playing);
-            loaded = false;
+            if (CheckBusy("Load"))
+                return false;
+
+            if (playing) {
+                timeSetter.SetPlaying(false);
+                playing = false;
+                DisableController();
+                sequencer.Pause();
+            }
+
+            if (loaded) {
+                await Unload();
+            }
+
+            using var busy = SetBusy(BusyReason.Loading);
 
             /////////////////////////////////
 
@@ -238,12 +251,7 @@ namespace MaTech.Gameplay {
                 await track.Load();
 
                 // TODO: 移植KeySoundManager至PlayBehavior接口
-                /*
-                await UniTask.WhenAll(
-                    track.Load(),
-                    KeySoundManager.SingletonInstance.PrepareForNotes(processor.ResultNoteList)
-                );
-                */
+                //await KeySoundManager.SingletonInstance.PrepareForNotes(processor.ResultNoteList);
 
                 sequencer.Track = track;
             }
@@ -273,9 +281,13 @@ namespace MaTech.Gameplay {
                 offsetDisplay = 0,
                 offsetAudio = 0,
             };
-
+            timeSetter.UpdateTime(timeTrackStart, true);
+            
+            
+            await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnLoad(SourcePlayInfo));
+            
             loaded = true;
-            onChartLoaded.Invoke();
+            playCount = 0;
 
             #endregion
 
@@ -283,11 +295,15 @@ namespace MaTech.Gameplay {
         }
 
         public async UniTask Unload() {
+            if (CheckBusy("Unload")) return;
             if (!loaded) return;
+            
+            using var busy = SetBusy(BusyReason.Unloading);
 
             timeSetter.SetPlaying(false);
             playing = false;
-
+            
+            await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnUnload(SourcePlayInfo));
             await sequencer.Track.Unload();
             
             Controller = null;
@@ -295,7 +311,11 @@ namespace MaTech.Gameplay {
         }
 
         public void Play() {
+            if (CheckBusy("Play")) return;
             if (!loaded || playing) return;
+
+            bool isRetry = playCount > 0;
+            PlayBehavior.ListAll.ForEach(isRetry ? behavior => behavior.OnStart(true) : behavior => behavior.OnStart(false));
 
             UpdateSettings();
 
@@ -308,6 +328,7 @@ namespace MaTech.Gameplay {
 
             playing = true;
             finishing = false;
+            playCount += 1;
             timeNextAllowedPause = double.MinValue;
 
             ResetController();
@@ -317,22 +338,24 @@ namespace MaTech.Gameplay {
             isEarlyUpdateScheduled = false;
             isLateUpdateScheduled = false;
             ScheduleUpdateForNextFrame();
-
-            onPlayStart.Invoke();
+            
             sequencer.Play(timeTrackStart);
         }
-
+        
         public void Pause() {
+            if (CheckBusy("Pause")) return;
             if (!loaded || !playing) return;
-
-            timeSetter.SetPlaying(false);
-            playing = false;
 
             timeNextAllowedPause = PlayTime.ChartTime + timePauseCooldown;
 
             DisableController();
 
             sequencer.Pause();
+            
+            timeSetter.SetPlaying(false);
+            playing = false;
+            
+            PlayBehavior.ListAll.ForEach(behavior => behavior.OnPause());
         }
 
         /// <summary>
@@ -340,10 +363,14 @@ namespace MaTech.Gameplay {
         /// </summary>
         /// <param name="skipRewinding">跳过倒退，从暂停点立即恢复</param>
         public void Resume(bool skipRewinding = false) {
+            if (CheckBusy("Resume")) return;
             if (!loaded || playing || rewinding) return;
 
+            PlayBehavior.ListAll.ForEach(behavior => behavior.OnResume());
+            
             UpdateSettings();
 
+            // TODO 移除rewind，并允许外部代码任意控制回放时间
             if (skipRewinding) {
                 ResumeImmediate();
             } else {
@@ -363,6 +390,30 @@ namespace MaTech.Gameplay {
             EnableController();
             sequencer.Resume();
         }
+
+        private void Finish(bool isDied) {
+            if (isDied && pauseWhenDied) Pause();
+
+            if (UnityUtil.IsAssigned(judgeLogic)) {
+                using var listLock = PlayBehavior.ListScoreResult.LockRAII();
+                if (!PlayBehavior.ListScoreResult.IsEmpty) {
+                    var scoreSnapshot = judgeLogic.UpdateScoreSnapshot();
+                    PlayBehavior.ListScoreResult.ForEach(behavior => behavior.OnFinishWithScore(isDied, scoreSnapshot));
+                }
+            }
+            
+            PlayBehavior.ListAll.ForEach(behavior => behavior.OnFinish(isDied));
+        }
         
+        private async UniTaskVoid HandleError(Exception ex) {
+            using var busy = SetBusy(BusyReason.ErrorHandling);
+            
+            Debug.LogException(ex);
+            
+            if (pauseOnError) Pause();
+            await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnError(ex));
+            if (unloadOnError) await Unload();
+        }
+
     }
 }
