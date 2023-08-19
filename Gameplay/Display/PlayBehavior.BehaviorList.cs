@@ -18,7 +18,7 @@ namespace MaTech.Gameplay.Display {
             void TryRemove(PlayBehavior behavior);
         }
 
-        public abstract class BehaviorList<T> : IEnumerable<T> {
+        internal abstract class BehaviorList<T> : IEnumerable<T> {
             public Enumerator GetEnumerator() => new Enumerator(this);
 
             public async UniTask WhenAll(Func<T, UniTask> callback) => await UniTask.WhenAll(Enumerable.Select(this, callback));
@@ -173,6 +173,36 @@ namespace MaTech.Gameplay.Display {
                 lock (mutexReaderCount) {
                     base.UnlockList();
                 }
+            }
+        }
+        
+        private static readonly List<IBehaviorListMemberOperation> lists = new List<IBehaviorListMemberOperation>();
+        
+        // Thread safe
+        internal static BehaviorList<IKeyInputEarly> ListKeyInputEarly { get; } = new ThreadSafeBehaviorList<IKeyInputEarly>(lists);
+        internal static BehaviorList<ITouchInputEarly> ListTouchInputEarly { get; } = new ThreadSafeBehaviorList<ITouchInputEarly>(lists);
+        internal static BehaviorList<IIndexedInputEarly> ListIndexedInputEarly { get; } = new ThreadSafeBehaviorList<IIndexedInputEarly>(lists);
+
+        // Main thread only
+        internal static BehaviorList<PlayBehavior> ListAll { get; } = new MainThreadBehaviorList<PlayBehavior>(lists);
+        internal static BehaviorList<IKeyInput> ListKeyInput { get; } = new MainThreadBehaviorList<IKeyInput>(lists);
+        internal static BehaviorList<ITouchInput> ListTouchInput { get; } = new MainThreadBehaviorList<ITouchInput>(lists);
+        internal static BehaviorList<IIndexedInput> ListIndexedInput { get; } = new MainThreadBehaviorList<IIndexedInput>(lists);
+        internal static BehaviorList<INoteHitResult> ListNoteHitResult { get; } = new MainThreadBehaviorList<INoteHitResult>(lists);
+        internal static BehaviorList<IScoreUpdate> ListScoreUpdate { get; } = new MainThreadBehaviorList<IScoreUpdate>(lists);
+        internal static BehaviorList<IScoreResult> ListScoreResult { get; } = new MainThreadBehaviorList<IScoreResult>(lists);
+
+        protected virtual void OnEnable() {
+            //Debug.Log($"PlayBehavior OnEnable: {this} #{GetInstanceID()}");
+            foreach (var list in lists) {
+                list.TryAdd(this);
+            }
+        }
+        
+        protected virtual void OnDisable() {
+            //Debug.Log($"PlayBehavior OnDisable: {this} #{GetInstanceID()}");
+            foreach (var list in lists) {
+                list.TryRemove(this);
             }
         }
     }

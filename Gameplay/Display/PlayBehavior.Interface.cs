@@ -4,7 +4,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-using System.Collections.Generic;
 using MaTech.Common.Data;
 using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Scoring;
@@ -57,33 +56,9 @@ namespace MaTech.Gameplay.Display {
             void OnUpdateScore(MetaTable<ScoreType> scoreSnapshot);
         }
         
-        private static readonly List<IBehaviorListMemberOperation> lists = new List<IBehaviorListMemberOperation>();
-        
-        // Thread safe
-        public static BehaviorList<IKeyInputEarly> ListKeyInputEarly { get; } = new ThreadSafeBehaviorList<IKeyInputEarly>(lists);
-        public static BehaviorList<ITouchInputEarly> ListTouchInputEarly { get; } = new ThreadSafeBehaviorList<ITouchInputEarly>(lists);
-        public static BehaviorList<IIndexedInputEarly> ListIndexedInputEarly { get; } = new ThreadSafeBehaviorList<IIndexedInputEarly>(lists);
-
-        // Main thread only
-        public static BehaviorList<PlayBehavior> ListAll { get; } = new MainThreadBehaviorList<PlayBehavior>(lists);
-        public static BehaviorList<IKeyInput> ListKeyInput { get; } = new MainThreadBehaviorList<IKeyInput>(lists);
-        public static BehaviorList<ITouchInput> ListTouchInput { get; } = new MainThreadBehaviorList<ITouchInput>(lists);
-        public static BehaviorList<IIndexedInput> ListIndexedInput { get; } = new MainThreadBehaviorList<IIndexedInput>(lists);
-        public static BehaviorList<INoteHitResult> ListNoteHitResult { get; } = new MainThreadBehaviorList<INoteHitResult>(lists);
-        public static BehaviorList<IScoreUpdate> ListScoreUpdate { get; } = new MainThreadBehaviorList<IScoreUpdate>(lists);
-
-        protected virtual void OnEnable() {
-            //Debug.Log($"PlayBehavior OnEnable: {this} #{GetInstanceID()}");
-            foreach (var list in lists) {
-                list.TryAdd(this);
-            }
-        }
-        
-        protected virtual void OnDisable() {
-            //Debug.Log($"PlayBehavior OnDisable: {this} #{GetInstanceID()}");
-            foreach (var list in lists) {
-                list.TryRemove(this);
-            }
+        /// 在即将触发PlayBehavior.OnFinish前调用。
+        public interface IScoreResult {
+            void OnFinishWithScore(bool isDied, MetaTable<ScoreType> scoreSnapshot);
         }
     }
 }
