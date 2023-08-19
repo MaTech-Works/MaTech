@@ -25,6 +25,7 @@ namespace MaTech.Common.Utils {
         [Serializable] public class UnityEventFloat : UnityEvent<float> { }
         [Serializable] public class UnityEventDouble : UnityEvent<double> { }
         [Serializable] public class UnityEventString : UnityEvent<string> { }
+        [Serializable] public class UnityEventException : UnityEvent<Exception> { }
         [Serializable] public class UnityEventGameObject : UnityEvent<GameObject> { }
 
         public static void DestroyAllChildren(this Transform transform) => transform.DestroyChildren();
