@@ -36,6 +36,7 @@ namespace MaTech.Common.Data {
         /// <summary>
         /// 读写值时的自动检查，传入的对象实现IConstraintTypeOfKey或IConstraintValueOfKey时将启用对应的检查。
         /// 仅在编辑器内，或开启Development Build的非IL2CPP平台（即IOS平台不可用）有效。
+        /// TODO: 将接口改为允许多重检查规则（类似于List<IConstraint>）
         /// </summary>
         public IConstraint? Constraint { get; set; }
 
