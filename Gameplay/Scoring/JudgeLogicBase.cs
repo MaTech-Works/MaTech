@@ -41,6 +41,12 @@ namespace MaTech.Gameplay.Scoring {
         // 以下组件从外部传入
         public ChartPlayer.IReplayRecordJudgeScore Recorder { get; set; }
 
+        public MetaTable<ScoreType> LastScoreSnapshot { get; } = new MetaTable<ScoreType>();
+        public MetaTable<ScoreType> UpdateScoreSnapshot() {
+            Score.GetSnapshot(LastScoreSnapshot);
+            return LastScoreSnapshot;
+        }
+        
         #endregion
         
         #region Abstract Methods
@@ -74,8 +80,6 @@ namespace MaTech.Gameplay.Scoring {
 
         #region Protected Utility Methods
 
-        protected readonly MetaTable<ScoreType> cachedScoreSnapshot = new MetaTable<ScoreType>();
-
         /// <summary>
         /// 向判定数值Timing查询给定音符的判定结果。
         /// </summary>
@@ -90,8 +94,11 @@ namespace MaTech.Gameplay.Scoring {
             DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit, action {action}, result {result}");
             
             // Note and Behavior callbacks
-            Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): PlayBehavior", this);
+            Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): NoteBehavior.OnHit", this);
             carrier.NoteVisual?.OnHit(action, result);
+            Profiler.EndSample();
+            
+            Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): PlayBehavior.OnHitNote", this);
             foreach (var behavior in PlayBehavior.ListNoteHitResult) {
                 behavior.OnHitNote(carrier, action, judgeTime, result);
             }
@@ -99,11 +106,17 @@ namespace MaTech.Gameplay.Scoring {
 
             // Update score & Broadcast score change
             if (Score != null) {
-                Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): Score", this);
+                Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): Score.HandleScoreResult", this);
                 Score.HandleScoreResult(result, judgeTime);
-                Score.GetSnapshot(cachedScoreSnapshot);
-                foreach (var behavior in PlayBehavior.ListScoreUpdate) {
-                    behavior.OnUpdateScore(cachedScoreSnapshot);
+                Profiler.EndSample();
+
+                Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): ScoreSnapshot", this);
+                using var listLock = PlayBehavior.ListScoreUpdate.LockRAII();
+                if (!PlayBehavior.ListScoreUpdate.IsEmpty) {
+                    var scoreSnapshot = UpdateScoreSnapshot();
+                    foreach (var behavior in PlayBehavior.ListScoreUpdate) {
+                        behavior.OnUpdateScore(scoreSnapshot);
+                    }
                 }
                 Profiler.EndSample();
             }
