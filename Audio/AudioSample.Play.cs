@@ -39,27 +39,30 @@ namespace MaTech.Audio {
 
         public void PlayImmediate() {
             Assert.IsTrue(audio != MaAudio.NullAudio, "Sample should be loaded (or in a prepared SampleTrack) before play.");
-            MaAudio.Play(audio, volume, MaAudio.Mixer.Instant, channel);
+            channelActive = MaAudio.Play(audio, volume, MaAudio.Mixer.Instant, channel);
             startDspTime = MaAudio.OutputDSPTime;
             playing = true;
         }
 
         public void PlayDelayed(double delayTime, bool withOffset = true) {
             Assert.AreNotEqual(MaAudio.NullAudio, audio, "Sample should be loaded (or in a prepared SampleTrack) before play.");
-            MaAudio.PlayDelayed(audio, delayTime, volume, MaAudio.Mixer.Instant, channel);
+            channelActive = MaAudio.PlayDelayed(audio, delayTime, volume, MaAudio.Mixer.Instant, channel);
             playing = true;
         }
 
         public void PlayScheduled(double scheduledDspTime, bool withOffset = true) {
             Assert.AreNotEqual(MaAudio.NullAudio, audio, "Sample should be loaded (or in a prepared SampleTrack) before play.");
             startDspTime = scheduledDspTime + (withOffset ? offset : 0);
-            MaAudio.PlayScheduled(audio, startDspTime, volume, MaAudio.Mixer.Instant, channel);
+            channelActive = MaAudio.PlayScheduled(audio, startDspTime, volume, MaAudio.Mixer.Instant, channel);
             playing = true;
         }
         
         public void Pause() {
             if (!playing) return;
-            Debug.LogWarning("MaAudio does not support stopping a single sample yet.");
+            if (channelActive.IsValid) {
+                MaAudio.Stop(MaAudio.Mixer.Instant, channelActive);
+                channelActive = MaAudio.InvalidChannel;
+            }
             timeWhenStopped = PlayTime;
             playing = false;
         }

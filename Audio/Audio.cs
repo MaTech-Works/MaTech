@@ -29,7 +29,9 @@ namespace MaTech.Audio {
 
         public struct Channel {
             public ushort index;
-            public bool IsManualAssignOnly => (index & (1 << 15)) == 0;  // 小于 1 << 15 的 index 都是手动指定的，不会被自动占
+            public bool IsValid => index != ushort.MaxValue;
+            public bool IsInvalid => index == ushort.MaxValue;
+            public bool IsManualAssignOnly => (index & (1 << 15)) == 0;  // 小于 1 << 15 的 index 仅用于手动指定，不会被自动分配
                 
             public static implicit operator Channel(int i) => new Channel { index = (ushort)i }; // 参数可以直接填int类型
         }

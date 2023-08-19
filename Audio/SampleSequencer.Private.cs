@@ -59,7 +59,10 @@ namespace MaTech.Audio {
         }
 
         private void StopAllSamples() {
-            while(listAudioPlaying.HasNext) RecycleAudioInfo(listAudioPlaying.Pop());
+            while (listAudioPlaying.HasNext) {
+                var audioInfo = listAudioPlaying.Pop();
+                RecycleAudioInfo(audioInfo);
+            }
         }
         
         private void Update() {
@@ -111,7 +114,7 @@ namespace MaTech.Audio {
         }
 
         private void RecycleAudioInfo(AudioInfo info) {
-            var channel = info.sample.Channel;
+            info.sample?.Stop();
             info.sample = null;
             listAudioPool.Add(info);
         }

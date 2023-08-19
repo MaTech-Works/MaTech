@@ -24,6 +24,7 @@ namespace MaTech.Audio {
 
         private float volume = 1;
         private MaAudio.Channel channel = MaAudio.ChannelAutoAssign;
+        private MaAudio.Channel channelActive = MaAudio.InvalidChannel;
 
         private double length = double.NaN; // set when loaded
 
