@@ -249,10 +249,6 @@ namespace MaTech.Gameplay {
             if (fullReload) {
                 var track = chart.sampleTrack;
                 await track.Load();
-
-                // TODO: 移植KeySoundManager至PlayBehavior接口
-                //await KeySoundManager.SingletonInstance.PrepareForNotes(processor.ResultNoteList);
-
                 sequencer.Track = track;
             }
 
