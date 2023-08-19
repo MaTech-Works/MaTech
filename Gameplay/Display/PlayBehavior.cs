@@ -4,6 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -13,21 +14,38 @@ using UnityEngine;
 
 namespace MaTech.Gameplay.Display {
     /// <summary>
-    /// 继承这个类的组件，可以实现以上接口以接受Play广播信息。
+    /// 继承这个基类以及额外接口以接受ChartPlayer广播信息。
+    /// async的接口将被对应的操作异步等待，比如说ChartPlayer.Load会等待OnLoad，捕获错误后会等待OnError结束后Unload。
     /// 
     /// 接口调用流程：
-    /// OnLoad --> OnStart --(完成关卡)--> OnExit(true)
-    ///                    --(暂停)--> OnPause --(继续)--> OnResume
-    ///                                       --(重开)--> OnStart
-    ///                                       --(退出)--> OnExit(false)
-    ///
+    /// 加载关卡 OnLoad
+    /// ↑ ↓
+    /// | 开始关卡 OnStart(false)
+    /// | 重开关卡 OnStart(true)  （可能在无OnFinish的情况下重复回调）
+    /// | ↑ ↓ ↑
+    /// | | 暂停关卡 OnPause
+    /// | | 解除暂停 OnResume  （暂停状态重开关卡时自动解除暂停，无回调）
+    /// | ↓ ↓
+    /// | 通关结束 OnFinish(false)  （可以靠IScoreResult进一步判断成绩）
+    /// | 死亡结束 OnFinish(true)
+    /// ↓ ↓
+    /// 卸载关卡 OnUnload
+    /// 
     /// 其他可选接口请参考interface注释。
     /// </summary>
     public abstract partial class PlayBehavior : MonoBehaviour {
+        /// <summary> 在ChartPlayer.Load即将加载完成时调用，并等待其结束后结束 </summary>
         public virtual async UniTask OnLoad(IPlayInfo playInfo) { }
-        public virtual async UniTask OnStart(bool isRetry) { }
-        public virtual async UniTask OnExit(bool isPlayFinished) { }
-        public virtual async UniTask OnPause() { }
-        public virtual async UniTask OnResume() { }
+        /// <summary> 在ChartPlayer.Unload刚开始时调用，等待其结束后再继续卸载其他资源 </summary>
+        public virtual async UniTask OnUnload(IPlayInfo playInfo) { }
+        
+        /// <summary> 当ChartPlayer捕获异常后调用，等待其结束后再完成Unload等其他善后处理 </summary>
+        public virtual async UniTask OnError(Exception exception) { }
+        
+        public virtual void OnStart(bool isRetry) { }
+        public virtual void OnFinish(bool isDied) { }
+        
+        public virtual void OnPause() { }
+        public virtual void OnResume() { }
     }
 }
