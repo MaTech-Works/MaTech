@@ -105,6 +105,6 @@ namespace MaTech.Gameplay.Time {
         public static readonly Comparison<ITimePoint> ComparisonTime = ComparerTime.Compare;
         public static Comparison<ITimePoint> GetComparison(TimePointOrderBy order) => order == TimePointOrderBy.Beat ? ComparisonBeat : ComparisonTime;
 
-        public override string ToString() => $"{beat}, {time}";
+        public override string ToString() => $"Beat {beat}, Time {time}";
     }
 }

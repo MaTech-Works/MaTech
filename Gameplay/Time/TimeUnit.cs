@@ -84,7 +84,7 @@ namespace MaTech.Gameplay.Time {
         public static implicit operator BeatUnit(double value) => new BeatUnit(value);
         public static implicit operator BeatUnit(Fraction value) => new BeatUnit(value);
 
-        public override string ToString() => $"Beat {fraction} ({Value:f3})";
+        public override string ToString() => $"{fraction} ({Value:f3})";
     }
 
     public readonly struct TimeUnit : IComparable<TimeUnit> {
@@ -155,6 +155,6 @@ namespace MaTech.Gameplay.Time {
             return decimals.CompareTo(other.decimals);
         }
         
-        public override string ToString() => $"Time {Milliseconds}ms";
+        public override string ToString() => $"{Milliseconds}ms";
     }
 }
