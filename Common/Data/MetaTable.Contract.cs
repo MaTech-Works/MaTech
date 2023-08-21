@@ -6,6 +6,8 @@
 
 #nullable enable
 
+using System;
+using System.Data;
 using UnityEngine;
 
 namespace MaTech.Common.Data {
@@ -36,9 +38,9 @@ namespace MaTech.Common.Data {
         /// <summary>
         /// 读写值时的自动检查，传入的对象实现IConstraintTypeOfKey或IConstraintValueOfKey时将启用对应的检查。
         /// 仅在编辑器内，或开启Development Build的非IL2CPP平台（即IOS平台不可用）有效。
-        /// TODO: 将接口改为允许多重检查规则（类似于List<IConstraint>）
+        /// TODO: 将接口改为允许多重检查规则（类似于List&lt;IConstraint&gt;）
         /// </summary>
-        public IConstraint? Constraint { get; set; }
+        public virtual IConstraint? Constraint { get; set; }
 
         // TODO: 泛型方法在IL2CPP环境下会被strip掉，需要其他替代方案
         #if UNITY_EDITOR || (!ENABLE_IL2CPP && DEVELOPMENT_BUILD)
@@ -69,5 +71,13 @@ namespace MaTech.Common.Data {
         private bool CheckConstraintTypeOfKey<T>(EnumEx<TEnum> keyToCheck) => true;
         private bool CheckConstraintValueOfKey<T>(EnumEx<TEnum> keyToCheck, in T valueToCheck) => true;
         #endif
+    }
+
+    public class MetaTableWithContract<TEnum, TConstraint> : MetaTable<TEnum> where TEnum : unmanaged, Enum, IConvertible where TConstraint : class, MetaTable<TEnum>.IConstraint, new() {
+        private static readonly TConstraint constraint = new TConstraint();
+        public override IConstraint? Constraint {
+            get => constraint;
+            set => throw new ReadOnlyException($"[MetaTableWithContract] Constraint is readonly and static, cannot be set to another instance.");
+        }
     }
 }
