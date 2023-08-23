@@ -31,14 +31,18 @@ namespace MaTech.Audio {
         /// 加载音轨中的所有采样并且排序。完成后，使用AddSample与RemoveSample时会当场加载增加的采样。
         /// </summary>
         public async UniTask<bool> Load() {
-            if (IsLoaded) return true;
+            if (IsLoaded) {
+                Debug.Log($"[SampleTrack] Trying to load a already loaded track.");
+                return true;
+            }
 
             if (samples == null) {
-                Debug.LogWarning("SampleTrack: sample list does not present");
+                Debug.LogError("[SampleTrack] Sample list is null, except it shouldn't be.");
                 return false;
             }
 
             if (samples.Count == 0) {
+                Debug.Log($"[SampleTrack] Track loaded with no samples at all.");
                 IsLoaded = true;
                 return true;
             }
@@ -50,7 +54,7 @@ namespace MaTech.Audio {
             samples.Sort();
             await UniTask.WhenAll(Enumerable.Select(samples, sample => sample.Load()));
             
-            Debug.Log($"Track loaded in {sw.Elapsed.TotalSeconds}s");
+            Debug.Log($"[SampleTrack] Track loaded in {sw.Elapsed.TotalSeconds}s");
 
             IsLoaded = true;
             return true;

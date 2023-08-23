@@ -248,9 +248,15 @@ namespace MaTech.Gameplay {
             #region Audio: Track and key sounds
 
             if (fullReload) {
+                Debug.Log("<b>[ChartPlayer]</b> Full loading SampleTrack");
                 var track = chart.sampleTrack;
-                await track.Load();
-                sequencer.Track = track;
+                if (await track.Load()) {
+                    sequencer.Track = track;
+                } else {
+                    Debug.LogError("<b>[ChartPlayer]</b> SampleTrack failed to load. Audio might not be able to start at all.");
+                }
+            } else {
+                Debug.Log("<b>[ChartPlayer]</b> Not full loading, skipping SampleTrack");
             }
 
             #endregion
@@ -279,7 +285,6 @@ namespace MaTech.Gameplay {
                 offsetAudio = 0,
             };
             timeSetter.UpdateTime(timeTrackStart, true);
-            
             
             await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnLoad(SourcePlayInfo));
             
