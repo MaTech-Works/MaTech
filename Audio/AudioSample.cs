@@ -82,10 +82,16 @@ namespace MaTech.Audio {
             }
 
             if (UnityUtil.IsUnassigned(clip)) {
-                if (url == null) return false;
+                if (url == null) {
+                    Debug.LogError($"[Sample] Both url and AudioClip are empty. Cannot be loaded.");
+                    return false;
+                }
                 clip = await AudioPool.SingletonInstance.LoadAudioClip(url, false);
                 await UniTask.SwitchToMainThread();
-                if (clip == null || clip.loadState == AudioDataLoadState.Failed) return false;
+                if (clip == null || clip.loadState == AudioDataLoadState.Failed) {
+                    Debug.LogError($"[Sample] AudioClip at url [{Path.GetFileName(url)}] cannot be loaded.");
+                    return false;
+                }
             }
             
             await UniTask.SwitchToMainThread();
@@ -93,7 +99,7 @@ namespace MaTech.Audio {
             audio = await MaAudio.CreateAudioFromClipAsync(clip);
 
             if (audio == MaAudio.NullAudio) {
-                Debug.LogError($"[Sample] Audio {Path.GetFileName(url)} cannot be loaded.");
+                Debug.LogError($"[Sample] Failed to load AudioClip [{clip.name}] into MaAudio.");
                 return false;
             }
             return true;
