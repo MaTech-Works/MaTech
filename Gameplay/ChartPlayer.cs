@@ -106,16 +106,14 @@ namespace MaTech.Gameplay {
         private double audioTimeLastResume;  // 对应ChartAudioPlayer的时间
         
         private double timeNextAllowedPause = double.MinValue;
-
-        //设置开始的时刻
-        public double TimeStart {
+        
+        private double speedScale = 1.0;
+        public double SpeedScale {
+            get => speedScale;
             set {
-                if (value < 0) {
-                    timeTrackStart = 0;
-                } else {
-                    timeTrackStart = value;
-                }
-            } 
+                speedScale = value;
+                UpdateObjectLayerSpeedScale(speedScale);
+            }
         }
 
         private bool NeedFrameUpdate => playing || rewinding;

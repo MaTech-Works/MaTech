@@ -190,7 +190,21 @@ namespace MaTech.Gameplay {
                     }
                 }
             }
+            
+            UpdateObjectLayerSpeedScale(speedScale);
         }
 
+        private void UpdateObjectLayerSpeedScale(double value) {
+            foreach (var layer in noteLayers) {
+                if (UnityUtil.IsAssigned(layer)) {
+                    layer.SetSpeedScale(value);
+                }
+            }
+            foreach (var layer in barLayers) {
+                if (UnityUtil.IsAssigned(layer)) {
+                    layer.SetSpeedScale(value);
+                }
+            }
+        }
     }
 }
