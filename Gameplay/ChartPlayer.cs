@@ -138,7 +138,7 @@ namespace MaTech.Gameplay {
                 sequencer.Pause();
             }
 
-            if (loaded) {
+            if (loaded && fullReload) {
                 await Unload();
             }
 
