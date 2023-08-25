@@ -57,7 +57,7 @@ namespace MaTech.Gameplay.Scoring {
             Score.Init(playInfo);
             Timing.Init(playInfo);
             
-            pendingNotes.Clear();
+            pendingNotes.ClearAndRestart();
             activeNotes.Clear();
             
             pendingNotes.AddRange(processor.ResultNoteList.Where(carrier => carrier.judgeState != null));
