@@ -37,21 +37,26 @@ namespace MaTech.Audio {
         public bool IsPlaying => playing;
         public bool IsFinished => PlayTime >= endTime;
 
+        private void AssertValidPlay() {
+            Assert.IsTrue(IsValid, "[Sample] Trying to play a invalid sample.");
+            if (IsValid) Assert.IsTrue(IsLoaded, "[Sample] Trying to play a sample that is not loaded.");
+        }
+
         public void PlayImmediate() {
-            Assert.IsTrue(audio != MaAudio.NullAudio, "Sample should be loaded (or in a prepared SampleTrack) before play.");
+            AssertValidPlay();
             channelActive = MaAudio.Play(audio, volume, MaAudio.Mixer.Instant, channel);
             startDspTime = MaAudio.OutputDSPTime;
             playing = true;
         }
 
         public void PlayDelayed(double delayTime, bool withOffset = true) {
-            Assert.AreNotEqual(MaAudio.NullAudio, audio, "Sample should be loaded (or in a prepared SampleTrack) before play.");
+            AssertValidPlay();
             channelActive = MaAudio.PlayDelayed(audio, delayTime, volume, MaAudio.Mixer.Instant, channel);
             playing = true;
         }
 
         public void PlayScheduled(double scheduledDspTime, bool withOffset = true) {
-            Assert.AreNotEqual(MaAudio.NullAudio, audio, "Sample should be loaded (or in a prepared SampleTrack) before play.");
+            AssertValidPlay();
             startDspTime = scheduledDspTime + (withOffset ? offset : 0);
             channelActive = MaAudio.PlayScheduled(audio, startDspTime, volume, MaAudio.Mixer.Instant, channel);
             playing = true;
