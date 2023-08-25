@@ -48,10 +48,4 @@ namespace MaTech.Audio {
 
         void Seek(double playTime);
     }
-
-    //关键tag
-    public struct AudioTag {
-        public string title;
-        public string artist;
-    }
 }
