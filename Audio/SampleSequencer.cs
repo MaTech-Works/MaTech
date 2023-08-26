@@ -31,7 +31,7 @@ namespace MaTech.Audio {
                 Stop();
                 
                 track = value;
-                trackSamplesDumped = false;
+                trackSamplesQueued = false;
                 
                 int sampleCount = queueSample.Count;
                 listAudioPlaying.Capacity = sampleCount;

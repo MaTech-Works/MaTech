@@ -20,7 +20,7 @@ namespace MaTech.Audio {
         }
 
         private SampleTrack track;
-        private bool trackSamplesDumped = false;
+        private bool trackSamplesQueued = false;
 
         private readonly QueueList<AudioSample> queueSample = new QueueList<AudioSample>();
         private readonly PriorityQueue<AudioInfo> listAudioPlaying = new PriorityQueue<AudioInfo>();
@@ -43,8 +43,8 @@ namespace MaTech.Audio {
         private void Reload() {
             StopAllSamples();
 
-            if (!trackSamplesDumped) {
-                queueSample.Clear();
+            if (!trackSamplesQueued) {
+                queueSample.ClearAndRestart();
                 queueSample.AddRange(track.Samples);
                 ShellSort.Hibbard(queueSample);
 
@@ -53,6 +53,8 @@ namespace MaTech.Audio {
                     maxTime = Math.Max(sample.OffsetEnd, maxTime);
                 }
                 Length = maxTime;
+
+                trackSamplesQueued = true;
             } else {
                 queueSample.Restart();
             }
