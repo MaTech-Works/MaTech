@@ -306,9 +306,15 @@ namespace MaTech.Common.Utils {
         public static Vector2 PointToNormalizedUnclamped(in this Rect rect, Vector2 point) {
             return point.InverseLerpUnclamped(rect.min, rect.max);
         }
-
         public static Vector2 NormalizedToPointUnclamped(in this Rect rect, Vector2 point) {
             return point.LerpUnclamped(rect.min, rect.max);
+        }
+        
+        public static Rect ScaleBy(in this Rect rect, Vector2 scale) {
+            return new Rect(rect.position * scale, rect.size * scale);
+        }
+        public static Rect NormalizeTo(in this Rect rect, Vector2 size) {
+            return new Rect(rect.position / size, rect.size / size);
         }
 
         public static float GetBeginTime(this AnimationCurve curve) => curve.keys.FirstOrDefault().time;
