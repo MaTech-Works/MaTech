@@ -263,7 +263,14 @@ namespace MaTech.Gameplay {
 
             #region Graphics: The object layers
 
-            UpdateObjectLayerSettings();
+            if (fullReload) {
+                // Notice that on non-full-reloading, objects originally on the layer are still loaded here,
+                // which means updating settings will trigger graphic updates and thus required to be on the main thread.
+                // Here we avoided switching threads because settings don't need to be updated.
+                // However, there should be a better way to universally setup display windows instead of relying on operation orders,
+                // which is another story.
+                UpdateObjectLayerSettings();
+            }
             
             await noteLayers.Select(layer => layer.Load(processor.ResultNoteList));
             await barLayers.Select(layer => layer.Load(processor.ResultBarList));
