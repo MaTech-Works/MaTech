@@ -6,7 +6,8 @@
 
 using System;
 using MaTech.Common.Algorithm;
-using MaTech.Common.Tools;
+using MaTech.Common.Utils;
+using UnityEditor;
 using UnityEngine;
 
 namespace MaTech.Audio {
@@ -20,7 +21,7 @@ namespace MaTech.Audio {
         }
 
         private SampleTrack track;
-        private bool trackSamplesQueued = false;
+        private bool trackSamplesQueued;
 
         private readonly QueueList<AudioSample> queueSample = new QueueList<AudioSample>();
         private readonly PriorityQueue<AudioInfo> listAudioPlaying = new PriorityQueue<AudioInfo>();
@@ -34,10 +35,11 @@ namespace MaTech.Audio {
         private double timeWhenStopped;
         
         #if UNITY_EDITOR
-        [SerializeField, ReadOnlyInInspector]
-        private double timePlaying;
-        [SerializeField, ReadOnlyInInspector]
-        private double timeBuffered;
+        internal struct TimeDisplay {
+            [NonSerialized] public double timePlaying;
+            [NonSerialized] public double timeBuffered;
+        }
+        internal TimeDisplay timeDisplay;
         #endif
 
         private void Reload() {
@@ -95,8 +97,8 @@ namespace MaTech.Audio {
             }
             
             #if UNITY_EDITOR
-            timePlaying = playTime;
-            timeBuffered = bufferTime;
+            timeDisplay.timePlaying = playTime;
+            timeDisplay.timeBuffered = bufferTime;
             #endif
         }
 
@@ -122,4 +124,25 @@ namespace MaTech.Audio {
         }
         
     }
+
+    #if UNITY_EDITOR
+    [CustomEditor(typeof(SampleSequencer))]
+    internal class SampleSequencerEditor : Editor {
+        public override void OnInspectorGUI() {
+            base.OnInspectorGUI();
+            
+            EditorGUILayout.Separator();
+
+            var sequencer = (SampleSequencer)target;
+            var display = sequencer.timeDisplay;
+            
+            GUILayout.BeginVertical("Time Infomation", "window");
+            GUI.enabled = false;
+            EditorGUILayout.DoubleField("Playing", display.timePlaying);
+            EditorGUILayout.DoubleField("Buffered", display.timeBuffered);
+            GUI.enabled = true;
+            GUILayout.EndVertical();
+        }
+    }
+    #endif
 }
