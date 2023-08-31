@@ -5,15 +5,14 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using MaTech.Common.Tools;
 using UnityEditor;
 using UnityEngine;
 
 namespace MaTech.Common.Algorithm {
     public static partial class Interpolators {
         // TODO: 换成任意Unit Test框架
-        #if MATECH_TEST && UNITY_EDITOR
-        [InitializeOnLoadMethod]
-        #endif
+        [TestInitializeOnLoadMethod]
         internal static void TestCalculus() {
             void CheckInterpolator(IInterpolator interpolator, int n = 1000, double tolerance = 1e-2, double maxDelta = 0.5) {
                 double delta = 1.0f / n;

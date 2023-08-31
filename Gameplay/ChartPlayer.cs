@@ -14,7 +14,6 @@ using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Scoring;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer : MonoBehaviour {

@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System.Collections.Generic;
+using MaTech.Common.Tools;
 using UnityEditor;
 
 namespace MaTech.Common.Data {
@@ -14,10 +15,8 @@ namespace MaTech.Common.Data {
         private enum Lui { Cat }
 
         // TODO: make this a unit test
-        #if MATECH_TEST && UNITY_EDITOR // compile check only if not for tests
-        [InitializeOnLoadMethod]
-        #endif
-        public static void Example() {
+        [TestInitializeOnLoadMethod]
+        internal static void Example() {
             Foo bar0 = Foo.Bar;
             var bar1 = new EnumEx<Foo>(bar0); // prints as "Bar", underlying enum value is 0 (Foo.Bar)
             var bar2 = new EnumEx<Foo>("Bar"); // prints as "Bar", underlying enum value is 0 (Foo.Bar)

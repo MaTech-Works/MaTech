@@ -5,7 +5,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+#if UNITY_STANDALONE_WIN
 using System.Runtime.InteropServices;
+#endif
 
 namespace MaTech.Gameplay.Input.NativeInput {
     /// API design similar to UnityRawInput plugin, windows only

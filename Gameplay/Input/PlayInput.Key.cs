@@ -4,9 +4,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using UnityEngine;
+#if UNITY_STANDALONE_WIN
 using System.Collections.Generic;
 using MaTech.Gameplay.Input.NativeInput;
-using UnityEngine;
+#endif
 
 namespace MaTech.Gameplay.Input {
     /// <summary>
