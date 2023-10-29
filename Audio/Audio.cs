@@ -150,12 +150,14 @@ namespace MaTech.Audio {
         }
 
         /// <summary>
-        /// 音频库是否以激进的方式填充混音缓冲，以最快的速度输出音频。（延迟接近ASIO）
-        /// 对CPU多核要求比较高，混音线程会用spinlock保持wait-free状态。通常会在Windows平台WaveRT驱动上开启。
+        /// 音频库是否以理想的低延迟方式，以最快的速度输出音频。
+        /// Windows：混音线程与WaveRT驱动配合，用spinlock保持wait-free状态，并且尝试通过IAudioClient3降低系统缓冲区大小。典型缓冲大小为10-20ms。
+        /// Android：由AAudio向设备要求LowLatency模式，低版本系统不一定支持。典型缓冲大小为4ms。
+        /// iOS/macOS：向CoreAudio设备要求setPreferredIOBufferDuration至0.005s（苹果文档注明的典型值），并且在macOS上要求降低设备缓冲区大小kAudioDevicePropertyBufferFrameSize至最低值。典型缓冲大小为5-15ms。
         /// todo: 增加方法以强制禁用此方式，以便节省性能。
         /// </summary>
-        public static extern bool IsActiveOutput {
-            [DllImport(dllName, EntryPoint = "MaAudio_IsActiveOutput")] get;
+        public static extern bool IsLowLatency {
+            [DllImport(dllName, EntryPoint = "MaAudio_IsLowLatency")] get;
         }
         
         #endregion
