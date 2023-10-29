@@ -44,10 +44,10 @@ namespace MaTech.Audio {
         #region Audio System
 
         [DllImport(dllName, EntryPoint = "MaAudio_Create")]
-        public static extern int Create(int sampleRate); // note: call MaAudio.LoadForUnity to register extra handling for Unity
+        public static extern bool Create(int sampleRate); // note: call MaAudio.LoadForUnity to register extra handling for Unity
 
         [DllImport(dllName, EntryPoint = "MaAudio_Destroy")]
-        public static extern void Destroy(); // note: call MaAudio.UnloadForUnity to register extra handling for Unity
+        public static extern bool Destroy(); // note: call MaAudio.UnloadForUnity to register extra handling for Unity
 
         public static extern bool IsValid {
             [DllImport(dllName, EntryPoint = "MaAudio_IsValid")] get;
@@ -69,13 +69,13 @@ namespace MaTech.Audio {
         public static extern IntPtr CreateAudioWithData(float[] samples, int sampleCount, int sampleRate);
 
         [DllImport(dllName, EntryPoint = "MaAudio_ReleaseAudio")]
-        public static extern void ReleaseAudio(IntPtr audio);
+        public static extern bool ReleaseAudio(IntPtr audio);
 
         [DllImport(dllName, EntryPoint = "MaAudio_ReleaseAllAudio")]
-        public static extern void ReleaseAllAudio();
+        public static extern bool ReleaseAllAudio();
 
         [DllImport(dllName, EntryPoint = "MaAudio_LoadAudio")]
-        public static extern void LoadAudio(IntPtr audio, float[] samples, int sampleCount, int sampleRate);
+        public static extern bool LoadAudio(IntPtr audio, float[] samples, int sampleCount, int sampleRate);
 
         [DllImport(dllName, EntryPoint = "MaAudio_TestAudio")]
         public static extern int TestAudio(IntPtr audio);
@@ -102,12 +102,12 @@ namespace MaTech.Audio {
         */
 
         [DllImport(dllName, EntryPoint = "MaAudio_SetVolume")]
-        public static extern void SetVolume(Mixer mixer, Channel channel, float volume);
+        public static extern bool SetVolume(Mixer mixer, Channel channel, float volume);
         [DllImport(dllName, EntryPoint = "MaAudio_GetVolume")]
         public static extern float GetVolume(Mixer mixer, Channel channel);
 
         [DllImport(dllName, EntryPoint = "MaAudio_SetMixerVolume")]
-        public static extern void SetMixerVolume(Mixer mixer, float volume);
+        public static extern bool SetMixerVolume(Mixer mixer, float volume);
         [DllImport(dllName, EntryPoint = "MaAudio_GetMixerVolume")]
         public static extern float GetMixerVolume(Mixer mixer);
         

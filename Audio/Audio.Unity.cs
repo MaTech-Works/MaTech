@@ -13,7 +13,7 @@ namespace MaTech.Audio {
         public static bool IsLoadedForUnity { get; private set; } = false;
 
         public static bool LoadForUnity() {
-            if (Create(AudioSettings.outputSampleRate) != 0) {
+            if (!Create(AudioSettings.outputSampleRate)) {
                 Debug.Log("Cannot create MaAudio. See AudioOutput.log for details.");
                 return false;
             }
