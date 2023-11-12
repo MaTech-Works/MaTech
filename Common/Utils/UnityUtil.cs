@@ -356,6 +356,7 @@ namespace MaTech.Common.Utils {
         public static bool SetBoxedValue(this SerializedProperty property, object value) {
             #if UNITY_2022_2_OR_NEWER
             property.boxedValue = value;
+            return true;
             #else
             object target = property.serializedObject.targetObject;
             
