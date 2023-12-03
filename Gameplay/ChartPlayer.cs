@@ -412,10 +412,7 @@ namespace MaTech.Gameplay {
         }
         
         private async UniTaskVoid HandleError(Exception ex) {
-            using var busy = SetBusy(BusyReason.ErrorHandling);
-            
             Debug.LogException(ex);
-            
             if (pauseOnError) Pause();
             await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnError(ex));
             if (unloadOnError) await Unload();

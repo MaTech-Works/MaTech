@@ -10,7 +10,7 @@ using UnityEngine;
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
         public enum BusyReason {
-            Idle, Loading, Unloading, ErrorHandling
+            Idle, Loading, Unloading
         }
 
         public bool IsBusy => BusyState != BusyReason.Idle;
