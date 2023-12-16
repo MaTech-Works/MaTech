@@ -1,0 +1,3 @@
+[*]
+file_header_template = unset
+resharper_check_namespace_highlighting = false
