@@ -181,10 +181,16 @@ namespace MaTech.Common.Algorithm {
                 dict.Add(key, value = create());
             return value;
         }
-
-        public static TValue GetOrNew<TKey, TValue, TNew>(this Dictionary<TKey, TValue> dict, TKey key) where TNew : TValue, new() {
+        
+        public static TValue GetOrNew<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : new() {
             if (!dict.TryGetValue(key, out var value))
-                dict.Add(key, value = new TNew());
+                dict.Add(key, value = new TValue());
+            return value;
+        }
+
+        public static TValue GetOrNewDerived<TKey, TValue, TDerived>(this Dictionary<TKey, TValue> dict, TKey key) where TDerived : TValue, new() {
+            if (!dict.TryGetValue(key, out var value))
+                dict.Add(key, value = new TDerived());
             return value;
         }
 
