@@ -7,7 +7,10 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using MaTech.Common.Algorithm;
+using Standart.Hash.xxHash;
 using UnityEngine;
 
 namespace MaTech.Common.Data {
@@ -29,35 +32,25 @@ namespace MaTech.Common.Data {
     /// }
     /// </code>
     /// </example>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TEnum"></typeparam>
     [Serializable]
-    public partial struct EnumEx<T> where T : unmanaged, Enum, IConvertible {
+    public partial struct EnumEx<TEnum> where TEnum : unmanaged, Enum, IConvertible {
         [field: SerializeField]
-        public T Value { get; private set; }
-        
-        public static implicit operator T(EnumEx<T> x) => x.Value;
-        public static implicit operator EnumEx<T>(T x) => new EnumEx<T>(x);
-        public static implicit operator EnumEx<T>(int x) => new EnumEx<T>(BoxlessConvert.To<T>.From(x));
+        public TEnum Value { get; private set; }
 
-        public EnumEx(T x) { Value = x; }
-        public EnumEx(string name, int? enumIndex = null) {
-            using (var lockRAII = ReaderLockRAII.EnterRead()) {
-                if (mapNameToEnum.TryGetValue(name, out var x)) {
-                    Value = x;
-                    return;
-                }
-            }
-            using (var lockRAII = WriterLockRAII.EnterRead()) {
-                if (mapNameToEnum.TryGetValue(name, out var x)) { // check again for race condition
-                    Value = x;
-                } else {
-                    lockRAII.EnterWrite();
-                    maxEnumIndex = enumIndex ?? maxEnumIndex + 1;
-                    Value = BoxlessConvert.To<T>.From(maxEnumIndex);
-                    mapNameToEnum.Add(name, Value);
-                    mapEnumToName.Add(Value, name);
-                }
-            }
-        }
+        public int UnderlyingValue => BoxlessConvert.To<int>.From(Value);
+        
+        public static implicit operator TEnum(EnumEx<TEnum> x) => x.Value;
+        public static implicit operator EnumEx<TEnum>(TEnum x) => new EnumEx<TEnum>(x);
+        public static implicit operator EnumEx<TEnum>(int x) => new EnumEx<TEnum>(x);
+
+        public EnumEx(TEnum x) { Value = x; }
+        public EnumEx(int x) { Value = BoxlessConvert.To<TEnum>.From(x); }
+        public EnumEx(string name, int index) { Value = DefineEnumWithIndex(name, index); }
+        public EnumEx(string name, bool ordered = true) { Value = ordered ? DefineOrderedEnum(name) : DefineUnorderedEnum(name); }
+    }
+
+    public static class EnumEx {
+        public static int MaxUnorderedHashAttempts { get; set; } = 10;
     }
 }

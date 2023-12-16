@@ -11,39 +11,41 @@ using System.Collections.Generic;
 using MaTech.Common.Algorithm;
 
 namespace MaTech.Common.Data {
-    public partial struct EnumEx<T>
-        : IComparable, IComparable<EnumEx<T>>, IComparable<T>
-        , IEquatable<EnumEx<T>>, IEquatable<T>
-        , IBoxlessConvertible, IFormattable {
+    public partial struct EnumEx<TEnum> :
+        IComparable, IComparable<EnumEx<TEnum>>, IComparable<TEnum>,
+        IEquatable<EnumEx<TEnum>>, IEquatable<TEnum>,
+        IConvertible, IBoxlessConvertible, IFormattable {
+
+        private static EqualityComparer<TEnum> valueEqualityComparer = EqualityComparer<TEnum>.Default;
         
         public override string ToString() => ToString(null, null);
-        public override int GetHashCode() => EqualityComparer<T>.Default.GetHashCode(Value);
+        public override int GetHashCode() => valueEqualityComparer.GetHashCode(Value);
 
         public override bool Equals(object? obj) {
             switch (obj) {
-            case EnumEx<T> ex: return Equals(ex);
-            case T e: return Equals(e);
+            case EnumEx<TEnum> ex: return Equals(ex);
+            case TEnum e: return Equals(e);
             default: return false;
             }
         }
 
-        public bool Equals(EnumEx<T> other) => EqualityComparer<T>.Default.Equals(Value, other.Value);
-        public bool Equals(T other) => EqualityComparer<T>.Default.Equals(Value, other);
+        public bool Equals(EnumEx<TEnum> other) => valueEqualityComparer.Equals(Value, other.Value);
+        public bool Equals(TEnum other) => valueEqualityComparer.Equals(Value, other);
 
         public int CompareTo(object? obj) {
             switch (obj) {
-            case EnumEx<T> ex: return CompareTo(ex);
-            case T e: return CompareTo(e);
+            case EnumEx<TEnum> ex: return CompareTo(ex);
+            case TEnum e: return CompareTo(e);
             case null: return 1; // as a tradition of .net
-            default: throw new InvalidOperationException($"EnumEx: Cannot compare to an object of type {obj.GetType()}");
+            default: throw new InvalidOperationException($"[EnumEx] Cannot compare to an object of type {obj.GetType()}.");
             }
         }
 
-        public int CompareTo(EnumEx<T> other) => Comparer<T>.Default.Compare(Value, other.Value);
-        public int CompareTo(T other) => Comparer<T>.Default.Compare(Value, other);
+        public int CompareTo(EnumEx<TEnum> other) => Comparer<TEnum>.Default.Compare(Value, other.Value);
+        public int CompareTo(TEnum other) => Comparer<TEnum>.Default.Compare(Value, other);
 
         TypeCode IConvertible.GetTypeCode() => Value.GetTypeCode(); // this will match the underlying type
-
+        
         Boolean IConvertible.ToBoolean(IFormatProvider? provider) => Value.ToBoolean(provider);
         Char IConvertible.ToChar(IFormatProvider? provider) => Value.ToChar(provider);
         SByte IConvertible.ToSByte(IFormatProvider? provider) => Value.ToSByte(provider);
@@ -58,24 +60,25 @@ namespace MaTech.Common.Data {
         Double IConvertible.ToDouble(IFormatProvider? provider) => Value.ToDouble(provider);
         Decimal IConvertible.ToDecimal(IFormatProvider? provider) => Value.ToDecimal(provider);
         DateTime IConvertible.ToDateTime(IFormatProvider? provider) => Value.ToDateTime(provider);
-        String IConvertible.ToString(IFormatProvider? provider) => ToString();
-
+        String IConvertible.ToString(IFormatProvider? provider) => ToString(null, provider);
+        
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => Value.ToType(conversionType, provider);
-        TResult IBoxlessConvertible.ToType<TResult>(IFormatProvider? provider) => BoxlessConvert.To<TResult>.From(Value, provider) ?? throw new InvalidCastException($"EnumEx: Boxless conversion to type {typeof(TResult)} is undefined.");
+        
+        TResult IBoxlessConvertible.ToType<TResult>(IFormatProvider? provider) => BoxlessConvert.ChangeType<TEnum, TResult>(Value, provider);
 
         public string ToString(string? format, IFormatProvider? formatProvider) {
-            if (predefinedEnums.Contains(Value)) return Value.ToString(format);
-            using (var lockRAII = ReaderLockRAII.EnterRead()) {
+            if (predefinedEnumToName.TryGetValue(Value, out var name)) return name;
+            using (var lockRAII = ReaderLockRAII.EnterRead(lockMetadata)) {
                 return mapEnumToName.GetValueOrDefault(Value) ?? Value.ToString(format);
             }
         }
 
-        public static bool operator<(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) < 0;
-        public static bool operator<=(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) <= 0;
-        public static bool operator>(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) > 0;
-        public static bool operator>=(EnumEx<T> left, EnumEx<T> right) => left.CompareTo(right) >= 0;
+        public static bool operator<(EnumEx<TEnum> left, EnumEx<TEnum> right) => left.CompareTo(right) < 0;
+        public static bool operator<=(EnumEx<TEnum> left, EnumEx<TEnum> right) => left.CompareTo(right) <= 0;
+        public static bool operator>(EnumEx<TEnum> left, EnumEx<TEnum> right) => left.CompareTo(right) > 0;
+        public static bool operator>=(EnumEx<TEnum> left, EnumEx<TEnum> right) => left.CompareTo(right) >= 0;
 
-        public static bool operator==(EnumEx<T> left, EnumEx<T> right) => left.Equals(right);
-        public static bool operator!=(EnumEx<T> left, EnumEx<T> right) => !left.Equals(right);
+        public static bool operator==(EnumEx<TEnum> left, EnumEx<TEnum> right) => left.Equals(right);
+        public static bool operator!=(EnumEx<TEnum> left, EnumEx<TEnum> right) => !left.Equals(right);
     }
 }
