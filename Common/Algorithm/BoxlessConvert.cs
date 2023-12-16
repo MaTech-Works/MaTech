@@ -18,7 +18,9 @@ namespace MaTech.Common.Algorithm {
     /// <example>
     /// <code>
     /// public struct Foo {
-    ///     [Preserve] public static bool IsBoxlessConvertibleToType(Type type) => type == typeof(int) || type == typeof(float);
+    ///     [Preserve] // to avoid trimming on AOT platforms -- IsBoxlessConvertibleToType is called by reflection since no static abstract support for now
+    ///     public static bool IsBoxlessConvertibleToType(Type type) => type == typeof(int) || type == typeof(float);
+    /// 
     ///     public T ToType&lt;T&gt;(IFormatProvider? provider) {
     ///         if (typeof(T) == typeof(int)) return BoxlessConvert.Identity&lt;int, T&gt;(765);
     ///         if (typeof(T) == typeof(float)) return BoxlessConvert.ChangeType&lt;int, T&gt;(573);

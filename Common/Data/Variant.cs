@@ -5,8 +5,10 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Collections.Generic;
 using MaTech.Common.Algorithm;
 using Newtonsoft.Json;
+using UnityEngine.Scripting;
 
 namespace MaTech.Common.Data {
     public enum VariantType {
@@ -22,10 +24,10 @@ namespace MaTech.Common.Data {
     ///
     /// The equality method compares the type and value strictly, not tolerant to float-point errors.
     ///
-    /// TODO: 重构成Number类，并移除对于string和object的支持
-    /// todo: 分裂出新Variant类，并以内存块的形式支持任意类型的struct
+    /// TODO: 分裂出Number类，并移除对于string和object的支持
+    /// TODO: 重构成新Variant类，支持4字节内任意类型的struct，用object成员记录类型
     [JsonConverter(typeof(VariantJsonConverter))]
-    public readonly struct Variant : IEquatable<Variant>, IBoxlessConvertible, IFormattable {
+    public readonly struct Variant : IEquatable<Variant>, IConvertible, IBoxlessConvertible, IFormattable {
         public VariantType Type { get; }
 
         private readonly FractionSimple f;
@@ -34,49 +36,49 @@ namespace MaTech.Common.Data {
 
         public static Variant None => new Variant();
 
-        public Variant(bool value) {
+        private Variant(bool value) {
             Type = VariantType.Bool;
             f = new FractionSimple(value ? 1 : 0);
             d = f.Numerator;
             o = null;
         }
 
-        public Variant(int value) {
+        private Variant(int value) {
             Type = VariantType.Int;
             f = new FractionSimple(value);
             d = f.Numerator;
             o = null;
         }
 
-        public Variant(float value) {
+        private Variant(float value) {
             Type = VariantType.Float;
             f = FractionSimple.FromFloat(value);
             d = value;
             o = null;
         }
 
-        public Variant(double value) {
+        private Variant(double value) {
             Type = VariantType.Double;
             f = FractionSimple.FromFloat(value);
             d = value;
             o = null;
         }
 
-        public Variant(Fraction value) {
+        private Variant(Fraction value) {
             Type = VariantType.Fraction;
             f = value;
             d = f.Double;
             o = null;
         }
 
-        public Variant(FractionSimple value) {
+        private Variant(FractionSimple value) {
             Type = VariantType.FractionSimple;
             f = value;
             d = f.Double;
             o = null;
         }
 
-        public Variant(string value) {
+        private Variant(string value) {
             if (value == null) this = None;
             else {
                 Type = VariantType.String;
@@ -86,7 +88,7 @@ namespace MaTech.Common.Data {
             }
         }
 
-        public Variant(object value) {
+        private Variant(object value) {
             if (value == null) this = None;
             else {
                 // no type infer, object in object out
@@ -106,13 +108,28 @@ namespace MaTech.Common.Data {
         public string String => IsString ? (string)o : null; // no conversion by default
         public object Object => IsObject ? o : null; // no conversion by default
 
+        public bool IsNone => Type == VariantType.None;
+        public bool IsBoolean => Type == VariantType.Bool;
+        public bool IsInteger => Type == VariantType.Int;
+        public bool IsFloatPoint => Type == VariantType.Float || Type == VariantType.Double;
+        public bool IsFraction => Type == VariantType.Fraction || Type == VariantType.FractionSimple;
+        public bool IsNumeral => IsInteger || IsFloatPoint || IsFraction;
+        public bool IsNumeralOrBoolean => IsNumeral || IsBoolean;
+        public bool IsString => Type == VariantType.String;
+        public bool IsStringEmpty => IsString && string.IsNullOrEmpty((string)o);
+        public bool IsStringWhiteSpace => IsString && string.IsNullOrWhiteSpace((string)o);
+        public bool IsObject => Type == VariantType.Object;
+
+        public T To<T>(IFormatProvider provider = null) => BoxlessConvert.To<T>.From(this, provider);
+
         public override string ToString() => ToString(null, null);
 
-        public static Variant FromObject<T>(T value) => new Variant(value);
+        public static Variant FromObject<T>(T value) where T : class => new Variant(value);
         public T ToObject<T>() where T : class => ToObject() as T;
         public T GetObject<T>() where T : class => Object as T;
-
-        public T To<T>(IFormatProvider provider = null) => BoxlessConvert.To<T>.FromBoxlessConvertible(this, provider);
+        
+        public static Variant Box<T>(T value) where T : struct => new Variant((object)value);
+        public T Unbox<T>() where T : struct => Object is T t ? t : default;
 
         public static implicit operator Variant(bool value) => new Variant(value);
         public static implicit operator Variant(int value) => new Variant(value);
@@ -124,6 +141,24 @@ namespace MaTech.Common.Data {
 
         private static readonly Type typeFraction = typeof(Fraction);
         private static readonly Type typeFractionSimple = typeof(FractionSimple);
+        
+        private static readonly HashSet<Type> typesConvertible = new HashSet<Type>() {
+            typeof(bool),
+            typeof(sbyte),
+            typeof(short),
+            typeof(int),
+            typeof(long),
+            typeof(byte),
+            typeof(ushort),
+            typeof(uint),
+            typeof(ulong),
+            typeof(float),
+            typeof(double),
+            typeof(decimal),
+            typeof(string),
+            typeFraction,
+            typeFractionSimple,
+        };
 
         bool IConvertible.ToBoolean(IFormatProvider provider) => Bool;
 
@@ -149,29 +184,20 @@ namespace MaTech.Common.Data {
         object IConvertible.ToType(Type type, IFormatProvider provider) {
             if (type == typeFraction) return Fraction;
             if (type == typeFractionSimple) return FractionSimple;
-            if (IsObject) Convert.ChangeType(o, type, provider);
+            if (IsObject) return Convert.ChangeType(o, type, provider);
             throw new InvalidCastException($"Variant: Conversion to type {type} is undefined.");
         }
 
+        [Preserve]
+        public static bool IsBoxlessConvertibleToType(Type type) => typesConvertible.Contains(type);
+        
         T IBoxlessConvertible.ToType<T>(IFormatProvider provider) {
             var type = typeof(T);
             if (type == typeFraction) return BoxlessConvert.Identity<Fraction, T>(Fraction);
             if (type == typeFractionSimple) return BoxlessConvert.Identity<FractionSimple, T>(FractionSimple);
-            throw new InvalidCastException($"Variant: Boxless conversion to type {type} is undefined.");
+            if (IsObject) return (T)Convert.ChangeType(o, type, provider);
+            return BoxlessConvert.To<T>.FromIConvertible(this, provider); // fallback to IConvertible
         }
-
-        public bool IsNothing => Type == VariantType.None;
-        public bool IsBoolean => Type == VariantType.Bool;
-        public bool IsInteger => Type == VariantType.Int;
-        public bool IsFloatPoint => Type == VariantType.Float || Type == VariantType.Double;
-        public bool IsFraction => Type == VariantType.Fraction || Type == VariantType.FractionSimple;
-        public bool IsNumeral => IsInteger || IsFloatPoint || IsFraction;
-        public bool IsNumeralOrBoolean => IsNumeral || IsBoolean;
-        public bool IsNone => Type == VariantType.None;
-        public bool IsString => Type == VariantType.String;
-        public bool IsStringEmpty => IsString && string.IsNullOrEmpty((string)o);
-        public bool IsStringWhiteSpace => IsString && string.IsNullOrWhiteSpace((string)o);
-        public bool IsObject => Type == VariantType.Object;
 
         public TypeCode GetTypeCode() {
             switch (Type) {
@@ -212,12 +238,13 @@ namespace MaTech.Common.Data {
             case VariantType.Fraction: return Fraction.ToString();
             case VariantType.FractionSimple: return FractionSimple.ToString();
             case VariantType.String: return String;
-            case VariantType.Object: return Convert.ToString(o, formatProvider);
+            case VariantType.Object: return o is IFormattable of ? of.ToString(format, formatProvider) : o is IConvertible oc ? oc.ToString(formatProvider) : o.ToString();
             default: return "<Undefined Variant>";
             }
         }
 
-        public object ToObject() {
+        public object ToObject(bool avoidValueTypes = false) {
+            if (avoidValueTypes) return o;
             switch (Type) {
             case VariantType.Bool: return Bool;
             case VariantType.Int: return Int;
@@ -251,7 +278,7 @@ namespace MaTech.Common.Data {
 
         public override int GetHashCode() => GetHashCode(true);
         public int GetHashCode(bool withVariantType) {
-            if (withVariantType) return HashCode.Combine(GetHashCode(false), Type.GetHashCode());
+            if (withVariantType) return HashCode.Combine(GetHashCode(false), (int)Type);
             switch (Type) {
             case VariantType.Bool: return Bool.GetHashCode();
             case VariantType.Int: return Int.GetHashCode();
