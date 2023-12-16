@@ -53,7 +53,7 @@ namespace MaTech.Common.Data {
         [field: SerializeField]
         public TEnum Value { get; private set; }
 
-        public int UnderlyingValue => BoxlessConvert.To<int>.From(Value);
+        public readonly int UnderlyingValue => BoxlessConvert.To<int>.From(Value);
         
         public static implicit operator TEnum(EnumEx<TEnum> x) => x.Value;
         public static implicit operator EnumEx<TEnum>(TEnum x) => new EnumEx<TEnum>(x);
@@ -66,6 +66,10 @@ namespace MaTech.Common.Data {
     }
 
     public static class EnumEx {
+        public static TEnum WithIndex<TEnum>(string name, int index) where TEnum : unmanaged, Enum, IConvertible => EnumEx<TEnum>.DefineEnumWithIndex(name, index);
+        public static TEnum Ordered<TEnum>(string name) where TEnum : unmanaged, Enum, IConvertible => EnumEx<TEnum>.DefineOrderedEnum(name);
+        public static TEnum Unordered<TEnum>(string name) where TEnum : unmanaged, Enum, IConvertible => EnumEx<TEnum>.DefineUnorderedEnum(name);
+        
         public static int MaxUnorderedHashAttempts { get; set; } = 10;
     }
 }

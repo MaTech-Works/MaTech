@@ -18,17 +18,21 @@ namespace MaTech.Common.Data {
         [field: SerializeField]
         public int Value { get; private set; }
 
-        public bool IsEmpty => ID == 0;
+        public readonly bool IsEmpty => ID == 0;
 
-        public bool Is<T>() where T : unmanaged, Enum, IConvertible => GetEnumID<T>() == ID;
-        public EnumEx<T>? As<T>() where T : unmanaged, Enum, IConvertible => Is<T>() ? new EnumEx<T>(Value) : null;
-        public EnumEx<T> UncheckedCastTo<T>() where T : unmanaged, Enum, IConvertible => new EnumEx<T>(Value);
+        public readonly bool Is<T>() where T : unmanaged, Enum, IConvertible => GetEnumID<T>() == ID;
+        public readonly EnumEx<T>? As<T>() where T : unmanaged, Enum, IConvertible => Is<T>() ? new EnumEx<T>(Value) : null;
+        public readonly EnumEx<T> UncheckedCastTo<T>() where T : unmanaged, Enum, IConvertible => new EnumEx<T>(Value);
 
-        public static MetaEnum FromEnum<T>(T x) where T : unmanaged, Enum, IConvertible => new() { ID = GetEnumID<T>(), Value = BoxlessConvert.To<int>.From(x) };
+        public static MetaEnum FromEnum<T>(T x) where T : unmanaged, Enum, IConvertible => new(GetEnumID<T>(), BoxlessConvert.To<int>.From(x));
         public static MetaEnum FromEnum<T>(EnumEx<T> x) where T : unmanaged, Enum, IConvertible => FromEnum(x.Value);
-        public static MetaEnum FromValue(string name, int value) => new() { ID = GetEnumID(name), Value = value };
+        public static MetaEnum FromValue(string name, int value) => new(GetEnumID(name), value);
 
         public static MetaEnum Empty => new MetaEnum();
 
+        private MetaEnum(uint id, int value) {
+            ID = id;
+            Value = value;
+        }
     }
 }
