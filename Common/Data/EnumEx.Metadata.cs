@@ -150,7 +150,11 @@ namespace MaTech.Common.Data {
             mapNameToEnum = new Dictionary<string, TEnum>(predefinedNameToEnum);
             mapEnumToName = new Dictionary<TEnum, string>(predefinedEnumToName);
 
-            currentEnumIndex = namesAndValues.Max(t => BoxlessConvert.To<int>.From(t.value));
+            if (namesAndValues.Length == 0) {
+                currentEnumIndex = -1; // make next 0
+            } else {
+                currentEnumIndex = namesAndValues.Max(t => BoxlessConvert.To<int>.From(t.value));
+            }
         }
 
         private static string[]? cachedRegisteredNames;
