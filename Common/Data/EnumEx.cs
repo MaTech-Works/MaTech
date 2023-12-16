@@ -7,10 +7,7 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using MaTech.Common.Algorithm;
-using Standart.Hash.xxHash;
 using UnityEngine;
 
 namespace MaTech.Common.Data {
@@ -18,10 +15,28 @@ namespace MaTech.Common.Data {
     /// 支持运行时增加条目、无boxing的整型转型与hashcode、缓存了条目名称的enum扩展数据类型。
     /// </summary>
     /// <example>
-    /// 因为EnumEx与enum一样使用自增的整型值，推荐使用这种格式来扩展EnumEx，让序列化的结果保持一致：
+    /// EnumEx与enum一样使用自增的整型值，依照C#对于static项按文字顺序初始化的特性，可以使用这种格式来扩展EnumEx，让序列化的结果保持一致：
     /// <code>
-    /// public enum Foo {}
+    /// [InitializeEnumExForEditor]
     /// public static class ExtraFoo {
+    ///     public enum Foo { Bar = 573 }
+    ///     public static EnumEx&lt;Foo&gt; Hello { get; } = new("Hi"); // 574, actual name is "Hi"
+    ///     public static EnumEx&lt;Foo&gt; Lui { get; } = new("Lui", 765);
+    ///     public static EnumEx&lt;Foo&gt; Cat { get; } = new("Cat"); // 766
+    /// }
+    /// </code>
+    /// 也可以使用原始enum类型：
+    /// <code>
+    /// [InitializeEnumExForEditor]
+    /// public static class ExtraFoo {
+    ///     public enum Foo {}
+    ///     public static Foo Bar { get; } = EnumEx.Ordered&lt;Foo&gt;("Bar"); // 0
+    /// }
+    /// </code>
+    /// 也可以集中处理初始化：
+    /// <code>
+    /// public static class ExtraFoo {
+    ///     public enum Foo {}
     ///     public static EnumEx&lt;Foo&gt; Bar1 { get; private set; }
     ///     public static EnumEx&lt;Foo&gt; Bar2 { get; private set; }
     ///     [InitializeEnumExMethod]
