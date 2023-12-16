@@ -18,8 +18,8 @@ namespace MaTech.Common.Data {
         public static WrappedMetaVisitableFromEnum<TEnum> Wrap<TEnum>(IMetaVisitable<TEnum> meta) where TEnum : unmanaged, Enum, IConvertible => new(meta);
 
         public readonly struct WrappedMetaToEnum<TEnum> : IMeta<TEnum> where TEnum : unmanaged, Enum, IConvertible {
-            public bool Has(in EnumEx<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
-            public Variant Get(in EnumEx<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
+            public bool Has(in DataEnum<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
+            public Variant Get(in DataEnum<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
             
             public WrappedMetaToEnum(IMeta target) {
                 this.target = target;
@@ -40,10 +40,10 @@ namespace MaTech.Common.Data {
         }
 
         public readonly struct WrappedMetaTableToEnum<TEnum> : IMetaTable<TEnum> where TEnum : unmanaged, Enum, IConvertible {
-            public bool Has(in EnumEx<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
-            public Variant Get(in EnumEx<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
-            public bool Remove(in EnumEx<TEnum> key) => target.Remove(MetaEnum.FromEnum(key));
-            public bool TrySet(in EnumEx<TEnum> key, in Variant value, bool overwrite) => target.TrySet(MetaEnum.FromEnum(key), value, overwrite);
+            public bool Has(in DataEnum<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
+            public Variant Get(in DataEnum<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
+            public bool Remove(in DataEnum<TEnum> key) => target.Remove(MetaEnum.FromEnum(key));
+            public bool TrySet(in DataEnum<TEnum> key, in Variant value, bool overwrite) => target.TrySet(MetaEnum.FromEnum(key), value, overwrite);
             
             public WrappedMetaTableToEnum(IMetaTable target) {
                 this.target = target;
@@ -96,7 +96,7 @@ namespace MaTech.Common.Data {
             private readonly struct Wrapper<TVisitor> : IMetaVisitable<TEnum>.IVisitor where TVisitor : IMetaVisitable.IVisitor {
                 public readonly TVisitor visitor;
                 public Wrapper(ref TVisitor visitor) => this.visitor = visitor;
-                public Variant Visit(in EnumEx<TEnum> key, in Variant value) => visitor.Visit(MetaEnum.FromEnum(key), in value);
+                public Variant Visit(in DataEnum<TEnum> key, in Variant value) => visitor.Visit(MetaEnum.FromEnum(key), in value);
             }
         }
     }

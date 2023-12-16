@@ -68,7 +68,7 @@ namespace MaTech.Gameplay.Utils {
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(HitEvent))]
     public class HitEventDrawer : PropertyDrawer {
-        private readonly List<EnumEx<NoteHitAction>> cachedEnums = new List<EnumEx<NoteHitAction>>(10);
+        private readonly List<DataEnum<NoteHitAction>> cachedEnums = new List<DataEnum<NoteHitAction>>(10);
         private readonly Dictionary<NoteHitAction, bool> cachedEnumState = new Dictionary<NoteHitAction, bool>(10);
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
@@ -127,7 +127,7 @@ namespace MaTech.Gameplay.Utils {
 
         private void DrawHitResultCheckBoxes(Rect position, SerializedProperty property) {
             cachedEnums.Clear();
-            EnumEx<NoteHitAction>.GetValues(cachedEnums);
+            DataEnum<NoteHitAction>.GetValues(cachedEnums);
             
             foreach (var action in cachedEnums) {
                 cachedEnumState[action] = false;

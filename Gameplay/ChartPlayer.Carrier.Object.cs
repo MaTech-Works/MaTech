@@ -14,7 +14,7 @@ namespace MaTech.Gameplay {
     public partial class ChartPlayer {
         public enum ObjectType {
             Generic,
-            // 可以用EnumEx扩展enum
+            // 可以用 DataEnum 扩展定义
         }
         
         // TODO: 根据需求整理接口操作，目前留空仅作类型检查用
@@ -28,7 +28,7 @@ namespace MaTech.Gameplay {
             public IObjectVisual<TCarrier, TLayer>? visual = null;
 
             /// <summary> 用于在ObjectLayer分选Carrier，只有类型匹配的Carrier才会在ObjectLayer实例化 </summary>
-            public EnumEx<ObjectType> type;
+            public DataEnum<ObjectType> type;
             
             /// <summary> 物体的移动速度相对TimeCarrier.scroll的倍率 </summary>
             public double scaleY = 1;

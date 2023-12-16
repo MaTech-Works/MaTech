@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace MaTech.Common.Data {
     [AttributeUsage(AttributeTargets.Method)]
-    public class InitializeEnumExMethodAttribute
+    public class InitializeDataEnumMethodAttribute
 #if UNITY_EDITOR
         : InitializeOnLoadMethodAttribute 
 #else
@@ -22,12 +22,12 @@ namespace MaTech.Common.Data {
 #endif
     {
 #if !UNITY_EDITOR
-        public InitializeEnumExMethodAttribute() : base(RuntimeInitializeLoadType.SubsystemRegistration) { }
+        public InitializeDataEnumMethodAttribute() : base(RuntimeInitializeLoadType.SubsystemRegistration) { }
 #endif
     }
     
     [AttributeUsage(AttributeTargets.Class)]
-    public class InitializeEnumExForEditorAttribute
+    public class InitializeDataEnumForEditorAttribute
 #if UNITY_EDITOR
         : InitializeOnLoadAttribute 
 #else

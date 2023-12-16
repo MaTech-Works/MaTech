@@ -24,7 +24,7 @@ namespace MaTech.Common.Data {
 
             public bool IsValid => owner != null;
             public bool HasValueDict => inner != null;
-            public bool HasValueDictOfType<T>() => inner is Dictionary<EnumEx<TEnum>, T>;
+            public bool HasValueDictOfType<T>() => inner is Dictionary<DataEnum<TEnum>, T>;
             public Type? TypeOfValueDict => inner?.GetType();
             
             public ValueDict<T> Dereference<T>() {
@@ -37,20 +37,20 @@ namespace MaTech.Common.Data {
                 }
                 #endif
                 
-                return new ValueDict<T>((Dictionary<EnumEx<TEnum>, T>?)inner);
+                return new ValueDict<T>((Dictionary<DataEnum<TEnum>, T>?)inner);
             }
         }
         
         private readonly struct ValueDict<T> {
-            private readonly Dictionary<EnumEx<TEnum>, T>? inner;
+            private readonly Dictionary<DataEnum<TEnum>, T>? inner;
             
-            public ValueDict(Dictionary<EnumEx<TEnum>, T>? dict) { inner = dict; }
+            public ValueDict(Dictionary<DataEnum<TEnum>, T>? dict) { inner = dict; }
             public static ValueDict<T> Empty => new ValueDict<T>(null);
 
             // non-value methods -- test nullable
-            public bool Has(EnumEx<TEnum> key) => inner?.ContainsKey(key) ?? false;
-            public bool TryGet(EnumEx<TEnum> key, out T? result) => inner != null ? inner.TryGetValue(key, out result) : ((result = default), false).Item2;
-            public bool Remove(EnumEx<TEnum> key) => inner?.Remove(key) ?? false;
+            public bool Has(DataEnum<TEnum> key) => inner?.ContainsKey(key) ?? false;
+            public bool TryGet(DataEnum<TEnum> key, out T? result) => inner != null ? inner.TryGetValue(key, out result) : ((result = default), false).Item2;
+            public bool Remove(DataEnum<TEnum> key) => inner?.Remove(key) ?? false;
             
             public int Collect(ICollection<T> outList) {
                 if (inner == null) return 0;
@@ -61,19 +61,19 @@ namespace MaTech.Common.Data {
             }
 
             // value methods -- assert not null
-            public T Set(EnumEx<TEnum> key, in T value) => inner![key] = value;
-            public T GetOrSet(EnumEx<TEnum> key, in T value) => inner!.GetOrAdd(key, value);
+            public T Set(DataEnum<TEnum> key, in T value) => inner![key] = value;
+            public T GetOrSet(DataEnum<TEnum> key, in T value) => inner!.GetOrAdd(key, value);
         }
 
         private readonly Dictionary<Type, ValueDictHandle> dictHandlesByType = new Dictionary<Type, ValueDictHandle>();
         
         private ValueDict<T> ValueDictOf<T>() => ValueDictHandleOf<T>().Dereference<T>();
-        private ValueDict<T> ValueDictOf<T>(EnumEx<TEnum> keyToCheck) {
+        private ValueDict<T> ValueDictOf<T>(DataEnum<TEnum> keyToCheck) {
             if (!CheckConstraintTypeOfKey<T>(keyToCheck)) return ValueDict<T>.Empty;
             return ValueDictHandleOf<T>().Dereference<T>();
         }
 
-        private ValueDict<T> ValueDictOf<T>(EnumEx<TEnum> keyToCheck, in T? valueToCheck) {
+        private ValueDict<T> ValueDictOf<T>(DataEnum<TEnum> keyToCheck, in T? valueToCheck) {
             if (!CheckConstraintTypeOfKey<T>(keyToCheck)) return ValueDict<T>.Empty;
             if (!CheckConstraintValueOfKey<T>(keyToCheck, valueToCheck)) return ValueDict<T>.Empty;
             return WritableValueDictHandleOf<T>().Dereference<T>();
@@ -90,7 +90,7 @@ namespace MaTech.Common.Data {
         private ValueDictHandle WritableValueDictHandleOf<T>() {
             Type type = typeof(T);
             if (!dictHandlesByType.TryGetValue(type, out var handle) || !handle.HasValueDict) {
-                dictHandlesByType[type] = handle = new ValueDictHandle(this, new Dictionary<EnumEx<TEnum>, T>());
+                dictHandlesByType[type] = handle = new ValueDictHandle(this, new Dictionary<DataEnum<TEnum>, T>());
             }
             return handle;
         }

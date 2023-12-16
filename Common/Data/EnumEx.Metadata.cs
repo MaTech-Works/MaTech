@@ -21,7 +21,7 @@ using UnityEngine.Scripting;
 // ReSharper disable StaticMemberInGenericType
 
 namespace MaTech.Common.Data {
-    public partial struct EnumEx<TEnum> {
+    public partial struct DataEnum<TEnum> {
         private static readonly ReaderWriterLockSlim lockMetadata = new ReaderWriterLockSlim();
         
         private static readonly Type typeEnum = typeof(TEnum);
@@ -42,7 +42,7 @@ namespace MaTech.Common.Data {
             return mapNameToEnum.Count;
         }
         
-        public static int GetValues(ICollection<EnumEx<TEnum>> outValues) {
+        public static int GetValues(ICollection<DataEnum<TEnum>> outValues) {
             using var lockRAII = ReaderLockRAII.EnterRead(lockMetadata);
             foreach (var value in mapNameToEnum.Values)
                 outValues.Add(value);
@@ -68,7 +68,7 @@ namespace MaTech.Common.Data {
                 if (currentEnumIndex == maxEnumIndex) {
                     var maxEnum = BoxlessConvert.To<TEnum>.From(maxEnumIndex);
                     if (mapEnumToName.TryGetValue(maxEnum, out var maxEnumName)) {
-                        Debug.LogError($"[EnumEx] Out of ordered indices for enum {typeof(TEnum)}; defining enum {name} to max underlying value {maxEnumIndex:X}, overlapping with existing {maxEnumName}.\n" +
+                        Debug.LogError($"[DataEnum] Out of ordered indices for enum {typeof(TEnum)}; defining enum {name} to max underlying value {maxEnumIndex:X}, overlapping with existing {maxEnumName}.\n" +
                             "Since it's unlikely to use up so many indices with unique enum names, are there an enum defined with underlying value close to max? Please avoid such use cases.");
                     }
                 } else {
@@ -80,7 +80,7 @@ namespace MaTech.Common.Data {
 
         public static TEnum DefineUnorderedEnum(string name) {
             return DefineEnum_Private(name, 0, (name, _) => {
-                int maxAttempts = EnumEx.MaxUnorderedHashAttempts;
+                int maxAttempts = DataEnum.MaxUnorderedHashAttempts;
                 
                 #if UNITY_EDITOR || MATECH_TEST
                 var listConflictNameValue = new List<(int index, string name)>(maxAttempts);
@@ -95,7 +95,7 @@ namespace MaTech.Common.Data {
                     
                     if (!mapEnumToName.ContainsKey(value)) {
                         if (seed != 0) {
-                            Debug.Log($"[EnumEx] Hash collision detected. Unordered enum {name} did {listConflictNameValue.Count} attempts before finding a unique hash.{CollisionText()}");
+                            Debug.Log($"[DataEnum] Hash collision detected. Unordered enum {name} did {listConflictNameValue.Count} attempts before finding a unique hash.{CollisionText()}");
                         }
                     }
                     
@@ -104,7 +104,7 @@ namespace MaTech.Common.Data {
                     #endif
                 }
                 
-                Debug.LogError($"[EnumEx] Too many hash collisions. Unordered enum {name} did {maxAttempts} attempts before finding a unique hash. -1 will be used for this enum name; gameplay features depending on it might break.{CollisionText()}");
+                Debug.LogError($"[DataEnum] Too many hash collisions. Unordered enum {name} did {maxAttempts} attempts before finding a unique hash. -1 will be used for this enum name; gameplay features depending on it might break.{CollisionText()}");
                 return BoxlessConvert.To<TEnum>.From(-1);
             });
         }
@@ -127,16 +127,16 @@ namespace MaTech.Common.Data {
             }
         }
         
-        static EnumEx() {
+        static DataEnum() {
             var enumType = typeof(TEnum);
             var underlyingType = Enum.GetUnderlyingType(enumType);
             
             if (underlyingType == typeof(bool)) {
-                throw new NotSupportedException($"[EnumEx] Unsupported boolean-backed enum type [{enumType}]; cannot call `Enum.GetNames()` on it. It doesn't make sense to extend a boolean-backed enum type.");
+                throw new NotSupportedException($"[DataEnum] Unsupported boolean-backed enum type [{enumType}]; cannot call `Enum.GetNames()` on it. It doesn't make sense to extend a boolean-backed enum type.");
             }
             if (underlyingType != typeof(int)) unsafe {
-                if (!EnumExMaxIndexLookUp.ofTypes.TryGetValue(underlyingType, out maxEnumIndex)) {
-                    Debug.LogError($"[EnumEx] Cannot determine max index for underlying type [{underlyingType}] of enum type [{enumType}]. Value auto-increment will be done in int range and might break with integer overflow.");
+                if (!DataEnumMaxIndexLookUp.ofTypes.TryGetValue(underlyingType, out maxEnumIndex)) {
+                    Debug.LogError($"[DataEnum] Cannot determine max index for underlying type [{underlyingType}] of enum type [{enumType}]. Value auto-increment will be done in int range and might break with integer overflow.");
                 }
             }
             
@@ -160,7 +160,7 @@ namespace MaTech.Common.Data {
         private static string[]? cachedRegisteredNames;
         
         // DO NOT MODIFY OR REMOVE THIS METHOD unless you know what you are doing.
-        // Has reflection usage in EnumExDrawer.
+        // Has reflection usage in DataEnumDrawer.
         [Preserve]
         public static string[] GetRegisteredNames() {
             if (cachedRegisteredNames == null || cachedRegisteredNames.Length != mapNameToEnum.Count) {
@@ -177,7 +177,7 @@ namespace MaTech.Common.Data {
         }
     }
 
-    internal static class EnumExMaxIndexLookUp {
+    internal static class DataEnumMaxIndexLookUp {
         public static readonly Dictionary<Type, int> ofTypes = new() {
             [typeof(sbyte)] = sbyte.MaxValue,
             [typeof(byte)] = byte.MaxValue,

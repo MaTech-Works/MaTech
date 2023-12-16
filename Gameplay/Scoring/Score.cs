@@ -12,7 +12,7 @@ using MaTech.Gameplay.Time;
 namespace MaTech.Gameplay.Scoring {
     public enum ScoreType {
         Score, Combo, Accuracy, HP, IsFailed, IsFullCombo, IsAllPerfect
-        // Tips: 可以使用 EnumEx 来扩展额外的 ScoreType
+        // Tips: 可以使用 DataEnum 来扩展额外的 ScoreType
     }
     
     public interface IScore {
@@ -22,7 +22,7 @@ namespace MaTech.Gameplay.Scoring {
         void HandleScoreResult(HitResult result, TimeUnit judgeTime);
         
         void GetSnapshot(MetaTableGeneric<ScoreType> outScoreSnapshot);
-        Variant GetValue(EnumEx<ScoreType> scoreType);
+        Variant GetValue(DataEnum<ScoreType> scoreType);
         
         bool IsScoreAuthentic { get; }
     }

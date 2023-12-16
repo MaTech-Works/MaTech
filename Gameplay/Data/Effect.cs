@@ -48,11 +48,11 @@ namespace MaTech.Gameplay.Data {
         /// </summary>
         Chorus,
         
-        // Tips: 可以使用 EnumEx 来扩展额外的 EffectType
+        // Tips: 可以使用 DataEnum 来扩展额外的 EffectType
     }
     
     public class Effect : TimedObjectRanged {
-        public readonly EnumEx<EffectType> type;
+        public readonly DataEnum<EffectType> type;
         public readonly Variant value;
         
         // TODO: 实现插值方法
@@ -64,7 +64,7 @@ namespace MaTech.Gameplay.Data {
         public Variant ValueAt(TimeUnit time) => TimeUnit.IsInRangeByValue(time, Start.Time, End.Time) ? value : Variant.None;
         public Variant ValueAt(BeatUnit beat) => BeatUnit.IsInRangeByFraction(beat, Start.Beat, End.Beat) ? value : Variant.None;
 
-        public Effect(EnumEx<EffectType> type, in Variant value, ITimePoint? injectedStart = null, ITimePoint? injectedEnd = null)
+        public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? injectedStart = null, ITimePoint? injectedEnd = null)
             : base(injectedStart, injectedEnd) {
             this.type = type;
             this.value = value;

@@ -18,10 +18,10 @@ namespace MaTech.Common.Data {
         [TestInitializeOnLoadMethod]
         internal static void Example() {
             Foo bar0 = Foo.Bar;
-            var bar1 = new EnumEx<Foo>(bar0); // prints as "Bar", underlying enum value is 0 (Foo.Bar)
-            var bar2 = new EnumEx<Foo>("Bar"); // prints as "Bar", underlying enum value is 0 (Foo.Bar)
-            var baz = new EnumEx<Foo>("Baz"); // prints as "Baz", underlying enum value is 1
-            Foo qux = new EnumEx<Foo>("Qux"); // prints as 2; new EnumEx<Foo>(qux) prints as "Qux"
+            var bar1 = new DataEnum<Foo>(bar0); // prints as "Bar", underlying enum value is 0 (Foo.Bar)
+            var bar2 = new DataEnum<Foo>("Bar"); // prints as "Bar", underlying enum value is 0 (Foo.Bar)
+            var baz = new DataEnum<Foo>("Baz"); // prints as "Baz", underlying enum value is 1
+            Foo qux = new DataEnum<Foo>("Qux"); // prints as 2; new DataEnum<Foo>(qux) prints as "Qux"
 
             { // Basics
                 var table = new MetaTableGeneric<Foo>();

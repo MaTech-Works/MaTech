@@ -10,7 +10,7 @@ using MaTech.Common.Algorithm;
 
 namespace MaTech.Common.Data {
     public partial struct MetaEnum : IEquatable<MetaEnum>, IFormattable {
-        // TODO: implement IBoxlessConvertible to EnumEx
+        // TODO: implement IBoxlessConvertible to DataEnum
         
         public override string ToString() => ToString("X", null);
         public string ToString(string format, IFormatProvider formatProvider) {

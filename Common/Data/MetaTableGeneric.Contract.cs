@@ -17,11 +17,11 @@ namespace MaTech.Common.Data {
         }
         public interface IConstraintTypeOfKey : IConstraint {
             /// <summary> 检查类型是否合理，在实际读写时检查（如Select方法在进行具体的Get/Set前不会触发检查） </summary>
-            bool IsValidTypeOfKey<T>(EnumEx<TEnum> key);
+            bool IsValidTypeOfKey<T>(DataEnum<TEnum> key);
         }
         public interface IConstraintValueOfKey : IConstraint {
             /// <summary> 检查值是否合理，仅在写入时检查 </summary>
-            bool IsValidValueOfKey<T>(EnumEx<TEnum> key, in T value);
+            bool IsValidValueOfKey<T>(DataEnum<TEnum> key, in T value);
         }
 
         public partial struct Selector<TContext, TEnum0> {
@@ -45,7 +45,7 @@ namespace MaTech.Common.Data {
         // TODO: 泛型方法在IL2CPP环境下会被strip掉，需替换成Variant
         #if UNITY_EDITOR || (!ENABLE_IL2CPP && DEVELOPMENT_BUILD)
 
-        private bool CheckConstraintTypeOfKey<T>(EnumEx<TEnum> keyToCheck) {
+        private bool CheckConstraintTypeOfKey<T>(DataEnum<TEnum> keyToCheck) {
             if (Constraint is IConstraintTypeOfKey contractTypeOfKey) {
                 if (!contractTypeOfKey.IsValidTypeOfKey<T>(keyToCheck)) {
                     Debug.LogError($"[MetaTableGeneric] Contract violated: type [{typeof(T).FullName}] is not allowed for key [{keyToCheck}].");
@@ -56,7 +56,7 @@ namespace MaTech.Common.Data {
             return true;
         }
         
-        private bool CheckConstraintValueOfKey<T>(EnumEx<TEnum> keyToCheck, in T? valueToCheck) {
+        private bool CheckConstraintValueOfKey<T>(DataEnum<TEnum> keyToCheck, in T? valueToCheck) {
             if (Constraint is IConstraintValueOfKey contractValueOfKey) {
                 if (!contractValueOfKey.IsValidValueOfKey(keyToCheck, valueToCheck)) {
                     Debug.LogError($"[MetaTableGeneric] Contract violated: value [{valueToCheck?.ToString()}] (of type [{typeof(T).FullName}]) is not allowed for key [{keyToCheck}].");
@@ -68,8 +68,8 @@ namespace MaTech.Common.Data {
         }
 
         #else
-        private bool CheckConstraintTypeOfKey<T>(EnumEx<TEnum> keyToCheck) => true;
-        private bool CheckConstraintValueOfKey<T>(EnumEx<TEnum> keyToCheck, in T valueToCheck) => true;
+        private bool CheckConstraintTypeOfKey<T>(DataEnum<TEnum> keyToCheck) => true;
+        private bool CheckConstraintValueOfKey<T>(DataEnum<TEnum> keyToCheck, in T valueToCheck) => true;
         #endif
     }
 

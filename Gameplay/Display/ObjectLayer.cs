@@ -50,7 +50,7 @@ namespace MaTech.Gameplay.Display {
         
         [Serializable]
         private class PrefabEntry {
-            public EnumEx<ObjectType> type = ObjectType.Generic;
+            public DataEnum<ObjectType> type = ObjectType.Generic;
             public GameObject? prefab = null;
             public int bufferCountInPool = 50;
             public int maxInstantiationPerFrame = 1;
@@ -73,7 +73,7 @@ namespace MaTech.Gameplay.Display {
                 bufferedGameObjects.Add(InstantiateGameObject());
             }
 
-            public EnumEx<ObjectType> PrefabLayerType => prefabEntry.type;
+            public DataEnum<ObjectType> PrefabLayerType => prefabEntry.type;
 
             public int MaxInstantiationPerFrame => prefabEntry.maxInstantiationPerFrame;
             public int InstantiationCountThisFrame => instantiationCountThisFrame;
@@ -125,7 +125,7 @@ namespace MaTech.Gameplay.Display {
             }
         }
         
-        private readonly Dictionary<EnumEx<ObjectType>, PrefabPool> pools = new Dictionary<EnumEx<ObjectType>, PrefabPool>();
+        private readonly Dictionary<DataEnum<ObjectType>, PrefabPool> pools = new Dictionary<DataEnum<ObjectType>, PrefabPool>();
 
         #endregion
         
@@ -437,7 +437,7 @@ namespace MaTech.Gameplay.Display {
 
         private const double epsilonK = 1.000001;
         
-        private bool IsLayerTypeValid(EnumEx<ObjectType> type) {
+        private bool IsLayerTypeValid(DataEnum<ObjectType> type) {
             return pools.ContainsKey(type);
         }
 
