@@ -8,6 +8,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace MaTech.Common.Algorithm {
@@ -15,43 +19,53 @@ namespace MaTech.Common.Algorithm {
         // Here we implement factories of casting delegates for IConvertible and IBoxlessConvertible.
         
         private static class BoxlessConvertibleCasterFactory<TSource> where TSource : IBoxlessConvertible {
+            private static bool IsBoxlessConvertibleToType<TResult>() {
+                try {
+                    var method = typeof(TSource).GetMethod("IsBoxlessConvertibleToType");
+                    if (method == null) return true; // undefined means all supported
+                    var constraints = method.GetGenericArguments()[0].GetGenericParameterConstraints();
+                    if (constraints.Any(constraint => !constraint.IsAssignableFrom(typeof(TResult)))) {
+                        return false; // failed constraint means not supported
+                    }
+                    var methodSpecific = method.MakeGenericMethod(typeof(TResult));
+                    return (bool)methodSpecific.Invoke(null, null);
+                } catch (Exception e) {
+                    throw new AmbiguousImplementationException($"[BoxlessConvert] Wrong definition of `public static bool IsBoxlessConvertibleToType<T>()` in type {typeof(TSource)} implementing IBoxlessConvertible.", e);
+                }
+            }
+            
             [Preserve]
-            public static Caster<TSource, TResult> Create<TResult>() {
-                return delegate (in TSource source, IFormatProvider? provider) { return source.ToType<TResult>(provider); };
+            public static Caster<TSource, TResult>? Create<TResult>() {
+                if (!IsBoxlessConvertibleToType<TResult>()) return null;
+                return (in TSource source, IFormatProvider? provider) => source.ToType<TResult>(provider);
             }
         }
 
         private static class ConvertibleCasterFactory<TSource> where TSource : IConvertible {
             private static readonly Dictionary<Type, Func<Delegate>> dict = new Dictionary<Type, Func<Delegate>>{
-                { typeBoolean, () => new Caster<TSource, Boolean>(delegate (in TSource source, IFormatProvider? provider) { return source.ToBoolean(provider); }) },
-                { typeChar, () => new Caster<TSource, Char>(delegate (in TSource source, IFormatProvider? provider) { return source.ToChar(provider); }) },
+                { typeBoolean, () => new Caster<TSource, Boolean>((in TSource source, IFormatProvider? provider) => source.ToBoolean(provider)) },
+                { typeChar, () => new Caster<TSource, Char>((in TSource source, IFormatProvider? provider) => source.ToChar(provider)) },
 
-                { typeSByte, () => new Caster<TSource, SByte>(delegate (in TSource source, IFormatProvider? provider) { return source.ToSByte(provider); }) },
-                { typeByte, () => new Caster<TSource, Byte>(delegate (in TSource source, IFormatProvider? provider) { return source.ToByte(provider); }) },
-                { typeInt16, () => new Caster<TSource, Int16>(delegate (in TSource source, IFormatProvider? provider) { return source.ToInt16(provider); }) },
-                { typeUInt16, () => new Caster<TSource, UInt16>(delegate (in TSource source, IFormatProvider? provider) { return source.ToUInt16(provider); }) },
-                { typeInt32, () => new Caster<TSource, Int32>(delegate (in TSource source, IFormatProvider? provider) { return source.ToInt32(provider); }) },
-                { typeUInt32, () => new Caster<TSource, UInt32>(delegate (in TSource source, IFormatProvider? provider) { return source.ToUInt32(provider); }) },
-                { typeInt64, () => new Caster<TSource, Int64>(delegate (in TSource source, IFormatProvider? provider) { return source.ToInt64(provider); }) },
-                { typeUInt64, () => new Caster<TSource, UInt64>(delegate (in TSource source, IFormatProvider? provider) { return source.ToUInt64(provider); }) },
+                { typeSByte, () => new Caster<TSource, SByte>((in TSource source, IFormatProvider? provider) => source.ToSByte(provider)) },
+                { typeByte, () => new Caster<TSource, Byte>((in TSource source, IFormatProvider? provider) => source.ToByte(provider)) },
+                { typeInt16, () => new Caster<TSource, Int16>((in TSource source, IFormatProvider? provider) => source.ToInt16(provider)) },
+                { typeUInt16, () => new Caster<TSource, UInt16>((in TSource source, IFormatProvider? provider) => source.ToUInt16(provider)) },
+                { typeInt32, () => new Caster<TSource, Int32>((in TSource source, IFormatProvider? provider) => source.ToInt32(provider)) },
+                { typeUInt32, () => new Caster<TSource, UInt32>((in TSource source, IFormatProvider? provider) => source.ToUInt32(provider)) },
+                { typeInt64, () => new Caster<TSource, Int64>((in TSource source, IFormatProvider? provider) => source.ToInt64(provider)) },
+                { typeUInt64, () => new Caster<TSource, UInt64>((in TSource source, IFormatProvider? provider) => source.ToUInt64(provider)) },
 
-                { typeSingle, () => new Caster<TSource, Single>(delegate (in TSource source, IFormatProvider? provider) { return source.ToSingle(provider); }) },
-                { typeDouble, () => new Caster<TSource, Double>(delegate (in TSource source, IFormatProvider? provider) { return source.ToDouble(provider); }) },
-                { typeDecimal, () => new Caster<TSource, Decimal>(delegate (in TSource source, IFormatProvider? provider) { return source.ToDecimal(provider); }) },
+                { typeSingle, () => new Caster<TSource, Single>((in TSource source, IFormatProvider? provider) => source.ToSingle(provider)) },
+                { typeDouble, () => new Caster<TSource, Double>((in TSource source, IFormatProvider? provider) => source.ToDouble(provider)) },
+                { typeDecimal, () => new Caster<TSource, Decimal>((in TSource source, IFormatProvider? provider) => source.ToDecimal(provider)) },
 
-                { typeDateTime, () => new Caster<TSource, DateTime>(delegate (in TSource source, IFormatProvider? provider) { return source.ToDateTime(provider); }) },
-                { typeString, () => new Caster<TSource, String>(delegate (in TSource source, IFormatProvider? provider) { return source.ToString(provider); }) },
+                { typeDateTime, () => new Caster<TSource, DateTime>((in TSource source, IFormatProvider? provider) => source.ToDateTime(provider)) },
+                { typeString, () => new Caster<TSource, String>((in TSource source, IFormatProvider? provider) => source.ToString(provider)) },
             };
-
-            private static readonly FactoryWithStricterConstraint<TSource> factoryBoxless = new FactoryWithStricterConstraint<TSource>(typeof(BoxlessConvertibleCasterFactory<>));
 
             [Preserve]
             public static Caster<TSource, TResult>? Create<TResult>() {
-                if (SimpleTypeCasterFactory<TSource>.Create<TResult>() is Caster<TSource, TResult> caster)
-                    return caster;
-                if (dict.TryGetValue(typeof(TResult), out var factoryFunc))
-                    return (Caster<TSource, TResult>)factoryFunc();
-                return factoryBoxless.CreateIfValid<TResult>();
+                return dict.TryGetValue(typeof(TResult), out var factoryFunc) ? (Caster<TSource, TResult>)factoryFunc() : null;
             }
         }
     }

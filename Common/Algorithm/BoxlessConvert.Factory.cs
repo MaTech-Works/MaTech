@@ -7,6 +7,7 @@
 #nullable enable
 
 using System;
+using System.Linq;
 using System.Reflection;
 using UnityEngine.Scripting;
 
@@ -18,13 +19,15 @@ namespace MaTech.Common.Algorithm {
             private static readonly FactoryWithStricterConstraint<TSource> factoryEnum = new FactoryWithStricterConstraint<TSource>(typeof(EnumCasterFactory<>));
             private static readonly FactoryWithStricterConstraint<TSource> factorySimpleType = new FactoryWithStricterConstraint<TSource>(typeof(SimpleTypeCasterFactory<>));
             private static readonly FactoryWithStricterConstraint<TSource> factoryConvertible = new FactoryWithStricterConstraint<TSource>(typeof(ConvertibleCasterFactory<>));
+            private static readonly FactoryWithStricterConstraint<TSource> factoryBoxless = new FactoryWithStricterConstraint<TSource>(typeof(BoxlessConvertibleCasterFactory<>));
 
             [Preserve]
             public static Caster<TSource, TResult>? Create<TResult>() {
                 return factoryEnum.CreateIfValid<TResult>()
                     ?? CasterFactory<TResult>.factoryEnum.CreateReversedIfValid<TSource>()
                     ?? factorySimpleType.CreateIfValid<TResult>()
-                    ?? factoryConvertible.CreateIfValid<TResult>();
+                    ?? factoryConvertible.CreateIfValid<TResult>()
+                    ?? factoryBoxless.CreateIfValid<TResult>();
             }
         }
         
@@ -37,13 +40,11 @@ namespace MaTech.Common.Algorithm {
             private readonly MethodInfo? methodCreateReversed;
 
             public FactoryWithStricterConstraint(Type typeGenericFactory) {
-                var contraints = typeGenericFactory.GetGenericArguments()[0].GetGenericParameterConstraints();
-                foreach (var constraint in contraints) {
-                    if (!constraint.IsAssignableFrom(typeof(TSource))) {
-                        methodCreate = null;
-                        methodCreateReversed = null;
-                        return;
-                    }
+                var constraints = typeGenericFactory.GetGenericArguments()[0].GetGenericParameterConstraints();
+                if (constraints.Any(constraint => !constraint.IsAssignableFrom(typeof(TSource)))) {
+                    methodCreate = null;
+                    methodCreateReversed = null;
+                    return;
                 }
                 var typeSpecific = typeGenericFactory.MakeGenericType(typeof(TSource));
                 methodCreate = typeSpecific.GetMethod("Create");

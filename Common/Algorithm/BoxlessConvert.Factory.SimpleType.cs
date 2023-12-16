@@ -12,7 +12,8 @@ using UnityEngine.Scripting;
 
 namespace MaTech.Common.Algorithm {
     public static partial class BoxlessConvert {
-        // Here we implement factories of casting delegates for simple value types
+        // Here we implement factories of casting delegates for value types supported by Convert.ToXXX().
+        // Notice that this supports all built-in value types except for IntPtr and UIntPtr.
 
         private static readonly Type typeBoolean = typeof(Boolean);
         private static readonly Type typeChar = typeof(Char);
@@ -27,8 +28,8 @@ namespace MaTech.Common.Algorithm {
         private static readonly Type typeSingle = typeof(Single);
         private static readonly Type typeDouble = typeof(Double);
         private static readonly Type typeDecimal = typeof(Decimal);
-        private static readonly Type typeDateTime = typeof(DateTime); // unsupported here, use IdentityCast instead
-        private static readonly Type typeString = typeof(String); // unsupported here, use ConvertibleCast instead
+        private static readonly Type typeDateTime = typeof(DateTime); // unsupported here, do IdentityCast instead
+        private static readonly Type typeString = typeof(String); // unsupported here, do ToStringCasterFactory instead
 
         // Comments from https://referencesource.microsoft.com/#mscorlib/system/convert.cs
         //
@@ -59,7 +60,9 @@ namespace MaTech.Common.Algorithm {
         // DateTime                                                        x   x
         // String      x   x   x   x   x   x   x   x   x   x   x   x   x   x   x
         // ----------------------------------------------------------------------
-        private static readonly Dictionary<(Type, Type), Func<Delegate>> matrixSimpleTypeCasterFactoryFunc = new Dictionary<(Type, Type), Func<Delegate>> { // 13 x 13
+        
+        // 13 x 13, no DateTime and String
+        private static readonly Dictionary<(Type, Type), Func<Delegate>> matrixSimpleTypeCasterFactoryFunc = new Dictionary<(Type, Type), Func<Delegate>> {
             { (typeBoolean, typeBoolean), () => new Caster<Boolean, Boolean>((in Boolean source, IFormatProvider? provider) => Convert.ToBoolean(source)) },
             //{ (typeBoolean, typeChar), () => new Caster<Boolean, Char>((in Boolean source, IFormatProvider? provider) => Convert.ToChar(source)) },
             { (typeBoolean, typeSByte), () => new Caster<Boolean, SByte>((in Boolean source, IFormatProvider? provider) => Convert.ToSByte(source)) },

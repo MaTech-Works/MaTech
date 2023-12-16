@@ -7,22 +7,42 @@
 #nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
+using Optional;
+
+// ReSharper disable StaticMemberInGenericType
 
 namespace MaTech.Common.Algorithm {
     public static partial class BoxlessConvert {
         // Here we do book-keeping of casting delegates on each pair of casted types
 
+        // ReSharper disable once TypeParameterCanBeVariant
         private delegate TResult Caster<TSource, TResult>(in TSource source, IFormatProvider? provider);
 
         private static Caster<TSource, TResult> CreateIdentityCaster<TSource, TResult>() {
-            return (Caster<TSource, TResult>)(Delegate)(Caster<TSource, TSource>) delegate (in TSource source, IFormatProvider? provider) { return source; };
+            return (Caster<TSource, TResult>)(Delegate)(Caster<TSource, TSource>)((in TSource source, IFormatProvider? provider) => source);
         }
 
-        private static TResult InvokeCaster<TSource, TResult>(Caster<TSource, TResult> caster, in TSource source, IFormatProvider? provider = null) {
-            return caster.Invoke(source, provider);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Option<TResult, Exception> InvokeCaster<TSource, TResult>(Caster<TSource, TResult>? caster, in TSource? source, IFormatProvider? provider = null) {
+            if (source is null) return FailedConversion<TSource, TResult>.NullSource;
+            if (caster is null) return FailedConversion<TSource, TResult>.Unsupported;
+            try {
+                return Option.Some<TResult, Exception>(caster.Invoke(source, provider));
+            } catch (Exception e) {
+                return FailedConversion<TSource, TResult>.Caught(e);
+            }
         }
-        private static TResult? InvokeCasterNullable<TSource, TResult>(Caster<TSource, TResult>? caster, in TSource source, IFormatProvider? provider = null) {
-            return caster is null ? default : caster.Invoke(source, provider);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Option<TResult, Exception> InvokeIdentityCaster<TSource, TResult>(in TSource? source) {
+            var caster = IdentityCast<TSource, TResult>.caster;
+            if (caster is null) return FailedConversion<TSource, TResult>.NotIdentity;
+            if (source is null) return Option.Some<TResult, Exception>(default!);
+            try {
+                return Option.Some<TResult, Exception>(caster.Invoke(source, null));
+            } catch (Exception e) {
+                return FailedConversion<TSource, TResult>.Caught(e);
+            }
         }
 
         private static class IdentityCast<TSource, TResult> {
@@ -36,7 +56,28 @@ namespace MaTech.Common.Algorithm {
             public static readonly Caster<TSource, TResult>? caster = IdentityCast<TSource, TResult>.caster ?? ConvertibleCasterFactory<TSource>.Create<TResult>();
         }
         private static class BoxlessConvertibleCast<TSource, TResult> where TSource : IBoxlessConvertible {
-            public static readonly Caster<TSource, TResult> caster = IdentityCast<TSource, TResult>.caster ?? BoxlessConvertibleCasterFactory<TSource>.Create<TResult>();
+            public static readonly Caster<TSource, TResult>? caster = IdentityCast<TSource, TResult>.caster ?? BoxlessConvertibleCasterFactory<TSource>.Create<TResult>();
+        }
+
+        private static class FailedConversion<TSource, TResult> {
+            public static Option<TResult, Exception> Caught(Exception e) => Option.None<TResult, Exception>(e);
+            public static Option<TResult, Exception> Unsupported => Option.None<TResult, Exception>(new InvalidCastException(
+                $"[BoxlessConvert] Conversion from {nameof(TSource)} to {nameof(TResult)} is unsupported. Implement IBoxlessConvertible and/or IConvertible to support boxless conversion."));
+            public static Option<TResult, Exception> NotIdentity => Option.None<TResult, Exception>(new InvalidCastException(
+                $"[BoxlessConvert] Invalid identity cast from {nameof(TSource)} to {nameof(TResult)}; they are not the same type."));
+            public static Option<TResult, Exception> NullSource => Option.None<TResult, Exception>(new InvalidCastException(
+                $"[BoxlessConvert] Cannot convert null except for identity cast."));
+        }
+    }
+    internal static class FailedConversionExtensions {
+        public static T ValueOrThrow<T>(in this Option<T, Exception> self) {
+            return self.HasValue ? self.Value : throw self.Exception;
+        }
+        public static void ThrowIfNone<T>(in this Option<T, Exception> self) {
+            if (!self.HasValue) throw self.Exception;
+        }
+        public static void Throw<T>(in this Option<T, Exception> self) {
+            throw self.Exception;
         }
     }
 }
