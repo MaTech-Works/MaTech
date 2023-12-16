@@ -21,7 +21,7 @@ namespace MaTech.Gameplay.Scoring {
         
         void HandleScoreResult(HitResult result, TimeUnit judgeTime);
         
-        void GetSnapshot(MetaTable<ScoreType> outScoreSnapshot);
+        void GetSnapshot(MetaTableGeneric<ScoreType> outScoreSnapshot);
         Variant GetValue(EnumEx<ScoreType> scoreType);
         
         bool IsScoreAuthentic { get; }

@@ -12,12 +12,12 @@ using System.Collections.Generic;
 using MaTech.Common.Algorithm;
 
 namespace MaTech.Common.Data {
-    public partial class MetaTable<TEnum> {
+    public partial class MetaTableGeneric<TEnum> {
         private readonly struct ValueDictHandle {
-            private readonly MetaTable<TEnum> owner;
+            private readonly MetaTableGeneric<TEnum> owner;
             private readonly IDictionary? inner;
             
-            public ValueDictHandle(MetaTable<TEnum> self, IDictionary? dict = null) {
+            public ValueDictHandle(MetaTableGeneric<TEnum> self, IDictionary? dict = null) {
                 owner = self;
                 inner = dict;
             }
@@ -30,10 +30,10 @@ namespace MaTech.Common.Data {
             public ValueDict<T> Dereference<T>() {
                 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 if (!IsValid) {
-                    throw new NotImplementedException("[MetaTable] Dereference on a invalid ValueDictHandle. The logic is implemented wrong.");
+                    throw new NotImplementedException("[MetaTableGeneric] Dereference on a invalid ValueDictHandle. The logic is implemented wrong.");
                 }
                 if (HasValueDict && !HasValueDictOfType<T>()) {
-                    throw new NotImplementedException($"[MetaTable] Dereference on a wrong typed ValueDict. Expected type [{typeof(ValueDict<T>).FullName}], got type [{TypeOfValueDict?.FullName}].");
+                    throw new NotImplementedException($"[MetaTableGeneric] Dereference on a wrong typed ValueDict. Expected type [{typeof(ValueDict<T>).FullName}], got type [{TypeOfValueDict?.FullName}].");
                 }
                 #endif
                 
@@ -86,7 +86,7 @@ namespace MaTech.Common.Data {
             }
             return handle;
         }
-        
+
         private ValueDictHandle WritableValueDictHandleOf<T>() {
             Type type = typeof(T);
             if (!dictHandlesByType.TryGetValue(type, out var handle) || !handle.HasValueDict) {
@@ -94,7 +94,5 @@ namespace MaTech.Common.Data {
             }
             return handle;
         }
-
-        // TODO: check boxing on enum keys and fix it with custom IEqualityComparer (hashcode from EnumEx)
     }
 }

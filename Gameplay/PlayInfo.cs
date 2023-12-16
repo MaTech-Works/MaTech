@@ -22,7 +22,7 @@ namespace MaTech.Gameplay {
             NoteCount, AccuracyDenominator, MaxCombo, MaxScore
         }
         
-        MetaTable<MetaType> Metadata { get; }
+        MetaTableGeneric<MetaType> Metadata { get; }
         
         // TODO: 根据ChartPlayer需要内部处理的信息，多加几个默认的时间定义
         TimeUnit? TrackStartTime { get; }

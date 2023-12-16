@@ -11,7 +11,7 @@ using System.Data;
 using UnityEngine;
 
 namespace MaTech.Common.Data {
-    public partial class MetaTable<TEnum> {
+    public partial class MetaTableGeneric<TEnum> {
         public interface IConstraint {
             bool StopOperationIfInvalid { get; }
         }
@@ -26,10 +26,10 @@ namespace MaTech.Common.Data {
 
         public partial struct Selector<TContext, TEnum0> {
             /// <summary>
-            /// 见 <see cref="MetaTable{TEnum}.Constraint"/>。
+            /// 见 <see cref="MetaTableGenericGeneric{TEnum}.Constraint"/>。
             /// 赋值时会为当前选中的路径创建MetaTable，类似于Set等方法。
             /// </summary>
-            public MetaTable<TEnum0>.IConstraint? Contract {
+            public MetaTableGeneric<TEnum0>.IConstraint? Contract {
                 get => GetContextTable()?.Constraint;
                 set => EnsureContextTable().Constraint = value;
             }
@@ -42,13 +42,13 @@ namespace MaTech.Common.Data {
         /// </summary>
         public virtual IConstraint? Constraint { get; set; }
 
-        // TODO: 泛型方法在IL2CPP环境下会被strip掉，需要其他替代方案
+        // TODO: 泛型方法在IL2CPP环境下会被strip掉，需替换成Variant
         #if UNITY_EDITOR || (!ENABLE_IL2CPP && DEVELOPMENT_BUILD)
 
         private bool CheckConstraintTypeOfKey<T>(EnumEx<TEnum> keyToCheck) {
             if (Constraint is IConstraintTypeOfKey contractTypeOfKey) {
                 if (!contractTypeOfKey.IsValidTypeOfKey<T>(keyToCheck)) {
-                    Debug.LogError($"[MetaTable] Contract violated: type [{typeof(T).FullName}] is not allowed for key [{keyToCheck}].");
+                    Debug.LogError($"[MetaTableGeneric] Contract violated: type [{typeof(T).FullName}] is not allowed for key [{keyToCheck}].");
                     if (contractTypeOfKey.StopOperationIfInvalid)
                         return false;
                 }
@@ -59,7 +59,7 @@ namespace MaTech.Common.Data {
         private bool CheckConstraintValueOfKey<T>(EnumEx<TEnum> keyToCheck, in T? valueToCheck) {
             if (Constraint is IConstraintValueOfKey contractValueOfKey) {
                 if (!contractValueOfKey.IsValidValueOfKey(keyToCheck, valueToCheck)) {
-                    Debug.LogError($"[MetaTable] Contract violated: value [{valueToCheck?.ToString()}] (of type [{typeof(T).FullName}]) is not allowed for key [{keyToCheck}].");
+                    Debug.LogError($"[MetaTableGeneric] Contract violated: value [{valueToCheck?.ToString()}] (of type [{typeof(T).FullName}]) is not allowed for key [{keyToCheck}].");
                     if (contractValueOfKey.StopOperationIfInvalid)
                         return false;
                 }
@@ -73,11 +73,11 @@ namespace MaTech.Common.Data {
         #endif
     }
 
-    public class MetaTableWithContract<TEnum, TConstraint> : MetaTable<TEnum> where TEnum : unmanaged, Enum, IConvertible where TConstraint : class, MetaTable<TEnum>.IConstraint, new() {
+    public class MetaTableGenericWithContract<TEnum, TConstraint> : MetaTableGeneric<TEnum> where TEnum : unmanaged, Enum, IConvertible where TConstraint : class, MetaTableGeneric<TEnum>.IConstraint, new() {
         private static readonly TConstraint constraint = new TConstraint();
         public override IConstraint? Constraint {
             get => constraint;
-            set => throw new ReadOnlyException($"[MetaTableWithContract] Constraint is readonly and static, cannot be set to another instance.");
+            set => throw new ReadOnlyException($"[MetaTableGenericWithContract] Constraint is readonly and static, cannot be set to another instance.");
         }
     }
 }

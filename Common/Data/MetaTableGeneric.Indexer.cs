@@ -9,19 +9,19 @@
 using System;
 
 namespace MaTech.Common.Data {
-    public partial class MetaTable<TEnum> {
+    public partial class MetaTableGeneric<TEnum> {
         public interface ITableContext {
-            MetaTable<TEnum1>? GetTable<TEnum1>() where TEnum1 : unmanaged, Enum, IConvertible;
-            MetaTable<TEnum1> EnsureTable<TEnum1>() where TEnum1 : unmanaged, Enum, IConvertible;
+            MetaTableGeneric<TEnum1>? GetTable<TEnum1>() where TEnum1 : unmanaged, Enum, IConvertible;
+            MetaTableGeneric<TEnum1> EnsureTable<TEnum1>() where TEnum1 : unmanaged, Enum, IConvertible;
         }
 
         public readonly struct Root : ITableContext {
-            private readonly MetaTable<TEnum> table;
-            internal Root(MetaTable<TEnum> table) { this.table = table; }
+            private readonly MetaTableGeneric<TEnum> table;
+            internal Root(MetaTableGeneric<TEnum> table) { this.table = table; }
 
-            MetaTable<TEnum1>? ITableContext.GetTable<TEnum1>() => table as MetaTable<TEnum1>;
-            MetaTable<TEnum1> ITableContext.EnsureTable<TEnum1>() => table as MetaTable<TEnum1>
-                ?? throw new InvalidOperationException($"[MetaTable] Cannot ensure a MetaTable of different enum type ({typeof(TEnum1)}) for Root; Root already exists with a fixed-typed enum ({typeof(TEnum)}).");
+            MetaTableGeneric<TEnum1>? ITableContext.GetTable<TEnum1>() => table as MetaTableGeneric<TEnum1>;
+            MetaTableGeneric<TEnum1> ITableContext.EnsureTable<TEnum1>() => table as MetaTableGeneric<TEnum1>
+                ?? throw new InvalidOperationException($"[MetaTableGeneric] Cannot ensure a MetaTableGeneric of different enum type ({typeof(TEnum1)}) for Root; Root already exists with a fixed-typed enum ({typeof(TEnum)}).");
         }
         
         public partial struct Selector<TContext, TEnum0> : ITableContext where TContext : struct, ITableContext where TEnum0 : unmanaged, Enum, IConvertible {
@@ -29,8 +29,8 @@ namespace MaTech.Common.Data {
             private readonly EnumEx<TEnum0> key;
             internal Selector(TContext context, EnumEx<TEnum0> key) { this.context = context; this.key = key; }
 
-            MetaTable<TEnum1>? ITableContext.GetTable<TEnum1>() => context.GetTable<TEnum0>()?.Get<MetaTable<TEnum1>>(key);
-            MetaTable<TEnum1> ITableContext.EnsureTable<TEnum1>() => context.EnsureTable<TEnum0>().GetOrSet(key, new MetaTable<TEnum1>());
+            MetaTableGeneric<TEnum1>? ITableContext.GetTable<TEnum1>() => context.GetTable<TEnum0>()?.Get<MetaTableGeneric<TEnum1>>(key);
+            MetaTableGeneric<TEnum1> ITableContext.EnsureTable<TEnum1>() => context.EnsureTable<TEnum0>().GetOrSet(key, new MetaTableGeneric<TEnum1>());
         }
         
         private Selector<Root, TEnum> CreateRootSelector(TEnum key) => new Selector<Root, TEnum>(new Root(this), (EnumEx<TEnum>)key);

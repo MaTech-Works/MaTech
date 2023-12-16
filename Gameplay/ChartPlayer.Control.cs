@@ -75,7 +75,7 @@ namespace MaTech.Gameplay {
             public void PlayTouchInput(PlayInput.Finger finger, TimeUnit judgeTime) => player?.OnTouchInput(finger, judgeTime);
             public void PlayIndexedInput(int index, bool isDown, TimeUnit judgeTime) => player?.OnIndexedInput(index, isDown, judgeTime);
 
-            public void PlayScoreInput(MetaTable<ScoreType> scoreSnapshot, TimeUnit judgeTime) => player?.OnScoreInput(scoreSnapshot, judgeTime);
+            public void PlayScoreInput(MetaTableGeneric<ScoreType> scoreSnapshot, TimeUnit judgeTime) => player?.OnScoreInput(scoreSnapshot, judgeTime);
             // ReSharper restore Unity.NoNullPropagation
         }
         

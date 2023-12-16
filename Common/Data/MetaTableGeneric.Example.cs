@@ -24,7 +24,7 @@ namespace MaTech.Common.Data {
             Foo qux = new EnumEx<Foo>("Qux"); // prints as 2; new EnumEx<Foo>(qux) prints as "Qux"
 
             { // Basics
-                var table = new MetaTable<Foo>();
+                var table = new MetaTableGeneric<Foo>();
                 
                 table.Set(bar0, 765);
                 table.Set(bar1, 5.73f);
@@ -48,7 +48,7 @@ namespace MaTech.Common.Data {
             }
 
             { // GetOrSet
-                var table = new MetaTable<Foo>();
+                var table = new MetaTableGeneric<Foo>();
                 table.GetOrSet(baz, 1); // --> 1
                 table.GetOrSet(baz, 2); // --> 1
                 table.Get<int>(baz); // --> 1
@@ -60,7 +60,7 @@ namespace MaTech.Common.Data {
             }
 
             { // Collect
-                var table = new MetaTable<Foo>();
+                var table = new MetaTableGeneric<Foo>();
                 table.Set(bar0, 0);
                 table.Set(bar1, "test bar1");
                 table.Set(bar2, "test bar2");
@@ -72,21 +72,21 @@ namespace MaTech.Common.Data {
             }
 
             { // Selector Methods
-                var table = new MetaTable<Foo>();
+                var table = new MetaTableGeneric<Foo>();
                 table.Select(qux).Select(Lui.Cat).EnsureContextTable();
                 table.Select(qux).Select(Lui.Cat).IsValid(); // --> true
                 table.Select(qux).Select(Foo.Bar).Set(Lui.Cat);
                 table.Select(qux).Select(Foo.Bar).Get<Lui>(); // --> Cat
             }
             { // Without Selector Methods
-                var table = new MetaTable<Foo>();
-                table.Set(qux, new MetaTable<Lui>());
-                table.Has<MetaTable<Lui>>(qux); // --> true
-                table.Set(qux, new MetaTable<Foo>()).Set(Foo.Bar, Lui.Cat);
-                table.Get<MetaTable<Foo>>(qux)!.Get<Lui>(Foo.Bar); // --> Cat
+                var table = new MetaTableGeneric<Foo>();
+                table.Set(qux, new MetaTableGeneric<Lui>());
+                table.Has<MetaTableGeneric<Lui>>(qux); // --> true
+                table.Set(qux, new MetaTableGeneric<Foo>()).Set(Foo.Bar, Lui.Cat);
+                table.Get<MetaTableGeneric<Foo>>(qux)!.Get<Lui>(Foo.Bar); // --> Cat
             }
             { // Selector Objects
-                var table = new MetaTable<Foo>();
+                var table = new MetaTableGeneric<Foo>();
                 var selector1 = table.Select(qux).Select(Lui.Cat);
                 var selector2 = table.Select(qux).Select(Foo.Bar);
                 selector1.EnsureContextTable();

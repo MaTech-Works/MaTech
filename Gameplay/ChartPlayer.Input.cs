@@ -29,7 +29,7 @@ namespace MaTech.Gameplay {
         private readonly List<InputData> listPendingInput = new List<InputData>(32);
         private readonly List<InputData> listPendingInputDumped = new List<InputData>(32);
         
-        private MetaTable<ScoreType> pendingOverrideScoreSnapshot;
+        private MetaTableGeneric<ScoreType> pendingOverrideScoreSnapshot;
         
         private void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {
             if (judgeLogic == null) return;
@@ -75,7 +75,7 @@ namespace MaTech.Gameplay {
             }
         }
 
-        private void OnScoreInput(MetaTable<ScoreType> scoreSnapshot, TimeUnit judgeTime) {
+        private void OnScoreInput(MetaTableGeneric<ScoreType> scoreSnapshot, TimeUnit judgeTime) {
             if (judgeLogic == null) return;
             lock (listPendingInput) {
                 this.pendingOverrideScoreSnapshot = scoreSnapshot;

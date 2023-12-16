@@ -41,8 +41,8 @@ namespace MaTech.Gameplay.Scoring {
         // 以下组件从外部传入
         public ChartPlayer.IReplayRecordJudgeScore Recorder { get; set; }
 
-        public MetaTable<ScoreType> LastScoreSnapshot { get; } = new MetaTable<ScoreType>();
-        public MetaTable<ScoreType> UpdateScoreSnapshot() {
+        public MetaTableGeneric<ScoreType> LastScoreSnapshot { get; } = new MetaTableGeneric<ScoreType>();
+        public MetaTableGeneric<ScoreType> UpdateScoreSnapshot() {
             Score.GetSnapshot(LastScoreSnapshot);
             return LastScoreSnapshot;
         }
