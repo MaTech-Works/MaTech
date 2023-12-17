@@ -18,57 +18,48 @@ namespace MaTech.Common.Data {
         public static WrappedMetaVisitableFromEnum<TEnum> Wrap<TEnum>(IMetaVisitable<TEnum> meta) where TEnum : unmanaged, Enum, IConvertible => new(meta);
 
         public readonly struct WrappedMetaToEnum<TEnum> : IMeta<TEnum> where TEnum : unmanaged, Enum, IConvertible {
+            public WrappedMetaToEnum(IMeta target) => this.target = target;
+            private readonly IMeta target;
+            
             public bool Has(in DataEnum<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
             public Variant Get(in DataEnum<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
-            
-            public WrappedMetaToEnum(IMeta target) {
-                this.target = target;
-            }
-
-            private readonly IMeta target;
         }
         
         public readonly struct WrappedMetaFromEnum<TEnum> : IMeta where TEnum : unmanaged, Enum, IConvertible {
+            public WrappedMetaFromEnum(IMeta<TEnum> target) => this.target = target;
+            private readonly IMeta<TEnum> target;
+            
             public bool Has(in MetaEnum key) => key.Is<TEnum>() && target.Has(key.UncheckedCastTo<TEnum>());
             public Variant Get(in MetaEnum key) => key.Is<TEnum>() ? target.Get(key.UncheckedCastTo<TEnum>()) : Variant.None;
-            
-            public WrappedMetaFromEnum(IMeta<TEnum> target) {
-                this.target = target;
-            }
-
-            private readonly IMeta<TEnum> target;
         }
 
         public readonly struct WrappedMetaTableToEnum<TEnum> : IMetaTable<TEnum> where TEnum : unmanaged, Enum, IConvertible {
+            public WrappedMetaTableToEnum(IMetaTable target) => this.target = target;
+            private readonly IMetaTable target;
+            
             public bool Has(in DataEnum<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
             public Variant Get(in DataEnum<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
             public bool Remove(in DataEnum<TEnum> key) => target.Remove(MetaEnum.FromEnum(key));
             public bool TrySet(in DataEnum<TEnum> key, in Variant value, bool overwrite) => target.TrySet(MetaEnum.FromEnum(key), value, overwrite);
-            
-            public WrappedMetaTableToEnum(IMetaTable target) {
-                this.target = target;
-            }
-
-            private readonly IMetaTable target;
         }
         
         public readonly struct WrappedMetaTableFromEnum<TEnum> : IMetaTable where TEnum : unmanaged, Enum, IConvertible {
+            public WrappedMetaTableFromEnum(IMetaTable<TEnum> target) => this.target = target;
+            private readonly IMetaTable<TEnum> target;
+            
             public bool Has(in MetaEnum key) => key.Is<TEnum>() && target.Has(key.UncheckedCastTo<TEnum>());
             public Variant Get(in MetaEnum key) => key.Is<TEnum>() ? target.Get(key.UncheckedCastTo<TEnum>()) : Variant.None;
             public bool Remove(in MetaEnum key) => key.Is<TEnum>() && target.Remove(key.UncheckedCastTo<TEnum>());
             public bool TrySet(in MetaEnum key, in Variant value, bool overwrite) => key.Is<TEnum>() && target.TrySet(key.UncheckedCastTo<TEnum>(), value, overwrite);
-            
-            public WrappedMetaTableFromEnum(IMetaTable<TEnum> target) {
-                this.target = target;
-            }
-
-            private readonly IMetaTable<TEnum> target;
         }
 
         
         public readonly struct WrappedMetaVisitableToEnum<TEnum> : IMetaVisitable<TEnum> where TEnum : unmanaged, Enum, IConvertible {
             public WrappedMetaVisitableToEnum(IMetaVisitable target) => this.target = target;
             private readonly IMetaVisitable target;
+            
+            public bool Has(in DataEnum<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
+            public Variant Get(in DataEnum<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
             
             public void Visit<TVisitor>(ref TVisitor visitor) where TVisitor : IMetaVisitable<TEnum>.IVisitor {
                 var wrapper = new Wrapper<TVisitor>(ref visitor);
@@ -86,6 +77,9 @@ namespace MaTech.Common.Data {
         public readonly struct WrappedMetaVisitableFromEnum<TEnum> : IMetaVisitable where TEnum : unmanaged, Enum, IConvertible {
             public WrappedMetaVisitableFromEnum(IMetaVisitable<TEnum> target) => this.target = target;
             private readonly IMetaVisitable<TEnum> target;
+            
+            public bool Has(in MetaEnum key) => key.Is<TEnum>() && target.Has(key.UncheckedCastTo<TEnum>());
+            public Variant Get(in MetaEnum key) => key.Is<TEnum>() ? target.Get(key.UncheckedCastTo<TEnum>()) : Variant.None;
             
             public void Visit<TVisitor>(ref TVisitor visitor) where TVisitor : IMetaVisitable.IVisitor {
                 var wrapper = new Wrapper<TVisitor>(ref visitor);
