@@ -30,6 +30,6 @@ namespace MaTech.Common.Data {
     public interface IMeta<TEnum> : IMetaMethods<DataEnum<TEnum>> where TEnum : unmanaged, Enum, IConvertible { }
     public interface IMetaTable : IMeta, IMetaTableMethods<MetaEnum> { }
     public interface IMetaTable<TEnum> : IMeta<TEnum>, IMetaTableMethods<DataEnum<TEnum>> where TEnum : unmanaged, Enum, IConvertible { }
-    public interface IMetaVisitable : IMetaVisitableMethods<MetaEnum> { }
-    public interface IMetaVisitable<TEnum> : IMetaVisitableMethods<DataEnum<TEnum>> where TEnum : unmanaged, Enum, IConvertible { }
+    public interface IMetaVisitable : IMeta, IMetaVisitableMethods<MetaEnum> { }
+    public interface IMetaVisitable<TEnum> : IMeta<TEnum>, IMetaVisitableMethods<DataEnum<TEnum>> where TEnum : unmanaged, Enum, IConvertible { }
 }
