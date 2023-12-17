@@ -15,7 +15,7 @@ namespace MaTech.Common.Data {
     }
 
     public interface IMetaTableMethods<TKey> where TKey : unmanaged {
-        bool Remove(in TKey key);
+        bool Remove(in TKey key) => TrySet(key, Variant.None);
         bool TrySet(in TKey key, in Variant value, bool overwrite = true);
     }
 
