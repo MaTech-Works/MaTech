@@ -45,8 +45,17 @@ namespace MaTech.Common.Data {
         public readonly double Double => d;
         public readonly Fraction Fraction => f;
         public readonly FractionSimple FractionSimple => f;
-        public readonly string String => IsString ? (string)o : null; // no conversion by default
-        public readonly object Object => IsObject ? o : null; // no conversion by default
+        public readonly string String => IsString ? (string)o : ToString();
+        public readonly object Object => IsObject ? o : ToObject();
+
+        public readonly bool? TryBool => Type == VariantType.Bool ? !f.IsZero : null;
+        public readonly int? TryInt => Type == VariantType.Int ? f.Numerator : null;
+        public readonly float? TryFloat => Type == VariantType.Float ? (float)d : null;
+        public readonly double? TryDouble =>  Type == VariantType.Double ? d : null;
+        public readonly Fraction? TryFraction => Type == VariantType.Fraction ? f : null;
+        public readonly FractionSimple? TryFractionSimple => Type == VariantType.FractionSimple ? f : null;
+        public readonly string TryString => Type == VariantType.String ? (string)o : null;
+        public readonly object TryObject => Type == VariantType.Object ? o : null;
 
         public readonly bool IsNone => Type == VariantType.None;
         public readonly bool IsBoolean => Type == VariantType.Bool;
@@ -156,7 +165,7 @@ namespace MaTech.Common.Data {
             case VariantType.Double: return Double.ToString(format, formatProvider);
             case VariantType.Fraction: return Fraction.ToString();
             case VariantType.FractionSimple: return FractionSimple.ToString();
-            case VariantType.String: return String;
+            case VariantType.String: return (string)o;
             case VariantType.Object: return o is IFormattable of ? of.ToString(format, formatProvider) : o is IConvertible oc ? oc.ToString(formatProvider) : o.ToString();
             default: return "<Undefined Variant>";
             }
@@ -185,7 +194,7 @@ namespace MaTech.Common.Data {
             case VariantType.Double: return Double.Equals(other.Double);
             case VariantType.Fraction: return Fraction.Equals(other.Fraction);
             case VariantType.FractionSimple: return FractionSimple.Equals(other.FractionSimple);
-            case VariantType.String: return String.Equals(other.String);
+            case VariantType.String:
             case VariantType.Object: return Equals(o, other.o);
             default: return false;
             }
