@@ -17,9 +17,9 @@ namespace MaTech.Common.Data {
     /// <example>
     /// DataEnum 与 enum 一样使用自增的整型值，依照 C# 对于 static 项按文字顺序初始化的特性，可以使用这种格式来扩展 DataEnum，让序列化的结果保持一致：
     /// <code>
-    /// [InitializeDataEnumForEditor]
+    /// public enum Foo { First = 573 }
+    /// [InitializeDataEnum]
     /// public static class ExtraFoo {
-    ///     public enum Foo { Bar = 573 }
     ///     public static DataEnum&lt;Foo&gt; Hello { get; } = new("Hi"); // 574, actual name is "Hi"
     ///     public static DataEnum&lt;Foo&gt; Lui { get; } = new("Lui", 765);
     ///     public static DataEnum&lt;Foo&gt; Cat { get; } = new("Cat"); // 766
@@ -27,16 +27,16 @@ namespace MaTech.Common.Data {
     /// </code>
     /// 也可以使用原始 enum 类型：
     /// <code>
-    /// [InitializeDataEnumForEditor]
+    /// public enum Foo { }
+    /// [InitializeDataEnum]
     /// public static class ExtraFoo {
-    ///     public enum Foo {}
     ///     public static Foo Bar { get; } = DataEnum.Ordered&lt;Foo&gt;("Bar"); // 0
     /// }
     /// </code>
     /// 也可以集中处理初始化：
     /// <code>
+    /// public enum Foo { }
     /// public static class ExtraFoo {
-    ///     public enum Foo {}
     ///     public static DataEnum&lt;Foo&gt; Bar1 { get; private set; }
     ///     public static DataEnum&lt;Foo&gt; Bar2 { get; private set; }
     ///     [InitializeDataEnumMethod]

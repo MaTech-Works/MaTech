@@ -27,7 +27,7 @@ namespace MaTech.Common.Data {
     }
     
     [AttributeUsage(AttributeTargets.Class)]
-    public class InitializeDataEnumForEditorAttribute
+    public class InitializeDataEnumAttribute
 #if UNITY_EDITOR
         : InitializeOnLoadAttribute 
 #else
