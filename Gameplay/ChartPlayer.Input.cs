@@ -29,7 +29,7 @@ namespace MaTech.Gameplay {
         private readonly List<InputData> listPendingInput = new List<InputData>(32);
         private readonly List<InputData> listPendingInputDumped = new List<InputData>(32);
         
-        private MetaTableGeneric<ScoreType> pendingOverrideScoreSnapshot;
+        private MetaTable<ScoreType> pendingScoreSnapshot;
         
         private void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {
             if (judgeLogic == null) return;
@@ -75,10 +75,10 @@ namespace MaTech.Gameplay {
             }
         }
 
-        private void OnScoreInput(MetaTableGeneric<ScoreType> scoreSnapshot, TimeUnit judgeTime) {
+        private void OnScoreInput(MetaTable<ScoreType> scoreSnapshot, TimeUnit judgeTime) {
             if (judgeLogic == null) return;
             lock (listPendingInput) {
-                this.pendingOverrideScoreSnapshot = scoreSnapshot;
+                pendingScoreSnapshot = scoreSnapshot;
             }
         }
         
@@ -128,11 +128,11 @@ namespace MaTech.Gameplay {
             // todo: 移除开源哥的todo，并且为他没有考虑操作顺序的tech debt买单
             // 以下是开源哥的注释
             //TODO 放这里合适吗？
-            if (pendingOverrideScoreSnapshot != null) {
+            if (pendingScoreSnapshot != null) {
                 foreach (var behavior in PlayBehavior.ListScoreUpdate) {
-                    behavior.OnUpdateScore(pendingOverrideScoreSnapshot);
+                    behavior.OnUpdateScore(pendingScoreSnapshot);
                 }
-                pendingOverrideScoreSnapshot = null;
+                pendingScoreSnapshot = null;
             }
             inputRecorder?.FlushRecords();
         }

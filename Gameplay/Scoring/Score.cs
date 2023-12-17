@@ -15,14 +15,11 @@ namespace MaTech.Gameplay.Scoring {
         // Tips: 可以使用 DataEnum 来扩展额外的 ScoreType
     }
     
-    public interface IScore {
+    public interface IScore : IMetaVisitable<ScoreType> {
         void Init(IPlayInfo info);
         void Finish();
         
         void HandleScoreResult(HitResult result, TimeUnit judgeTime);
-        
-        void GetSnapshot(MetaTableGeneric<ScoreType> outScoreSnapshot);
-        Variant GetValue(DataEnum<ScoreType> scoreType);
         
         bool IsScoreAuthentic { get; }
     }

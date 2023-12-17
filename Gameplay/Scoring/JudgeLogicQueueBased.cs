@@ -53,8 +53,8 @@ namespace MaTech.Gameplay.Scoring {
         public override bool IsFinished => (pendingNotes == null || !pendingNotes.HasNext) && activeNotes.Count == 0;
         public override bool IsFailed {
             get {
-                var failed = Score.GetValue(ScoreType.IsFailed);
-                var hp = Score.GetValue(ScoreType.HP);
+                var failed = Score.Get(ScoreType.IsFailed);
+                var hp = Score.Get(ScoreType.HP);
                 return failed.IsBoolean ? failed.Bool : hp.Double <= 0;
             }
         }
