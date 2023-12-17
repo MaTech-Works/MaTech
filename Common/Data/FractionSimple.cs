@@ -83,6 +83,7 @@ namespace MaTech.Common.Data {
             }
         }
 
+        public int Floored => _den == 0 ? 0 : _num / _den;
         public int Rounded => _den == 0 ? 0 : (_num + _den / 2) / _den;
         public int Ceiling => _den == 0 ? 0 : (_num + _den - 1) / _den;
 
