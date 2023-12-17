@@ -93,7 +93,9 @@ namespace MaTech.Gameplay.Scoring {
         /// 记录判定结果，并将判定发送至图形。
         /// </summary>
         protected void HandleNoteHit(ChartPlayer.NoteCarrier carrier, NoteHitAction action, TimeUnit judgeTime, HitResult result) {
-            DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit, action {action}, result {result}");
+            if (DebugLogHistory.IsActive) {
+                DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit, action {action}, result {result}");
+            }
             
             // Note and Behavior callbacks
             Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): NoteBehavior.OnHit", this);
@@ -138,8 +140,10 @@ namespace MaTech.Gameplay.Scoring {
         /// 将空击消息传递给所有子元件上的JudgeResultBehaviour
         /// </summary>
         protected void HandleEmptyHit(EmptyHitAction action, TimeUnit judgeTime) {
-            DebugLogHistory.PushHistory("play", $"{judgeTime}: empty hit, result {action}");
-            
+            if (DebugLogHistory.IsActive) {
+                DebugLogHistory.PushHistory("play", $"{judgeTime}: empty hit, result {action}");
+            }
+
             Profiler.BeginSample("JudgeLogicBase.HandleEmptyHit(): PlayBehavior", this);
             foreach (var behavior in PlayBehavior.ListNoteHitResult) {
                 behavior.OnHitEmpty(action, judgeTime);
