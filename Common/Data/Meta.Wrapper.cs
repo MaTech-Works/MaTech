@@ -40,7 +40,7 @@ namespace MaTech.Common.Data {
             public bool Has(in DataEnum<TEnum> key) => target.Has(MetaEnum.FromEnum(key));
             public Variant Get(in DataEnum<TEnum> key) => target.Get(MetaEnum.FromEnum(key));
             public bool Remove(in DataEnum<TEnum> key) => target.Remove(MetaEnum.FromEnum(key));
-            public bool TrySet(in DataEnum<TEnum> key, in Variant value, bool overwrite) => target.TrySet(MetaEnum.FromEnum(key), value, overwrite);
+            public bool Set(in DataEnum<TEnum> key, in Variant value, bool overwrite) => target.Set(MetaEnum.FromEnum(key), value, overwrite);
         }
         
         public readonly struct WrappedMetaTableFromEnum<TEnum> : IMetaTable where TEnum : unmanaged, Enum, IConvertible {
@@ -50,7 +50,7 @@ namespace MaTech.Common.Data {
             public bool Has(in MetaEnum key) => key.Is<TEnum>() && target.Has(key.UncheckedCastTo<TEnum>());
             public Variant Get(in MetaEnum key) => key.Is<TEnum>() ? target.Get(key.UncheckedCastTo<TEnum>()) : Variant.None;
             public bool Remove(in MetaEnum key) => key.Is<TEnum>() && target.Remove(key.UncheckedCastTo<TEnum>());
-            public bool TrySet(in MetaEnum key, in Variant value, bool overwrite) => key.Is<TEnum>() && target.TrySet(key.UncheckedCastTo<TEnum>(), value, overwrite);
+            public bool Set(in MetaEnum key, in Variant value, bool overwrite) => key.Is<TEnum>() && target.Set(key.UncheckedCastTo<TEnum>(), value, overwrite);
         }
 
         

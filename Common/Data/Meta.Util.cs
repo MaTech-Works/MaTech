@@ -12,7 +12,7 @@ namespace MaTech.Common.Data {
         private struct ShallowCopyVisitor<TKey> : IMetaVisitableMethods<TKey>.IVisitor where TKey : unmanaged {
             public IMetaTableMethods<TKey> target;
             public Variant Visit(in TKey key, in Variant value) {
-                target.TrySet(key, value);
+                target.Set(key, value);
                 return value;
             }
         }
@@ -26,9 +26,9 @@ namespace MaTech.Common.Data {
                     if (depth <= 1) return value;
                     var visitor = new DeepCopyVisitor<TKey, TTable> { target = new TTable(), depth = depth - 1 };
                     nested.Visit(ref visitor);
-                    target.TrySet(key, Variant.FromObject(visitor.target));
+                    target.Set(key, Variant.FromObject(visitor.target));
                 } else {
-                    target.TrySet(key, value);
+                    target.Set(key, value);
                 }
                 return value;
             }

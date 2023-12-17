@@ -21,7 +21,7 @@ namespace MaTech.Common.Data {
         public bool Has(in MetaEnum key) => dict.ContainsKey(key);
         public Variant Get(in MetaEnum key) => dict.TryGetValue(key, out var value) ? value : Variant.None;
         public bool Remove(in MetaEnum key) => dict.Remove(key);
-        public bool TrySet(in MetaEnum key, in Variant value, bool overwrite = true) => dict.TrySetMeta(key, value, overwrite);
+        public bool Set(in MetaEnum key, in Variant value, bool overwrite = true) => dict.TrySetMeta(key, value, overwrite);
         
         public void Visit<TVisitor>(ref TVisitor visitor) where TVisitor : IMetaVisitable.IVisitor {
             foreach (var kv in dict) {
@@ -43,7 +43,7 @@ namespace MaTech.Common.Data {
         public bool Has(in DataEnum<TEnum> key) => dict.ContainsKey(key);
         public Variant Get(in DataEnum<TEnum> key) => dict.TryGetValue(key, out var value) ? value : Variant.None;
         public bool Remove(in DataEnum<TEnum> key) => dict.Remove(key);
-        public bool TrySet(in DataEnum<TEnum> key, in Variant value, bool overwrite = true) => dict.TrySetMeta(key, value, overwrite);
+        public bool Set(in DataEnum<TEnum> key, in Variant value, bool overwrite = true) => dict.TrySetMeta(key, value, overwrite);
         
         public void Visit<TVisitor>(ref TVisitor visitor) where TVisitor : IMetaVisitable<TEnum>.IVisitor {
             foreach (var kv in dict) {
