@@ -17,7 +17,7 @@ namespace MaTech.Gameplay.Scoring {
     
     public interface IScore : IMetaVisitable<ScoreType> {
         void Init(IPlayInfo info);
-        void Finish();
+        void Finish(bool isFailed);
         
         void HandleScoreResult(HitResult result, TimeUnit judgeTime);
         

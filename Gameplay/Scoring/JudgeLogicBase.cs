@@ -13,7 +13,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 
 namespace MaTech.Gameplay.Scoring {
-    public abstract partial class JudgeLogicBase : MonoBehaviour {
+    public abstract partial class JudgeLogicBase : PlayBehavior {
         // 分发输入操作到note的处理逻辑。
         // 全部的回调都发生在主线程。
         
@@ -75,7 +75,9 @@ namespace MaTech.Gameplay.Scoring {
         public abstract void OnIndexedInput(int index, bool isDown, TimeUnit judgeTime);
         public abstract void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime);
         public abstract void OnTouchInput(PlayInput.Finger finger, TimeUnit judgeTime);
-        
+
+        public override void OnFinish(bool isFailed) => Score.Finish(isFailed);
+
         #endregion
 
         #region Protected Utility Methods
