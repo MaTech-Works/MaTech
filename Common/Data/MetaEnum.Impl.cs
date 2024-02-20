@@ -14,9 +14,7 @@ namespace MaTech.Common.Data {
         
         public override string ToString() => ToString("X", null);
         public string ToString(string format, IFormatProvider formatProvider) {
-            using var lockRAII = ReaderLockRAII.EnterRead(lockMetadata);
-            var name = knownNamesByID.GetValueOrDefault(ID, "Unknown");
-            return $"{name}.{Value.ToString(format, formatProvider)}";
+            return $"{Name}.{Value.ToString(format, formatProvider)}";
         }
         
         public override int GetHashCode() => IsEmpty ? 0 : HashCode.Combine(ID, Value);

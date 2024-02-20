@@ -7,6 +7,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using MaTech.Common.Algorithm;
 using UnityEngine;
 
@@ -17,6 +18,13 @@ namespace MaTech.Common.Data {
         public uint ID { get; private set; }
         [field: SerializeField]
         public int Value { get; private set; }
+        
+        public readonly string? Name {
+            get {
+                using var lockRAII = ReaderLockRAII.EnterRead(lockMetadata);
+                return knownNamesByID.GetOrNull(ID);
+            }
+        }
 
         public readonly bool IsEmpty => ID == 0;
 
