@@ -11,10 +11,21 @@ using UnityEngine;
 namespace MaTech.Audio {
     public static partial class MaAudio {
         public static bool IsLoadedForUnity { get; private set; } = false;
+        public static bool IsDebugLogEnabled { get; private set; } = false;
 
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD || MAAUDIO_DEBUG_LOG  
+        [AOT.MonoPInvokeCallback(typeof(Logger))]
+        private static void Log(string s) => Debug.Log("[MaAudio Native] " + s);
+        static MaAudio() {
+            Debug.Log("MaAudio native debug logging enabled.");
+            DebugLogFunction = Log;
+            IsDebugLogEnabled = true;
+        }
+        #endif
+        
         public static bool LoadForUnity() {
             if (!Create(AudioSettings.outputSampleRate)) {
-                Debug.Log("Cannot create MaAudio. See AudioOutput.log for details.");
+                Debug.LogError(IsDebugLogEnabled ? "Cannot create MaAudio." : "Cannot create MaAudio. Enable debug logging on native plugin to see more details.");
                 return false;
             }
             

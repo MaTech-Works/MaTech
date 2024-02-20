@@ -161,6 +161,17 @@ namespace MaTech.Audio {
         }
         
         #endregion
+        
+        #region Debug
+        
+        private delegate void Logger([MarshalAs(UnmanagedType.LPStr)] string s);
+
+        private static extern Logger DebugLogFunction {
+            [param: MarshalAs(UnmanagedType.FunctionPtr)]
+            [DllImport(dllName, EntryPoint = "MaAudio_SetDebugLogFunction", CharSet = CharSet.Ansi)] set;
+        }
+        
+        #endregion
 
         #region Utility Methods
 
