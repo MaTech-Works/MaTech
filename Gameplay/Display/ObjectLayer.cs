@@ -336,7 +336,7 @@ namespace MaTech.Gameplay.Display {
             }
 
             // 展示列表中，超过显示范围且可以移除的，放回pool
-            listObjectRealized.RemoveAllAndFillWithLast(cachedVirtualizationAction);
+            listObjectRealized.RemoveCyclicWhere(cachedVirtualizationAction);
             
             onAfterUpdate.Invoke();
             

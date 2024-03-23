@@ -140,16 +140,23 @@ namespace MaTech.Common.Algorithm {
             }
         }
 
-        public static void RemoveAndFillWithLast<T>(this List<T> list, int index) {
+        public static bool RemoveCyclic<T>(this List<T> list, in T value) {
+            int index = list.IndexOf(value);
+            if (index == -1) return false;
+            list.RemoveCyclicAt(index);
+            return true;
+        }
+
+        public static void RemoveCyclicAt<T>(this List<T> list, int index) {
             int indexLast = list.Count - 1;
             list[index] = list[indexLast];
             list.RemoveAt(indexLast);
         }
 
-        public static void RemoveAllAndFillWithLast<T>(this List<T> list, Func<T, bool> conditionRemove) {
+        public static void RemoveCyclicWhere<T>(this List<T> list, Func<T, bool> conditionRemove) {
             for (int i = 0, n = list.Count; i < n;) {
                 if (conditionRemove(list[i])) {
-                    list.RemoveAndFillWithLast(i);
+                    list.RemoveCyclicAt(i);
                     --n;
                 } else {
                     ++i;
