@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using MaTech.Common.Algorithm;
 
 namespace MaTech.Common.Data {
     // TODO: 把MetaTableGeneric中实现的Selector机制移植到Meta扩展类里
