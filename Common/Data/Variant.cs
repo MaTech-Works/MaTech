@@ -13,7 +13,7 @@ using UnityEngine.Scripting;
 
 namespace MaTech.Common.Data {
     public enum VariantType {
-        None = 0, Bool, Int, Float, Double, Fraction, FractionSimple, String, Object
+        None = 0, Bool, Int, Float, Double, Enum, Fraction, FractionSimple, String, Object
     }
 
     /// A boolean, an integer, a float-point, a fraction, a string, an object, or nothing ("None" type).
@@ -43,6 +43,7 @@ namespace MaTech.Common.Data {
         public readonly int Int => f.Rounded;
         public readonly float Float => (float)d;
         public readonly double Double => d;
+        public readonly MetaEnum Enum => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
         public readonly Fraction Fraction => f;
         public readonly FractionSimple FractionSimple => f;
         public readonly string String => IsString ? (string)o : ToString();
@@ -61,6 +62,7 @@ namespace MaTech.Common.Data {
         public readonly bool IsBoolean => Type == VariantType.Bool;
         public readonly bool IsInteger => Type == VariantType.Int;
         public readonly bool IsFloatPoint => Type == VariantType.Float || Type == VariantType.Double;
+        public readonly bool IsEnum => Type == VariantType.Enum;
         public readonly bool IsFraction => Type == VariantType.Fraction || Type == VariantType.FractionSimple;
         public readonly bool IsNumeral => IsInteger || IsFloatPoint || IsFraction;
         public readonly bool IsNumeralOrBoolean => IsNumeral || IsBoolean;
@@ -73,6 +75,12 @@ namespace MaTech.Common.Data {
 
         public override readonly string ToString() => ToString(null, null);
 
+        public static Variant FromEnum(MetaEnum value) => new Variant(value);
+        public static Variant FromEnum<TEnum>(DataEnum<TEnum> value) where TEnum : unmanaged, Enum, IConvertible => new Variant(MetaEnum.FromEnum(value));
+        public static Variant FromEnum<TEnum>(TEnum value) where TEnum : unmanaged, Enum, IConvertible => new Variant(MetaEnum.FromEnum(value));
+        public readonly MetaEnum ToEnum() => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
+        public readonly DataEnum<TEnum>? ToEnum<TEnum>() where TEnum : unmanaged, Enum, IConvertible => ToEnum().As<TEnum>();
+        
         public static Variant FromObject<T>(T value) where T : class => new Variant(value);
         public readonly T ToObject<T>() where T : class => ToObject() as T;
         public readonly T GetObject<T>() where T : class => Object as T;
@@ -84,6 +92,7 @@ namespace MaTech.Common.Data {
         public static implicit operator Variant(int value) => new Variant(value);
         public static implicit operator Variant(float value) => new Variant(value);
         public static implicit operator Variant(double value) => new Variant(value);
+        public static implicit operator Variant(MetaEnum value) => new Variant(value);
         public static implicit operator Variant(Fraction value) => new Variant(value);
         public static implicit operator Variant(FractionSimple value) => new Variant(value);
         public static implicit operator Variant(string value) => new Variant(value);
@@ -112,8 +121,9 @@ namespace MaTech.Common.Data {
         readonly object IConvertible.ToType(Type type, IFormatProvider provider) {
             if (type == typeFraction) return Fraction;
             if (type == typeFractionSimple) return FractionSimple;
+            // TODO: 支持enum
             if (IsObject) return Convert.ChangeType(o, type, provider);
-            throw new InvalidCastException($"Variant: Conversion to type {type} is undefined.");
+            throw new InvalidCastException($"Variant: Conversion to type {type} is unsupported.");
         }
 
         [Preserve]
@@ -123,6 +133,7 @@ namespace MaTech.Common.Data {
             var type = typeof(T);
             if (type == typeFraction) return BoxlessConvert.Identity<Fraction, T>(Fraction);
             if (type == typeFractionSimple) return BoxlessConvert.Identity<FractionSimple, T>(FractionSimple);
+            // TODO: 支持enum
             if (IsObject) return (T)Convert.ChangeType(o, type, provider);
             return BoxlessConvert.To<T>.FromIConvertible(this, provider); // fallback to IConvertible
         }
@@ -134,6 +145,7 @@ namespace MaTech.Common.Data {
             case VariantType.Int: return TypeCode.Int32;
             case VariantType.Float: return TypeCode.Single;
             case VariantType.Double: return TypeCode.Double;
+            case VariantType.Enum: return TypeCode.Int32; // same as MetaEnum
             case VariantType.String: return TypeCode.String;
             default: return TypeCode.Object; // Fraction, FractionSimple, Object
             }
@@ -163,6 +175,7 @@ namespace MaTech.Common.Data {
             case VariantType.Int: return Int.ToString(format, formatProvider);
             case VariantType.Float: return Float.ToString(format, formatProvider);
             case VariantType.Double: return Double.ToString(format, formatProvider);
+            case VariantType.Enum: return Enum.ToString(format, formatProvider);
             case VariantType.Fraction: return Fraction.ToString();
             case VariantType.FractionSimple: return FractionSimple.ToString();
             case VariantType.String: return (string)o;
@@ -178,6 +191,7 @@ namespace MaTech.Common.Data {
             case VariantType.Int: return Int;
             case VariantType.Float: return Float;
             case VariantType.Double: return Double;
+            case VariantType.Enum: return Enum;
             case VariantType.Fraction: return Fraction;
             case VariantType.FractionSimple: return FractionSimple;
             default: return o; // String and Object
@@ -192,6 +206,7 @@ namespace MaTech.Common.Data {
             case VariantType.Int: return Int.Equals(other.Int);
             case VariantType.Float: return Float.Equals(other.Float);
             case VariantType.Double: return Double.Equals(other.Double);
+            case VariantType.Enum: return Enum.Equals(other.Enum);
             case VariantType.Fraction: return Fraction.Equals(other.Fraction);
             case VariantType.FractionSimple: return FractionSimple.Equals(other.FractionSimple);
             case VariantType.String:
@@ -212,6 +227,7 @@ namespace MaTech.Common.Data {
             case VariantType.Int: return Int.GetHashCode();
             case VariantType.Float: return Float.GetHashCode();
             case VariantType.Double: return Double.GetHashCode();
+            case VariantType.Enum: return Enum.GetHashCode();
             case VariantType.Fraction: return Fraction.GetHashCode();
             case VariantType.FractionSimple: return FractionSimple.GetHashCode();
             case VariantType.String:

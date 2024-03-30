@@ -33,6 +33,12 @@ namespace MaTech.Common.Data {
             d = value;
             o = null;
         }
+        private Variant(MetaEnum value) {
+            Type = VariantType.Enum;
+            f = new FractionSimple(value.Value);
+            d = f.Numerator;
+            o = value.Name;
+        }
         private Variant(Fraction value) {
             Type = VariantType.Fraction;
             f = value;
