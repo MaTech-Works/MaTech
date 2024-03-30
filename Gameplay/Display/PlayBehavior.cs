@@ -17,19 +17,23 @@ namespace MaTech.Gameplay.Display {
     /// 继承这个基类以及额外接口以接受ChartPlayer广播信息。
     /// async的接口将被对应的操作异步等待，比如说ChartPlayer.Load会等待OnLoad，捕获错误后会等待OnError结束后Unload。
     /// 
+    /// <code>
     /// 接口调用流程：
     /// 加载关卡 OnLoad
     /// ↑ ↓
     /// | 开始关卡 OnStart(false)
     /// | 重开关卡 OnStart(true)  （可能在无OnFinish的情况下重复回调）
-    /// | ↑ ↓ ↑
+    /// | ↑ ↑                    （暂停状态重开关卡时无OnResume回调）
     /// | | 暂停关卡 OnPause
-    /// | | 解除暂停 OnResume  （暂停状态重开关卡时自动解除暂停，无回调）
-    /// | ↓ ↓
-    /// | 通关结束 OnFinish(false)  （可以靠IScoreResult进一步判断成绩）
+    /// | | 解除暂停 OnResume
+    /// | ↓ ↑ ↓
+    /// | (游玩中)
+    /// | ↓
+    /// | 通关结束 OnFinish(false) （可以靠PlayBehavior.IScoreResult获得详细成绩）
     /// | 死亡结束 OnFinish(true)
     /// ↓ ↓
     /// 卸载关卡 OnUnload
+    /// </code>
     /// 
     /// 其他可选接口请参考interface注释。
     /// </summary>
