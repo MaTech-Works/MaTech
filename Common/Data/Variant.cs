@@ -7,6 +7,7 @@
 using System;
 using MaTech.Common.Algorithm;
 using Newtonsoft.Json;
+using Optional;
 using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -46,17 +47,18 @@ namespace MaTech.Common.Data {
         public readonly MetaEnum Enum => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
         public readonly Fraction Fraction => f;
         public readonly FractionSimple FractionSimple => f;
-        public readonly string String => IsString ? (string)o : ToString();
-        public readonly object Object => IsObject ? o : ToObject();
+        public readonly string String => o as string;
+        public readonly object Object => o;
 
-        public readonly bool? TryBool => Type == VariantType.Bool ? !f.IsZero : null;
-        public readonly int? TryInt => Type == VariantType.Int ? f.Numerator : null;
-        public readonly float? TryFloat => Type == VariantType.Float ? (float)d : null;
-        public readonly double? TryDouble =>  Type == VariantType.Double ? d : null;
-        public readonly Fraction? TryFraction => Type == VariantType.Fraction ? f : null;
-        public readonly FractionSimple? TryFractionSimple => Type == VariantType.FractionSimple ? f : null;
-        public readonly string TryString => Type == VariantType.String ? (string)o : null;
-        public readonly object TryObject => Type == VariantType.Object ? o : null;
+        public readonly Option<bool> TryBool => Type == VariantType.Bool ? Option.Some(!f.IsZero) : Option.None<bool>();
+        public readonly Option<int> TryInt => Type == VariantType.Int ? Option.Some(f.Numerator) : Option.None<int>();
+        public readonly Option<float> TryFloat => Type == VariantType.Float ? Option.Some((float)d) : Option.None<float>();
+        public readonly Option<double> TryDouble => Type == VariantType.Double ? Option.Some(d) : Option.None<double>();
+        public readonly Option<MetaEnum> TryEnum => Type == VariantType.Enum ? Option.Some(ToEnum()) : Option.None<MetaEnum>();
+        public readonly Option<Fraction> TryFraction => Type == VariantType.Fraction ? Option.Some((Fraction)f) : Option.None<Fraction>();
+        public readonly Option<FractionSimple> TryFractionSimple => Type == VariantType.FractionSimple ? Option.Some(f) : Option.None<FractionSimple>();
+        public readonly Option<string> TryString => Type == VariantType.String ? Option.Some((string)o) : Option.None<string>();
+        public readonly Option<object> TryObject => Type == VariantType.Object ? Option.Some(o) : Option.None<object>();
 
         public readonly bool IsNone => Type == VariantType.None;
         public readonly bool IsBoolean => Type == VariantType.Bool;
@@ -83,10 +85,10 @@ namespace MaTech.Common.Data {
         
         public static Variant FromObject<T>(T value) where T : class => new Variant(value);
         public readonly T ToObject<T>() where T : class => ToObject() as T;
-        public readonly T GetObject<T>() where T : class => Object as T;
+        public readonly T GetObject<T>() where T : class => o as T;
         
         public static Variant Box<T>(T value) where T : struct => new Variant((object)value);
-        public readonly T Unbox<T>() where T : struct => Object is T t ? t : default;
+        public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
 
         public static implicit operator Variant(bool value) => new Variant(value);
         public static implicit operator Variant(int value) => new Variant(value);
