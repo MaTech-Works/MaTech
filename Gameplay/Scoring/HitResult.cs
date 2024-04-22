@@ -11,7 +11,7 @@ namespace MaTech.Gameplay.Scoring {
     // TODO: 为BitFlag结构增加简单的二进制加密
     [Flags]
     public enum HitResult {
-        None = 0, //占位用  也可用于需要无效/吃掉某次击打时使用，注意与IGNORE相区分
+        None = 0,
         
         // 默认定义
         
@@ -53,8 +53,9 @@ namespace MaTech.Gameplay.Scoring {
         
         Delay = 1 << 27, // 延迟结算判定结果
         Finish = 1 << 28, // 结束这个判定单元的全部判定结算
-        Repeat = 1 << 29, // 以同样的输入条件对当前音符进行重复判定
-        Ignore = 1 << 30, // 忽略本次判定的成绩，不要下发给任何下游游戏逻辑；同时也可用来表示此音符没有参与判定
+        Block = 1 << 29, // 阻拦本次判定，不要继续尝试匹配其他判定单元
+        Ignore = 1 << 30, // 忽略本次判定，不要产生任何判定结果，并且继续尝试匹配其他判定单元
+        Repeat = 1 << 31, // 以同样的输入条件对当前音符进行重复判定
     };
 
     #if UNITY_EDITOR
@@ -70,7 +71,7 @@ namespace MaTech.Gameplay.Scoring {
             /*  0 --  7 */ "Miss", "Score1", "Score2", "Score3", "Score4", "Late", "Early", "Combo Up",
             /*  8 -- 15 */ "Combo Break", null, "Wipe", "Catch", "Flick", "Bomb", "Pass", "Linked",
             /* 16 -- 23 */ "Hold Start", "Hold End", "Hold Tick", "Hold Progress", "Hold Break", "Hold Continue", "Hold Bonus", null,
-            /* 24 -- 30 */ "Activate", "Deactivate", "Mute", "Delay", "Finish", "Repeat", "Ignore",
+            /* 24 -- 31 */ "Activate", "Deactivate", "Mute", "Delay", "Finish", "Block", "Ignore", "Repeat",
         };
     }
     #endif
@@ -79,5 +80,6 @@ namespace MaTech.Gameplay.Scoring {
         public static bool HasAnyFlag(this HitResult self, HitResult any) => (self & any) != 0;
         public static bool HasAllFlag(this HitResult self, HitResult all) => (self & all) == all;
         public static bool HasAnyFlagExcept(this HitResult self, HitResult any, HitResult except) => (self & any) != 0 && (self & except) == 0;
+        public static bool HasAllFlagExcept(this HitResult self, HitResult all, HitResult except) => (self & all) == all && (self & except) == 0;
     }
 }
