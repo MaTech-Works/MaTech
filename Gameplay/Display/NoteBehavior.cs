@@ -6,6 +6,7 @@
 
 using MaTech.Common.Tools;
 using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Time;
 using UnityEngine;
 using static MaTech.Gameplay.ChartPlayer;
 
@@ -21,13 +22,13 @@ namespace MaTech.Gameplay.Display {
         protected virtual void DeactivateObject() => gameObject.SetActive(false);
         protected abstract void UpdateObject();
 
-        protected virtual void HitObject(JudgeLogicBase.NoteHitAction action, HitResult result) {}
+        protected virtual void HitObject(JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result) {}
 
         void Awake() => DeactivateObject();
 
         void IObjectVisual<NoteCarrier, NoteLayer>.InitVisual(NoteCarrier initCarrier, NoteLayer initLayer) {
-            this.carrier = initCarrier;
-            this.layer = initLayer;
+            carrier = initCarrier;
+            layer = initLayer;
             ActivateObject();
         }
 
@@ -38,6 +39,6 @@ namespace MaTech.Gameplay.Display {
 
         void IObjectVisual<NoteCarrier, NoteLayer>.UpdateVisual() => UpdateObject();
 
-        void INoteVisual.OnHit(JudgeLogicBase.NoteHitAction action, HitResult result) => HitObject(action, result);
+        void INoteVisual.OnHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result) => HitObject(action, judgeTime, result);
     }
 }

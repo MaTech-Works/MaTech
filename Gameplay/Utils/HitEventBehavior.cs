@@ -12,7 +12,7 @@ namespace MaTech.Gameplay.Utils {
     public class HitEventBehavior : PlayBehavior, PlayBehavior.INoteHitResult {
         public HitEvent[] hitEvents;
 
-        public void OnHitNote(ChartPlayer.NoteCarrier carrier, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime, HitResult result) {
+        public void OnHitNote(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime, HitResult result) {
             foreach (var hitEvent in hitEvents) {
                 hitEvent.InvokeIfMatch(action, result);
             }

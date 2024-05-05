@@ -47,7 +47,7 @@ namespace MaTech.Gameplay.Display {
         
         /// 输入信息被JudgeLogic分发至某个音符后被调用；NoteBehavior上也会接收到类似的信息。
         public interface INoteHitResult {
-            void OnHitNote(ChartPlayer.NoteCarrier carrier, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime, HitResult result);
+            void OnHitNote(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime, HitResult result);
             void OnHitEmpty(JudgeLogicBase.EmptyHitAction action, TimeUnit judgeTime);
         }
     

@@ -6,12 +6,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
 using MaTech.Common.Utils;
 using MaTech.Gameplay.Processor;
+using MaTech.Gameplay.Scoring;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;
@@ -23,6 +25,8 @@ namespace MaTech.Gameplay.Display {
     public class ObjectLayer<TCarrier, TLayer> : MonoBehaviour
         where TCarrier : ObjectCarrier<TCarrier, TLayer>
         where TLayer : ObjectLayer<TCarrier, TLayer> {
+        
+        // TODO: 支持为每个VisualUnit实例化图形，而非为每个NoteCarrier实例化图形
         
         #region Private Fields - Runtime Containers
         
@@ -41,9 +45,11 @@ namespace MaTech.Gameplay.Display {
         private PointerList<TCarrier> listCarrierDownY = null!;     // 按经过DownY的时机排序
         private PointerList<TCarrier> listCarrierUpTime = null!;    // 按判定时间排序
         
-        private readonly HashSet<Carrier> hashsetCarrierRealized = new HashSet<Carrier>();
-        private readonly List<ObjectTuple> listObjectRealized = new List<ObjectTuple>();
-        
+        private readonly Dictionary<Carrier, IObjectVisual<TCarrier, TLayer>> hashsetCarrierRealized = new();
+        private readonly List<ObjectTuple> listObjectRealized = new();
+
+        protected Dictionary<Carrier, IObjectVisual<TCarrier, TLayer>>.KeyCollection RealizedCarriers => hashsetCarrierRealized.Keys;
+
         #endregion
         
         #region Private Fields - Pool
@@ -217,6 +223,9 @@ namespace MaTech.Gameplay.Display {
             return deltaY;
         }
 
+        public IObjectVisual<TCarrier, TLayer>? FindVisual(TCarrier carrier) => hashsetCarrierRealized.GetOrNull(carrier);
+        public T? FindVisual<T>(TCarrier carrier) where T : class, IObjectVisual<TCarrier, TLayer> => FindVisual(carrier) as T;
+
         #endregion
         
         #region Public Methods - Load and Update
@@ -384,7 +393,7 @@ namespace MaTech.Gameplay.Display {
         
         #region Private Methods - Realization
 
-        private bool IsCarrierRealized(TCarrier carrier) => hashsetCarrierRealized.Contains(carrier);
+        private bool IsCarrierRealized(TCarrier carrier) => hashsetCarrierRealized.ContainsKey(carrier);
 
         private void RealizeCarrierIfInRange(TCarrier carrier) {
             if (IsCarrierInRange(carrier) && !IsCarrierRealized(carrier))
@@ -395,24 +404,21 @@ namespace MaTech.Gameplay.Display {
             Assert.IsTrue(IsLayerTypeValid(carrier.type));
             Assert.IsFalse(IsCarrierRealized(carrier));
             
-            hashsetCarrierRealized.Add(carrier);
-
             var pool = pools[carrier.type];
             var obj = pool.GetPooledGameObject();
             
             var tuple = new ObjectTuple(carrier, obj);
-            tuple.carrier.visual = tuple.visual;
             tuple.visual.InitVisual(carrier, (TLayer)this);
             
             if (tuple.visual.IsVisualFinished) {
                 tuple.visual.FinishVisual();
-                tuple.carrier.visual = null;
                 pool.RecycleGameObject(tuple.obj);
                 return;
             }
         
             listObjectRealized.Add(tuple);
-            
+            hashsetCarrierRealized.Add(carrier, tuple.visual);
+
             if (logRealization) Debug.Log($"Realize {carrier.StartY:F2} - {carrier.EndY:F2} at {PlayTime.DisplayY:F2} (delta: {carrier.DeltaYStart(PlayTime.DisplayY):F2} - {carrier.DeltaYEnd(PlayTime.DisplayY):F2})");
         }
 
@@ -425,7 +431,6 @@ namespace MaTech.Gameplay.Display {
             var pool = pools[tuple.carrier.type];
 
             tuple.visual.FinishVisual();
-            tuple.carrier.visual = null;
             pool.RecycleGameObject(tuple.obj);
             
             if (logRealization) Debug.Log($"Virtualize {tuple.carrier.StartY:F2} - {tuple.carrier.EndY:F2} at {PlayTime.DisplayY:F2} (delta: {tuple.carrier.DeltaYStart(PlayTime.DisplayY):F2} - {tuple.carrier.DeltaYEnd(PlayTime.DisplayY):F2})");

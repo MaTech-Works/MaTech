@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using MaTech.Gameplay.Time;
+using static MaTech.Gameplay.ChartPlayer;
 
 namespace MaTech.Gameplay.Scoring {
     // TODO: 合并进JudgeLogic，不在核心层面定义判定数据接口
@@ -16,7 +17,6 @@ namespace MaTech.Gameplay.Scoring {
         /// <summary> 判定逻辑的结束生效范围，返回正的绝对值（返回负数会让结束位置比音符更早）。 </summary>
         TimeUnit WindowLate { get; }
             
-        HitResult JudgeNoteHit(ChartPlayer.NoteCarrier carrier, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime);
-
+        HitResult JudgeNoteHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime);
     }
 }

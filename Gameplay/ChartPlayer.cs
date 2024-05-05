@@ -13,6 +13,7 @@ using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Time;
 using UnityEngine;
 
 namespace MaTech.Gameplay {
@@ -207,6 +208,12 @@ namespace MaTech.Gameplay {
             // todo: 将以下的一切数据的来源打包成一个ModeRule类，来规定模式相关的所有数据，递交模式特定的派生类组件
             if (judgeLogic != null) {
                 judgeLogic.OnLoadChart(playInfo, processor);
+
+                judgeLogic.OnHitNote = (IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result) => {
+                    foreach (var layer in noteLayers) {
+                        layer.HandleNoteHit(unit, action, judgeTime, result);
+                    }
+                };
 
                 // todo: 需要禁用成绩上传时，增加一步操作：“将加密成绩计算替换为明文成绩计算，使得最终成绩无法被上传并接受”
                 /* if (playInfo.playBy == PlayByType.ReplayPlayer) {

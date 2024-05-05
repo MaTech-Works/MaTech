@@ -14,6 +14,7 @@ namespace MaTech.Gameplay {
         /// <summary> 时间载体: 用于承载与显示相关的时间轴相关数据，同时对应TimePoint和Effect数据，所有数据自计算结束后应当保持不再改变 </summary>
         public class TimeCarrier : Carrier {
             // TODO: 将effect数值封装到一个时间轴类里，隐藏本类的实现细节
+            // TODO: 不再使用Carrier盛放这一时间轴信息，考虑重用CarrierTiming结构
 
             /// <summary> 本TimeCarrier至下一个TimeCarrier之间的谱面滚动速度，对时间积分即为Y值 </summary>
             public double speed = 1;

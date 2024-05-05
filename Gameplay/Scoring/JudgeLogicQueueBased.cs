@@ -15,28 +15,32 @@ namespace MaTech.Gameplay.Scoring {
     /// 基于队列的判定查询逻辑，根据队列是否为空来决定游戏是否结束
     /// 完全是特设功能，派生类需要知道这个类的完整实现，适用于大部分模式的判定
     public abstract class JudgeLogicQueueBased : JudgeLogicBase {
-        /// 还未进入判定范围的音符队列，按顺序检查进入ActiveNoteEarlyWindow范围并踢到activeNotes中。
-        private readonly QueueList<NoteCarrier> pendingNotes = new QueueList<NoteCarrier>();
-        /// 进入判定范围的所有音符，会被检查是否退出了judgeWindowLate指定的时间范围
-        private readonly Queue<NoteCarrier> activeNotes = new Queue<NoteCarrier>(1000);
+        /// 还未进入判定范围的carrier队列，按顺序检查进入ActiveNoteEarlyWindow范围并踢到activeNotes中。
+        private readonly QueueList<NoteCarrier> pendingCarriers = new();
+        /// 进入判定范围的所有carrier，会被检查是否退出了judgeWindowLate指定的判定范围
+        private readonly Queue<NoteCarrier> activeCarriers = new(1000);
+        
+        /// 进入判定范围的所有carrier携带的unit，在carrier进入或退出activeCarriers容器时更新
+        private readonly Dictionary<IJudgeUnit, HashSet<NoteCarrier>> activeUnitsWithCarriers = new(1000);
+        private readonly HashSetPool<NoteCarrier> carrierHashSetPool = new HashSetPool<NoteCarrier>(1000, 100);
 
-        protected readonly struct ReadOnlyQueue<T> : IReadOnlyCollection<T> {
-            private readonly Queue<T> inner;
-            public ReadOnlyQueue(Queue<T> inner) { this.inner = inner; }
+        // 让activeList里的音符离miss边界远一些。100ms的额外边界暂时足够了。
+        // todo: 为IJudgeUnit增加接口来表示判定是否处理完成，而非用固定的WindowOffset来保证完成判定处理
+        private readonly TimeUnit activeNoteWindowOffset = TimeUnit.FromMilliseconds(100);
+        
+        protected readonly struct ReadOnlyUnits : IReadOnlyCollection<IJudgeUnit> {
+            private readonly Dictionary<IJudgeUnit, HashSet<NoteCarrier>>.KeyCollection inner;
+            public ReadOnlyUnits(Dictionary<IJudgeUnit, HashSet<NoteCarrier>> dict) { this.inner = dict.Keys; }
 
-            public Queue<T>.Enumerator GetEnumerator() => inner.GetEnumerator();
+            public Dictionary<IJudgeUnit, HashSet<NoteCarrier>>.KeyCollection.Enumerator GetEnumerator() => inner.GetEnumerator();
             public int Count => inner.Count;
             
-            IEnumerator<T> IEnumerable<T>.GetEnumerator() => ((IEnumerable<T>)inner).GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)inner).GetEnumerator();
+            IEnumerator<IJudgeUnit> IEnumerable<IJudgeUnit>.GetEnumerator() => inner.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => inner.GetEnumerator();
         }
         
         /// 用于判定时遍历枚举的容器
-        protected ReadOnlyQueue<NoteCarrier> ActiveNotes => new ReadOnlyQueue<NoteCarrier>(activeNotes);
-        
-        // 让activeList里的音符离miss边界远一些。100ms的额外边界暂时足够了。
-        // todo: 为IJudgeState增加接口来表示判定是否处理完成，而非用固定的WindowOffset来保证完成判定处理
-        private readonly TimeUnit activeNoteWindowOffset = TimeUnit.FromMilliseconds(100);
+        protected ReadOnlyUnits ActiveUnits => new(activeUnitsWithCarriers);
         
         // todo: 这些应该移动到一个专用的ModeRule工厂类中，从外部inject进来这些实例依赖（现在这样写只是为了方便重构）
         protected abstract IJudgeTiming CreateJudgeTiming(IPlayInfo playInfo);
@@ -50,7 +54,7 @@ namespace MaTech.Gameplay.Scoring {
         protected abstract void ResetJudge(IPlayInfo playInfo);
         protected abstract void UpdateJudge(TimeUnit judgeTimeStart, TimeUnit judgeTimeEnd);
 
-        public override bool IsFinished => (pendingNotes == null || !pendingNotes.HasNext) && activeNotes.Count == 0;
+        public override bool IsFinished => (pendingCarriers == null || !pendingCarriers.HasNext) && activeCarriers.Count == 0;
         public override bool IsFailed {
             get {
                 var failed = Score.Get(ScoreType.IsFailed);
@@ -68,10 +72,15 @@ namespace MaTech.Gameplay.Scoring {
             Score.Init(playInfo);
             Timing.Init(playInfo);
             
-            pendingNotes.ClearAndRestart();
-            activeNotes.Clear();
+            pendingCarriers.ClearAndRestart();
+            activeCarriers.Clear();
             
-            pendingNotes.AddRange(processor.ResultNoteList.Where(carrier => carrier.judgeState != null));
+            pendingCarriers.AddRange(processor.ResultNoteList.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null));
+
+            var judgeUnits = processor.ResultNoteList.SelectMany(carrier =>
+                carrier.units?.OfType<IJudgeUnit>().Select(unit => (unit, carrier)) ??
+                Enumerable.Empty<(IJudgeUnit, NoteCarrier)>()
+            ).Distinct();
 
             ResetJudge(playInfo);
         }
@@ -87,20 +96,34 @@ namespace MaTech.Gameplay.Scoring {
         // todo: 能不能把区间查找做进一种队列性质的helper容器，而非中间类？
         protected void DepopulateActiveListUntil(TimeUnit judgeTime) {
             // todo: 这里应当以某个“最后一次处理输入消息的时间”值为标准弹出note
-            while (activeNotes.Count > 0) {
-                var carrier = activeNotes.Peek();
-                if (carrier.EndTime > judgeTime.Seconds - ActiveNoteLateWindow.Seconds)
-                    break;
-                activeNotes.Dequeue();
+            while (activeCarriers.Count > 0) {
+                var carrier = activeCarriers.Peek();
+                if (carrier.EndTime > judgeTime.Seconds - ActiveNoteLateWindow.Seconds) break;
+                activeCarriers.Dequeue();
+                foreach (var unit in carrier.UnitsOf<IJudgeUnit>()) {
+                    if (!activeUnitsWithCarriers.TryGetValue(unit, out var set)) continue;
+                    set.Remove(carrier);
+                    if (set.Count == 0) {
+                        activeUnitsWithCarriers.Remove(unit);
+                        carrierHashSetPool.Recycle(set);
+                    }
+                }
             }
         }
 
         protected void PopulateActiveListUntil(TimeUnit judgeTime) {
-            while(pendingNotes.HasNext) {
-                var carrier = pendingNotes.Peek();
+            while(pendingCarriers.HasNext) {
+                var carrier = pendingCarriers.Peek();
                 if (carrier.StartTime > judgeTime.Seconds + ActiveNoteEarlyWindow.Seconds) break;
-                pendingNotes.Skip();
-                activeNotes.Enqueue(carrier);
+                pendingCarriers.Skip();
+                activeCarriers.Enqueue(carrier);
+                foreach (var unit in carrier.UnitsOf<IJudgeUnit>()) {
+                    if (!activeUnitsWithCarriers.TryGetValue(unit, out var set)) {
+                        set = carrierHashSetPool.Get();
+                        activeUnitsWithCarriers.Add(unit, set);
+                    }
+                    set.Add(carrier);
+                }
             }
         }
     }

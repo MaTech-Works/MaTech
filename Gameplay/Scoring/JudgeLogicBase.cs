@@ -4,6 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using System;
 using MaTech.Common.Data;
 using MaTech.Common.Tools;
 using MaTech.Gameplay.Display;
@@ -11,6 +12,7 @@ using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Time;
 using UnityEngine;
 using UnityEngine.Profiling;
+using static MaTech.Gameplay.ChartPlayer;
 
 namespace MaTech.Gameplay.Scoring {
     public abstract partial class JudgeLogicBase : PlayBehavior {
@@ -22,7 +24,7 @@ namespace MaTech.Gameplay.Scoring {
         public enum NoteHitAction {
             Unknown = -1, // 无法判别交互形式时使用
             Auto = 0, // 无对应输入操作（如超时自动判miss）或无法判别交互形式时使用
-            Hit, Hold, Release, Flick,
+            Press, Hold, Release, Flick,
             Linked, // 被其他音符连锁触发
         };
 
@@ -32,6 +34,8 @@ namespace MaTech.Gameplay.Scoring {
             Down, Move, Up, Flick,
         }
 
+        public delegate void ActionHitNote(IJudgeUnit unit, NoteHitAction action, in TimeUnit judgeTime, HitResult result);
+
         // 以下组件getter在OnLoadChart后应当指向一个有效的实例
         // todo: 有没有更好的方法给这些组件添加工厂函数？是否将这些全部移动到一个ModeRule类，全部从外部传入这里？
         public IJudgeTiming Timing { get; protected set; }
@@ -39,8 +43,9 @@ namespace MaTech.Gameplay.Scoring {
         public AutoPlayControllerBase AutoPlayController { get; protected set; }
 
         // 以下组件从外部传入
-        public ChartPlayer.IReplayRecordJudgeScore Recorder { get; set; }
-
+        public IReplayRecordJudgeScore Recorder { get; set; }
+        public ActionHitNote OnHitNote { get; set; }
+        
         public MetaTable<ScoreType> LastScoreSnapshot { get; } = new();
         public MetaTable<ScoreType> UpdateScoreSnapshot() {
             Meta.ShallowCopy(Score, LastScoreSnapshot);
@@ -85,26 +90,26 @@ namespace MaTech.Gameplay.Scoring {
         /// <summary>
         /// 向判定数值Timing查询给定音符的判定结果。
         /// </summary>
-        protected HitResult JudgeNoteHit(ChartPlayer.NoteCarrier carrier, NoteHitAction action, TimeUnit judgeTime) {
-            return Timing?.JudgeNoteHit(carrier, action, judgeTime) ?? HitResult.None;
+        protected HitResult JudgeNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit judgeTime) {
+            return Timing?.JudgeNoteHit(unit, action, judgeTime) ?? HitResult.None;
         }
         
         /// <summary>
         /// 记录判定结果，并将判定发送至图形。
         /// </summary>
-        protected void HandleNoteHit(ChartPlayer.NoteCarrier carrier, NoteHitAction action, TimeUnit judgeTime, HitResult result) {
+        protected void HandleNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit judgeTime, HitResult result) {
             if (DebugLogHistory.IsActive) {
                 DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit, action {action}, result {result}");
             }
             
             // Note and Behavior callbacks
             Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): NoteBehavior.OnHit", this);
-            carrier.NoteVisual?.OnHit(action, result);
+            OnHitNote(unit, action, judgeTime, result);
             Profiler.EndSample();
             
             Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): PlayBehavior.OnHitNote", this);
             foreach (var behavior in PlayBehavior.ListNoteHitResult) {
-                behavior.OnHitNote(carrier, action, judgeTime, result);
+                behavior.OnHitNote(unit, action, judgeTime, result);
             }
             Profiler.EndSample();
 

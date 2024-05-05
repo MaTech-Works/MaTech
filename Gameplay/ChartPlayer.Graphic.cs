@@ -6,10 +6,11 @@
 
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
-        public interface IObjectVisual<TCarrier, TLayer>
+        public interface IObjectVisual<in TCarrier, in TLayer>
             where TCarrier : ObjectCarrier<TCarrier, TLayer>
             where TLayer : ObjectLayer<TCarrier, TLayer> {
             /// <summary> 元件作为新音符被显示时调用 </summary>
@@ -26,7 +27,7 @@ namespace MaTech.Gameplay {
 
         public interface INoteVisual : IObjectVisual<NoteCarrier, NoteLayer> {
             /// <summary> 接受JudgeLogic传递的判定消息 </summary>
-            void OnHit(JudgeLogicBase.NoteHitAction action, HitResult result);
+            void OnHit(IJudgeUnit judgeUnit, JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result);
         }
 
         public interface IBarVisual : IObjectVisual<BarCarrier, BarLayer> {}
