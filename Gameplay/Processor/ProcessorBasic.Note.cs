@@ -4,6 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using MaTech.Common.Data;
 using MaTech.Gameplay.Time;
 using static MaTech.Gameplay.ChartPlayer;
 
@@ -18,13 +19,13 @@ namespace MaTech.Gameplay.Processor {
         /// <param name="start"> 剔除区间的开始位置 </param>
         /// <param name="end"> 剔除区间的结束位置，不填则同start </param>
         /// <param name="anchor"> 图形效果（主要是hs）的采样位置，不填则同start </param>
-        protected NoteCarrier CreateNoteCarrier(TimedObject note, TimePoint? overrideStart = null, TimePoint? overrideEnd = null, TimePoint? overrideAnchor = null) {
+        protected NoteCarrier CreateNoteCarrier(DataEnum<ObjectType> type, TimedObject note, TimePoint? overrideStart = null, TimePoint? overrideEnd = null, TimePoint? overrideAnchor = null) {
             return new NoteCarrier() {
                 // TODO: 实现一种同时计算start和end的CreateTiming方法，正确计算卷轴回退时的Y值极值
                 start = CreateTiming(overrideStart ?? note.Start),
                 end = CreateTiming(overrideEnd ?? note.End),
+                type = type,
                 scaleY = FindTimeCarrier(overrideAnchor ?? note.Anchor).EffectiveNoteVelocity,
-                note = note,
             };
         }
         
