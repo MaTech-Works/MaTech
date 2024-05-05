@@ -34,24 +34,30 @@ namespace MaTech.Gameplay {
         }
 
         public abstract class Carrier : IComparable<Carrier> {
-            /// <summary> Carrier的开始位置，用于剔除物体的显示 </summary>
+            // TODO: 增加不受speed scale影响的边缘时间margin
+
             public CarrierTiming start;
+            public CarrierTiming end;
             
             public double StartTime => start.time;
             public double StartY => start.displayY;
             public Fraction StartBeat => start.beat;
             
-            public virtual double EndTime => start.time;
-            public virtual double EndY => start.displayY;
-            public virtual Fraction EndBeat => start.beat;
+            public double EndTime => end.time;
+            public double EndY => end.displayY;
+            public Fraction EndBeat => end.beat;
+
+            public double LengthTime => end.time - start.time;
+            public double LengthY => end.displayY - start.displayY;
+            public Fraction LengthBeat => end.beat - start.beat;
 
             public static readonly Comparer<Carrier> ComparerStartOffset = Comparer<Carrier>.Create((x, y) => x.start.time.CompareTo(y.start.time));
             public static readonly Comparer<Carrier> ComparerStartY = Comparer<Carrier>.Create((x, y) => x.start.displayY.CompareTo(y.start.displayY));
             public static readonly Comparer<Carrier> ComparerStartBeat = Comparer<Carrier>.Create((x, y) => x.start.beat.CompareTo(y.start.beat));
 
-            public static readonly Comparer<Carrier> ComparerEndOffset = Comparer<Carrier>.Create((x, y) => x.EndTime.CompareTo(y.EndTime));
-            public static readonly Comparer<Carrier> ComparerEndY = Comparer<Carrier>.Create((x, y) => x.EndY.CompareTo(y.EndY));
-            public static readonly Comparer<Carrier> ComparerEndBeat = Comparer<Carrier>.Create((x, y) => x.EndBeat.CompareTo(y.EndBeat));
+            public static readonly Comparer<Carrier> ComparerEndOffset = Comparer<Carrier>.Create((x, y) => x.end.time.CompareTo(y.end.time));
+            public static readonly Comparer<Carrier> ComparerEndY = Comparer<Carrier>.Create((x, y) => x.end.displayY.CompareTo(y.end.displayY));
+            public static readonly Comparer<Carrier> ComparerEndBeat = Comparer<Carrier>.Create((x, y) => x.end.beat.CompareTo(y.end.beat));
             
             /// <summary>
             /// 默认的比较行为，以startOffset的大小为准。
@@ -59,15 +65,6 @@ namespace MaTech.Gameplay {
             public int CompareTo(Carrier other) {
                 return StartTime.CompareTo(other.StartTime);
             }
-        }
-
-        public abstract class CarrierRanged : Carrier {
-            /// <summary> Carrier的结束位置，用于剔除物体的显示 </summary>
-            public CarrierTiming end;
-            
-            public override double EndTime => end.time;
-            public override double EndY => end.displayY;
-            public override Fraction EndBeat => end.beat;
         }
     }
 }
