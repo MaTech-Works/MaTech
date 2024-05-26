@@ -16,8 +16,7 @@ using MaTech.Gameplay.Time;
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
         public enum ObjectType {
-            Generic,
-            ExtensionStart = 100 // 可以用 DataEnum 扩展定义
+            Generic, // 可以用 DataEnum 扩展定义
         }
 
         // TODO: 把这个基类与模板参数干掉
