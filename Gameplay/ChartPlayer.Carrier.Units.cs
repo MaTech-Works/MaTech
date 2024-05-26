@@ -17,14 +17,7 @@ namespace MaTech.Gameplay {
         public interface IVisualUnit : IUnit { }
         
         public partial class NoteCarrier {
-            public void CreateUnits(params IUnit[] paramsUnits) {
-                if (units != null && units.Length > 0) {
-                    Debug.LogWarning(
-                        "[NoteCarrier] Created units for NoteCarrier that already contains units, that are of types: " +
-                        string.Join(",", units.Select(unit => unit.GetType().Name)) +
-                        ". Please set units to null before creating new ones to suppress this warning."
-                    );
-                }
+            public void AssignUnits(params IUnit[] paramsUnits) {
                 units = paramsUnits;
             }
             
