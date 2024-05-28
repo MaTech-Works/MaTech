@@ -51,7 +51,7 @@ namespace MaTech.Gameplay.Data {
         // Tips: 可以使用 DataEnum 来扩展额外的 EffectType
     }
     
-    public class Effect : TimedObjectRanged {
+    public class Effect : TimedObject {
         public readonly DataEnum<EffectType> type;
         public readonly Variant value;
         
