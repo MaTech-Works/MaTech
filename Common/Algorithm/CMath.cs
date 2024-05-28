@@ -34,6 +34,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// ReSharper disable CompareOfFloatsByEqualityOperator
+// ReSharper disable InconsistentNaming
+
 using math = MaTech.Common.Algorithm.CMath;
 
 namespace MaTech.Common.Algorithm {
@@ -536,11 +539,11 @@ namespace MaTech.Common.Algorithm {
         /// <para>
         /// </para>
         /// <para>
-        /// The function <see cref="math.frexp(double, ref int)"/>, together with its dual, <see cref="math.ldexp(double, int)"/>,
+        /// The function <see cref="math.frexp(double, out int)"/>, together with its dual, <see cref="math.ldexp(double, int)"/>,
         /// can be used to manipulate the representation of a floating-point number without direct bit manipulations.
         /// </para>
         /// <para>
-        /// The relation of <see cref="math.frexp(double, ref int)"/> to <see cref="math.logb(double)"/> and <see cref="math.scalbn(double, int)"/> is:
+        /// The relation of <see cref="math.frexp(double, out int)"/> to <see cref="math.logb(double)"/> and <see cref="math.scalbn(double, int)"/> is:
         /// </para>
         /// <para>
         /// <c><paramref name="exponent"/> = (<paramref name="number"/> == 0) ? 0 : (int)(1 + <see cref="math.logb(double)">logb</see>(<paramref name="number"/>))</c><br/>
@@ -578,7 +581,7 @@ namespace MaTech.Common.Algorithm {
         /// Assert.IsTrue(exponent = -1073);
         /// </code> 
         /// </example>
-        public static double frexp(double number, ref int exponent)
+        public static double frexp(double number, out int exponent)
         {
             long bits = System.BitConverter.DoubleToInt64Bits(number);
             int exp = (int)((bits & math.DBL_EXP_MASK) >> math.DBL_MANT_BITS);
@@ -621,11 +624,11 @@ namespace MaTech.Common.Algorithm {
         /// <item>If <paramref name="number"/> is NaN, it is returned, and an undefined value is returned in <paramref name="exponent"/>.</item>
         /// </list>
         /// <para>
-        /// The function <see cref="math.frexp(float, ref int)"/>, together with its dual, <see cref="math.ldexp(float, int)"/>,
+        /// The function <see cref="math.frexp(float, out int)"/>, together with its dual, <see cref="math.ldexp(float, int)"/>,
         /// can be used to manipulate the representation of a floating-point number without direct bit manipulations.
         /// </para>
         /// <para>
-        /// The relation of <see cref="math.frexp(float, ref int)"/> to <see cref="math.logb(float)"/> and <see cref="math.scalbn(float, int)"/> is:
+        /// The relation of <see cref="math.frexp(float, out int)"/> to <see cref="math.logb(float)"/> and <see cref="math.scalbn(float, int)"/> is:
         /// </para>
         /// <para>
         /// <c><paramref name="exponent"/> = (<paramref name="number"/> == 0) ? 0 : (int)(1 + <see cref="math.logb(float)">logb</see>(<paramref name="number"/>))</c><br/>
@@ -663,7 +666,7 @@ namespace MaTech.Common.Algorithm {
         /// Assert.IsTrue(exponent = -148);
         /// </code> 
         /// </example>
-        public static float frexp(float number, ref int exponent)
+        public static float frexp(float number, out int exponent)
         {
             int bits = math.SingleToInt32Bits(number);
             int exp = (int)((bits & math.FLT_EXP_MASK) >> math.FLT_MANT_BITS);
@@ -721,9 +724,9 @@ namespace MaTech.Common.Algorithm {
         /// </para>
         /// <para>
         /// The value of the exponent returned by <see cref="math.ilogb(double)"/> is always <c>1</c> less than the exponent retuned by
-        /// <see cref="math.frexp(double, ref int)"/> because of the different normalization requirements:
+        /// <see cref="math.frexp(double, out int)"/> because of the different normalization requirements:
         /// for <see cref="math.ilogb(double)"/>, the normalized significand is in the interval <c>[1, 2)</c>,
-        /// but for <see cref="math.frexp(double, ref int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>.
+        /// but for <see cref="math.frexp(double, out int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>.
         /// </para>
         /// <para>
         /// See <a href="http://en.cppreference.com/w/c/numeric/math/ilogb">ilogb</a> in the C standard documentation.
@@ -823,9 +826,9 @@ namespace MaTech.Common.Algorithm {
         /// </para>
         /// <para>
         /// The value of the exponent returned by <see cref="math.ilogb(float)"/> is always <c>1</c> less than the exponent retuned by
-        /// <see cref="math.frexp(float, ref int)"/> because of the different normalization requirements:
+        /// <see cref="math.frexp(float, out int)"/> because of the different normalization requirements:
         /// for <see cref="math.ilogb(float)"/>, the normalized significand is in the interval <c>[1, 2)</c>,
-        /// but for <see cref="math.frexp(float, ref int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>.
+        /// but for <see cref="math.frexp(float, out int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>.
         /// </para>
         /// <para>
         /// See <a href="http://en.cppreference.com/w/c/numeric/math/ilogb">ilogb</a> in the C standard documentation.
@@ -919,7 +922,7 @@ namespace MaTech.Common.Algorithm {
         /// <item>If <paramref name="number"/> is NaN, <see cref="System.Double.NaN"/> is returned.</item>
         /// </list>
         /// <para>
-        /// The function <see cref="math.ldexp(double, int)"/> ("load exponent"), together with its dual, <see cref="math.frexp(double, ref int)"/>,
+        /// The function <see cref="math.ldexp(double, int)"/> ("load exponent"), together with its dual, <see cref="math.frexp(double, out int)"/>,
         /// can be used to manipulate the representation of a floating-point number without direct bit manipulations.
         /// </para>
         /// <para>
@@ -987,7 +990,7 @@ namespace MaTech.Common.Algorithm {
         /// <item>If <paramref name="number"/> is NaN, <see cref="System.Single.NaN"/> is returned.</item>
         /// </list>
         /// <para>
-        /// The function <see cref="math.ldexp(float, int)"/> ("load exponent"), together with its dual, <see cref="math.frexp(float, ref int)"/>,
+        /// The function <see cref="math.ldexp(float, int)"/> ("load exponent"), together with its dual, <see cref="math.frexp(float, out int)"/>,
         /// can be used to manipulate the representation of a floating-point number without direct bit manipulations.
         /// </para>
         /// <para>
@@ -1069,9 +1072,9 @@ namespace MaTech.Common.Algorithm {
         /// </para>
         /// <para>
         /// The value of the exponent returned by <see cref="math.logb(double)"/> is always <c>1</c> less than the exponent retuned by
-        /// <see cref="math.frexp(double, ref int)"/> because of the different normalization requirements:
+        /// <see cref="math.frexp(double, out int)"/> because of the different normalization requirements:
         /// for <see cref="math.logb(double)"/>, the normalized significand is in the interval <c>[1, 2)</c>,
-        /// but for <see cref="math.frexp(double, ref int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>. 
+        /// but for <see cref="math.frexp(double, out int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>. 
         /// </para>
         /// <para>
         /// See <a href="http://en.cppreference.com/w/c/numeric/math/logb">logb</a> in the C standard documentation.
@@ -1173,9 +1176,9 @@ namespace MaTech.Common.Algorithm {
         /// </para>
         /// <para>
         /// The value of the exponent returned by <see cref="math.logb(float)"/> is always <c>1</c> less than the exponent retuned by
-        /// <see cref="math.frexp(float, ref int)"/> because of the different normalization requirements:
+        /// <see cref="math.frexp(float, out int)"/> because of the different normalization requirements:
         /// for <see cref="math.logb(float)"/>, the normalized significand is in the interval <c>[1, 2)</c>,
-        /// but for <see cref="math.frexp(float, ref int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>. 
+        /// but for <see cref="math.frexp(float, out int)"/>, the normalized significand is in the interval <c>[0.5, 1)</c>. 
         /// </para>
         /// <para>
         /// See <a href="http://en.cppreference.com/w/c/numeric/math/logb">logb</a> in the C standard documentation.
