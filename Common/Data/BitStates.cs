@@ -74,13 +74,12 @@ namespace MaTech.Common.Data {
         }
 
         private static class Private {
-            /// Magic Number，用于计算为1的LSB的index
             /// https://github.com/stevengj/nlopt/blob/004f415c5d04dd1f616a953eb8ad078a20b72c58/src/util/sobolseq.c#L77-L104
-            private static readonly int[] DECODE = new int[32] { 0, 1, 2, 26, 23, 3, 15, 27, 24, 21, 19, 4, 12, 16, 28, 6, 31, 25, 22, 14, 20, 18, 11, 5, 30, 13, 17, 10, 29, 9, 8, 7 };
-            private const uint MAGIC_NUMBER = 0x05f66a47;
+            private const uint MagicNumberLSB = 0x05f66a47;
+            private static readonly int[] decode = new int[32] { 0, 1, 2, 26, 23, 3, 15, 27, 24, 21, 19, 4, 12, 16, 28, 6, 31, 25, 22, 14, 20, 18, 11, 5, 30, 13, 17, 10, 29, 9, 8, 7 };
             
             public static uint LowBit(uint state) => state & (uint)-(int)state;
-            public static int BitIndex(uint bit) => DECODE[(MAGIC_NUMBER * bit) >> 27];
+            public static int BitIndex(uint bit) => decode[(MagicNumberLSB * bit) >> 27];
             public static int FirstValid(uint state) => state == 0 ? -1 : BitIndex(LowBit(state));
         }
     }

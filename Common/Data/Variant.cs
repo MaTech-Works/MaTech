@@ -29,7 +29,7 @@ namespace MaTech.Common.Data {
     /// TODO: 分裂出Number类，并移除对于string和object的支持
     /// TODO: 重构成新Variant类，支持4字节内任意类型的struct，用object成员记录类型
     [Serializable]
-    [JsonConverter(typeof(Variant.JsonConverter))]
+    [JsonConverter(typeof(JsonConverter))]
     public partial struct Variant : IEquatable<Variant>, IConvertible, IBoxlessConvertible, IFormattable {
         [field: SerializeField]
         public VariantType Type { get; private set; }

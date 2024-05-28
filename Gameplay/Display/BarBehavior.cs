@@ -9,7 +9,7 @@ using static MaTech.Gameplay.ChartPlayer;
 
 namespace MaTech.Gameplay.Display {
     // TODO: remove this class and always use NoteBehavior. see comments on BarCarrier
-    public class BarBehavior : MonoBehaviour, ChartPlayer.IBarVisual {
+    public class BarBehavior : MonoBehaviour, IBarVisual {
         protected BarCarrier carrier;
         protected BarLayer layer;
         

@@ -34,7 +34,7 @@ namespace MaTech.Gameplay.Data {
 
         public IEnumerable<SignatureChange> SignatureChanges => signatures;
 
-        public SignatureTimeline() : this(new FractionSimple(4), null) { }
+        public SignatureTimeline() : this(new FractionSimple(4)) { }
         public SignatureTimeline(FractionSimple defaultBeatPerBar, FractionSimple? defaultQuarterNotesPerBeat = null) {
             signatures.Add(new SignatureChange {
                 barAtChange = 0,

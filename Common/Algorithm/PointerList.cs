@@ -12,7 +12,7 @@ namespace MaTech.Common.Algorithm {
     /// 一个内置了index的List。提供一些方便的取元素功能。
     /// </summary>
     public class PointerList<T> : List<T> {
-        public PointerList() : base() { }
+        public PointerList() { }
         public PointerList(IEnumerable<T> collection) : base(collection) { }
         public PointerList(int capacity) : base(capacity) { }
 

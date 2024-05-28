@@ -101,7 +101,7 @@ namespace MaTech.Gameplay.Input {
             Handles.color = selected ? colorSelected : colorNormal;
             
             #if UNITY_EDITOR
-            if (Application.isPlaying) {
+            if (Application.isPlaying && Camera.main != null) {
                 var ray = Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition);
                 if (RayCast(ray, out var _)) Handles.color = new Color(1f, 1f, 0.7f);
             }

@@ -52,13 +52,13 @@ namespace MaTech.Gameplay.Input.NativeInput {
         }
 
         private static class Private {
-            private const string LIBNAME = "NativeInput.dll";
+            private const string DllName = "NativeInput.dll";
 
             public delegate void CallbackKeyInput(uint vkCode, bool isDown);
 
             #if UNITY_STANDALONE_WIN
-            [DllImport(LIBNAME)] public static extern bool HookKeyboard(CallbackKeyInput onKeyInput);
-            [DllImport(LIBNAME)] public static extern void UnhookKeyboard();
+            [DllImport(DllName)] public static extern bool HookKeyboard(CallbackKeyInput onKeyInput);
+            [DllImport(DllName)] public static extern void UnhookKeyboard();
             #else
             public static bool HookKeyboard(CallbackKeyInput onKeyInput) => false;
             public static void UnhookKeyboard() {}

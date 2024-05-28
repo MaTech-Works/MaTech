@@ -77,11 +77,6 @@ namespace MaTech.Gameplay.Scoring {
             
             pendingCarriers.AddRange(processor.ResultNoteList.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null));
 
-            var judgeUnits = processor.ResultNoteList.SelectMany(carrier =>
-                carrier.units?.OfType<IJudgeUnit>().Select(unit => (unit, carrier)) ??
-                Enumerable.Empty<(IJudgeUnit, NoteCarrier)>()
-            ).Distinct();
-
             ResetJudge(playInfo);
         }
         

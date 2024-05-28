@@ -18,31 +18,31 @@ namespace MaTech.Common.Algorithm {
                 for (int i = 0; i < n; ++i) {
                     double k0 = i * delta;
                     double k1 = (i + 1) * delta;
-                    double F0 = interpolator.Map(k0);
-                    double F1 = interpolator.Map(k1);
-                    if (Math.Abs(F1 - F0) > maxDelta) continue;
-                    double f0 = interpolator.Derivative(k0);
-                    double f1 = interpolator.Derivative(k1);
-                    double dFdk = (F1 - F0) / delta;
-                    if (Math.Abs(dFdk - f0) > tolerance) {
-                        Debug.LogError($"[Interpolator] derivative of {interpolator.GetType()} has error > {tolerance} at k0 = {k0}, k1 = {k1}:\nf0 = {f0}, dFdk = {dFdk}\nF0 = {F0}, F1 = {F1}");
+                    double f0 = interpolator.Map(k0);
+                    double f1 = interpolator.Map(k1);
+                    if (Math.Abs(f1 - f0) > maxDelta) continue;
+                    double df0 = interpolator.Derivative(k0);
+                    double df1 = interpolator.Derivative(k1);
+                    double dfdk = (f1 - f0) / delta;
+                    if (Math.Abs(dfdk - df0) > tolerance) {
+                        Debug.LogError($"[Interpolator] derivative of {interpolator.GetType()} has error > {tolerance} at k0 = {k0}, k1 = {k1}:\nf0 = {df0}, dFdk = {dfdk}\nF0 = {f0}, F1 = {f1}");
                         break;
                     }
-                    if (Math.Abs(dFdk - f1) > tolerance) {
-                        Debug.LogError($"[Interpolator] derivative of {interpolator.GetType()} has error > {tolerance} at k0 = {k0}, k1 = {k1}:\nf1 = {f1}, dFdk = {dFdk}\nF0 = {F0}, F1 = {F1}");
+                    if (Math.Abs(dfdk - df1) > tolerance) {
+                        Debug.LogError($"[Interpolator] derivative of {interpolator.GetType()} has error > {tolerance} at k0 = {k0}, k1 = {k1}:\nf1 = {df1}, dFdk = {dfdk}\nF0 = {f0}, F1 = {f1}");
                         break;
                     }
                 }
                 for (int i = 0; i < n; ++i) {
                     double k0 = i * delta;
                     double k1 = (i + 1) * delta;
-                    double F0 = interpolator.Map(k0);
-                    double F1 = interpolator.Map(k1);
-                    if (Math.Abs(F1 - F0) > maxDelta) continue;
-                    double iFdk = (F0 + F1) * delta / 2;
-                    double FI = interpolator.Integral(k1) - interpolator.Integral(k0);
-                    if (Math.Abs(iFdk - FI) > tolerance) {
-                        Debug.LogError($"[Interpolator] integral of {interpolator.GetType()} has error > {tolerance} at k0 = {k0}, k1 = {k1}:\nFI = {FI}, iFdk = {iFdk}\nF0 = {F0}, F1 = {F1}");
+                    double f0 = interpolator.Map(k0);
+                    double f1 = interpolator.Map(k1);
+                    if (Math.Abs(f1 - f0) > maxDelta) continue;
+                    double sfdk = (f0 + f1) * delta / 2;
+                    double sf01 = interpolator.Integral(k1) - interpolator.Integral(k0);
+                    if (Math.Abs(sfdk - sf01) > tolerance) {
+                        Debug.LogError($"[Interpolator] integral of {interpolator.GetType()} has error > {tolerance} at k0 = {k0}, k1 = {k1}:\nFI = {sf01}, iFdk = {sfdk}\nF0 = {f0}, F1 = {f1}");
                         break;
                     }
                 }

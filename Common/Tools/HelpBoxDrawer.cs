@@ -27,7 +27,8 @@ namespace MaTech.Common.Tools {
     [CustomPropertyDrawer(typeof(HelpBoxAttribute))]
     public class HelpBoxDrawer : DecoratorDrawer {
         public override float GetHeight() {
-            var helpBoxStyle = GUI.skin?.GetStyle("helpbox");
+            if (GUI.skin == null) return base.GetHeight();
+            var helpBoxStyle = GUI.skin.GetStyle("helpbox");
             if (helpBoxStyle == null) return base.GetHeight();
             var helpBoxAttribute = (HelpBoxAttribute)attribute;
             return Mathf.Max(40f, helpBoxStyle.CalcHeight(new GUIContent(helpBoxAttribute.Text), EditorGUIUtility.currentViewWidth) + 4);

@@ -10,8 +10,8 @@ using MaTech.Common.Data;
 namespace MaTech.Gameplay.Input {
     // 把finger转换为index的部分
     public partial class PlayInput {
-        private readonly Dictionary<Finger, BitStates> activeHold = new Dictionary<Finger, BitStates>(fingerCapacity);
-        private readonly Dictionary<Finger, BitStates> activeSlide = new Dictionary<Finger, BitStates>(fingerCapacity);
+        private readonly Dictionary<Finger, BitStates> activeHold = new Dictionary<Finger, BitStates>(FingerCapacity);
+        private readonly Dictionary<Finger, BitStates> activeSlide = new Dictionary<Finger, BitStates>(FingerCapacity);
 
         private readonly List<TouchAreaBase> touchAreasCached = new List<TouchAreaBase>(20);
         private readonly object mutexTouchAreas = new object();

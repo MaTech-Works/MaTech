@@ -163,6 +163,7 @@ namespace MaTech.Gameplay.Processor {
         /// 为Carrier列表排序，使得有hs存在的情况下，音符按照排序后的顺序依次通过指定的卷轴位置。
         /// 排序算法为希尔排序（不稳定排序）。
         /// </summary>
+        /// <param name="list"> 被排序的列表 </param>
         /// <param name="sortDeltaY"> 为每个Carrier计入的排序提前量，排序的结果会在计入hs超车影响的情况下，在相对判定点的这个位置是有序的 </param>
         public static void SortCarriers<TCarrier, TLayer>(IList<TCarrier> list, double sortDeltaY)
             where TCarrier : ObjectCarrier<TCarrier, TLayer>

@@ -132,7 +132,7 @@ namespace MaTech.Common.Data {
             if (underlyingType == typeof(bool)) {
                 throw new NotSupportedException($"[DataEnum] Unsupported boolean-backed enum type [{enumType}]; cannot call `Enum.GetNames()` on it. It doesn't make sense to extend a boolean-backed enum type.");
             }
-            if (underlyingType != typeof(int)) unsafe {
+            if (underlyingType != typeof(int)) {
                 if (!DataEnumMaxIndexLookUp.ofTypes.TryGetValue(underlyingType, out maxEnumIndex)) {
                     Debug.LogError($"[DataEnum] Cannot determine max index for underlying type [{underlyingType}] of enum type [{enumType}]. Value auto-increment will be done in int range and might break with integer overflow.");
                 }

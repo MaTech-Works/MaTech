@@ -8,9 +8,9 @@ using System;
 
 namespace MaTech.Common.Algorithm {
     public static partial class Interpolators {
-        private const double PI_OVER_TWO = Math.PI / 2;
-        private const double TWO_OVER_PI = 2 / Math.PI;
-        private const double INVERSE_TWO_PI = 1 / (Math.PI * 2);
+        private const double PiOverTwo = Math.PI / 2;
+        private const double TwoOverPi = 2 / Math.PI;
+        private const double InverseTwoPi = 1 / (Math.PI * 2);
 
         private static class Presets {
             public class Linear : IInterpolator {
@@ -59,21 +59,21 @@ namespace MaTech.Common.Algorithm {
             }
 
             public class EaseInSine : IInterpolator {
-                public double Map(double k) => 1 - Math.Cos(k * PI_OVER_TWO);
-                public double Derivative(double k) => (PI_OVER_TWO * Math.Sin(k * PI_OVER_TWO));
-                public double Integral(double k) => k - (TWO_OVER_PI * Math.Sin(k * PI_OVER_TWO));
+                public double Map(double k) => 1 - Math.Cos(k * PiOverTwo);
+                public double Derivative(double k) => (PiOverTwo * Math.Sin(k * PiOverTwo));
+                public double Integral(double k) => k - (TwoOverPi * Math.Sin(k * PiOverTwo));
             }
 
             public class EaseOutSine : IInterpolator {
-                public double Map(double k) => Math.Sin(k * PI_OVER_TWO);
-                public double Derivative(double k) => (PI_OVER_TWO * Math.Cos(k * PI_OVER_TWO));
-                public double Integral(double k) => (-TWO_OVER_PI * Math.Sin(k * PI_OVER_TWO));
+                public double Map(double k) => Math.Sin(k * PiOverTwo);
+                public double Derivative(double k) => (PiOverTwo * Math.Cos(k * PiOverTwo));
+                public double Integral(double k) => (-TwoOverPi * Math.Sin(k * PiOverTwo));
             }
 
             public class EaseInOutSine : IInterpolator {
                 public double Map(double k) => (1 - Math.Cos(k * Math.PI)) / 2;
-                public double Derivative(double k) => (PI_OVER_TWO * Math.Sin(k * Math.PI));
-                public double Integral(double k) => k / 2 - (Math.Sin(k * Math.PI) * INVERSE_TWO_PI);
+                public double Derivative(double k) => (PiOverTwo * Math.Sin(k * Math.PI));
+                public double Integral(double k) => k / 2 - (Math.Sin(k * Math.PI) * InverseTwoPi);
             }
         }
     }

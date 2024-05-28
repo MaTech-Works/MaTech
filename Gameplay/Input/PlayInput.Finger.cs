@@ -55,8 +55,6 @@ namespace MaTech.Gameplay.Input {
         }
 
         public class FingerDictionary {
-            public const int defaultFingerCapacity = PlayInput.fingerCapacity;
-        
             public abstract class FingerRecord : Finger {
                 public override Ray Ray => ray;
                 public override Vector2Int Coord => coord;
@@ -75,7 +73,7 @@ namespace MaTech.Gameplay.Input {
             
             private readonly Dictionary<int, FingerRecordPrivate> dict;
 
-            public FingerDictionary(int initCapacity = defaultFingerCapacity) {
+            public FingerDictionary(int initCapacity = FingerCapacity) {
                 dict = new Dictionary<int, FingerRecordPrivate>(initCapacity);
             }
 
@@ -112,7 +110,7 @@ namespace MaTech.Gameplay.Input {
             
         }
 
-        public const int fingerCapacity = 10;
+        public const int FingerCapacity = 10;
 
         private readonly FingerDictionary fingers = new FingerDictionary();
         private readonly List<int> keyFingerCount = new List<int>(20);

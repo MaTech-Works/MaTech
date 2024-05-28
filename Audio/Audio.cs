@@ -11,13 +11,13 @@ using UnityEngine;
 
 namespace MaTech.Audio {
     public static partial class MaAudio {
-        private const string dllNameDefault = "MaAudio_Core";
-        private const string dllNameIOS = "__Internal";
+        private const string DllNameDefault = "MaAudio_Core";
+        private const string DllNameIOS = "__Internal";
         
         #if UNITY_IOS
-        private const string dllName = dllNameIOS;
+        private const string DllName = DllNameIOS;
         #elif UNITY_ANDROID || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_EDITOR
-        private const string dllName = dllNameDefault;
+        private const string DllName = DllNameDefault;
         #else
         #warning "MaAudio does not support this build platform. Exception will be thrown on calling native APIs since the native binary is not available."
         #endif
@@ -43,54 +43,54 @@ namespace MaTech.Audio {
 
         #region Audio System
 
-        [DllImport(dllName, EntryPoint = "MaAudio_Create")]
+        [DllImport(DllName, EntryPoint = "MaAudio_Create")]
         public static extern bool Create(int sampleRate); // note: call MaAudio.LoadForUnity to register extra handling for Unity
 
-        [DllImport(dllName, EntryPoint = "MaAudio_Destroy")]
+        [DllImport(DllName, EntryPoint = "MaAudio_Destroy")]
         public static extern bool Destroy(); // note: call MaAudio.UnloadForUnity to register extra handling for Unity
 
         public static extern bool IsValid {
-            [DllImport(dllName, EntryPoint = "MaAudio_IsValid")] get;
+            [DllImport(DllName, EntryPoint = "MaAudio_IsValid")] get;
         }
 
         public static extern bool Paused {
-            [DllImport(dllName, EntryPoint = "MaAudio_Pause")] set;
-            [DllImport(dllName, EntryPoint = "MaAudio_IsPaused")] get;
+            [DllImport(DllName, EntryPoint = "MaAudio_Pause")] set;
+            [DllImport(DllName, EntryPoint = "MaAudio_IsPaused")] get;
         }
 
         #endregion
 
         #region Audio Data
         
-        [DllImport(dllName, EntryPoint = "MaAudio_CreateAudio")]
+        [DllImport(DllName, EntryPoint = "MaAudio_CreateAudio")]
         public static extern IntPtr CreateAudio();
 
-        [DllImport(dllName, EntryPoint = "MaAudio_CreateAudioWithData")]
+        [DllImport(DllName, EntryPoint = "MaAudio_CreateAudioWithData")]
         public static extern IntPtr CreateAudioWithData(float[] samples, int sampleCount, int sampleRate);
 
-        [DllImport(dllName, EntryPoint = "MaAudio_ReleaseAudio")]
+        [DllImport(DllName, EntryPoint = "MaAudio_ReleaseAudio")]
         public static extern bool ReleaseAudio(IntPtr audio);
 
-        [DllImport(dllName, EntryPoint = "MaAudio_ReleaseAllAudio")]
+        [DllImport(DllName, EntryPoint = "MaAudio_ReleaseAllAudio")]
         public static extern bool ReleaseAllAudio();
 
-        [DllImport(dllName, EntryPoint = "MaAudio_LoadAudio")]
+        [DllImport(DllName, EntryPoint = "MaAudio_LoadAudio")]
         public static extern bool LoadAudio(IntPtr audio, float[] samples, int sampleCount, int sampleRate);
 
-        [DllImport(dllName, EntryPoint = "MaAudio_TestAudio")]
+        [DllImport(DllName, EntryPoint = "MaAudio_TestAudio")]
         public static extern int TestAudio(IntPtr audio);
         
         #endregion
 
         #region Audio Playback
 
-        [DllImport(dllName, EntryPoint = "MaAudio_Play")]
+        [DllImport(DllName, EntryPoint = "MaAudio_Play")]
         public static extern Channel Play(IntPtr audio, float volume, Mixer mixer, Channel channel);
-        [DllImport(dllName, EntryPoint = "MaAudio_PlayScheduled")]
+        [DllImport(DllName, EntryPoint = "MaAudio_PlayScheduled")]
         public static extern Channel PlayScheduled(IntPtr audio, double scheduledDspTime, float volume, Mixer mixer, Channel channel);
-        [DllImport(dllName, EntryPoint = "MaAudio_PlayDelayed")]
+        [DllImport(DllName, EntryPoint = "MaAudio_PlayDelayed")]
         public static extern Channel PlayDelayed(IntPtr audio, double delay, float volume, Mixer mixer, Channel channel);
-        [DllImport(dllName, EntryPoint = "MaAudio_Stop")]
+        [DllImport(DllName, EntryPoint = "MaAudio_Stop")]
         public static extern Channel Stop(Mixer mixer, Channel channel);
 
         // todo: native侧export还没有完成
@@ -101,14 +101,14 @@ namespace MaTech.Audio {
         public static extern double GetPosition(Mixer mixer, Channel channel);
         */
 
-        [DllImport(dllName, EntryPoint = "MaAudio_SetVolume")]
+        [DllImport(DllName, EntryPoint = "MaAudio_SetVolume")]
         public static extern bool SetVolume(Mixer mixer, Channel channel, float volume);
-        [DllImport(dllName, EntryPoint = "MaAudio_GetVolume")]
+        [DllImport(DllName, EntryPoint = "MaAudio_GetVolume")]
         public static extern float GetVolume(Mixer mixer, Channel channel);
 
-        [DllImport(dllName, EntryPoint = "MaAudio_SetMixerVolume")]
+        [DllImport(DllName, EntryPoint = "MaAudio_SetMixerVolume")]
         public static extern bool SetMixerVolume(Mixer mixer, float volume);
-        [DllImport(dllName, EntryPoint = "MaAudio_GetMixerVolume")]
+        [DllImport(DllName, EntryPoint = "MaAudio_GetMixerVolume")]
         public static extern float GetMixerVolume(Mixer mixer);
         
         #endregion
@@ -127,17 +127,17 @@ namespace MaTech.Audio {
         
         /// <summary> 音频进入到输出缓冲的时间，以秒计，可以用于游戏音效的准确计时，精度因平台而定。与GetMixerDSPTime(Instant)结果相同。 </summary>
         public static extern double OutputDSPTime {
-            [DllImport(dllName, EntryPoint = "MaAudio_GetOutputDSPTime")] get;
+            [DllImport(DllName, EntryPoint = "MaAudio_GetOutputDSPTime")] get;
         }
         
         /// <summary> 缓冲区的总大小，以秒计 </summary>
         public static extern double OutputBufferSize {
-            [DllImport(dllName, EntryPoint = "MaAudio_GetOutputBufferSize")] get;
+            [DllImport(DllName, EntryPoint = "MaAudio_GetOutputBufferSize")] get;
         }
         
         /// <summary> 缓冲区的最小填充大小，以秒计，这个数值可能来自音频驱动提供的数值，或者在无信息时可能取缓冲区大小的一半 </summary>
         public static extern double OutputBufferPadding {
-            [DllImport(dllName, EntryPoint = "MaAudio_GetOutputBufferPadding")] get;
+            [DllImport(DllName, EntryPoint = "MaAudio_GetOutputBufferPadding")] get;
         }
         
         /// <summary>
@@ -146,7 +146,7 @@ namespace MaTech.Audio {
         /// 当ActiveOutput开启时，本数值可能为自动测量的数值，可能在计算机切换硬件时发生变化。
         /// </summary>
         public static extern double OutputLatency {
-            [DllImport(dllName, EntryPoint = "MaAudio_GetOutputLatencyMeasured")] get;
+            [DllImport(DllName, EntryPoint = "MaAudio_GetOutputLatencyMeasured")] get;
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace MaTech.Audio {
         /// todo: 增加方法以强制禁用此方式，以便节省性能。
         /// </summary>
         public static extern bool IsLowLatency {
-            [DllImport(dllName, EntryPoint = "MaAudio_IsLowLatency")] get;
+            [DllImport(DllName, EntryPoint = "MaAudio_IsLowLatency")] get;
         }
         
         #endregion
@@ -168,7 +168,7 @@ namespace MaTech.Audio {
 
         private static extern Logger DebugLogFunction {
             [param: MarshalAs(UnmanagedType.FunctionPtr)]
-            [DllImport(dllName, EntryPoint = "MaAudio_SetDebugLogFunction", CharSet = CharSet.Ansi)] set;
+            [DllImport(DllName, EntryPoint = "MaAudio_SetDebugLogFunction", CharSet = CharSet.Ansi)] set;
         }
         
         #endregion

@@ -10,12 +10,12 @@ using MaTech.Gameplay.Input;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
-        private const int fingerBufferInitCapacity = 3 * PlayInput.fingerCapacity; // assumption: max 3 input events per frame per finger
+        private const int FingerBufferInitCapacity = 3 * PlayInput.FingerCapacity; // assumption: max 3 input events per frame per finger
         
         private readonly PlayInput.FingerDictionary fingersMainThread = new PlayInput.FingerDictionary();
 
-        private readonly List<PlayInput.FingerClone> fingerBuffer = new List<PlayInput.FingerClone>(fingerBufferInitCapacity);
-        private readonly StackList<int> fingerBufferIndexPool = new StackList<int>(fingerBufferInitCapacity);
+        private readonly List<PlayInput.FingerClone> fingerBuffer = new List<PlayInput.FingerClone>(FingerBufferInitCapacity);
+        private readonly StackList<int> fingerBufferIndexPool = new StackList<int>(FingerBufferInitCapacity);
 
         private int AllocateTouchIndex(PlayInput.Finger finger) {
             lock (fingerBuffer) {

@@ -438,7 +438,7 @@ namespace MaTech.Gameplay.Display {
         
         #region Private Methods - Sanity Check
 
-        private const double epsilonK = 1.000001;
+        private const double EpsilonK = 1.000001;
         
         private bool IsLayerTypeValid(DataEnum<ObjectType> type) {
             return pools.ContainsKey(type);
@@ -446,7 +446,7 @@ namespace MaTech.Gameplay.Display {
 
         private bool IsCarrierInRange(TCarrier carrier) {
             return (carrier.StartTime <= PlayTime.JudgeTime.Seconds + judgeWindowUp && carrier.EndTime >= PlayTime.JudgeTime.Seconds + judgeWindowDown) ||
-                   (carrier.DeltaYStart(PlayTime.DisplayY) <= DisplayWindowUpScaled * epsilonK && carrier.DeltaYEnd(PlayTime.DisplayY) >= DisplayWindowDownScaled * epsilonK);
+                   (carrier.DeltaYStart(PlayTime.DisplayY) <= DisplayWindowUpScaled * EpsilonK && carrier.DeltaYEnd(PlayTime.DisplayY) >= DisplayWindowDownScaled * EpsilonK);
         }
         
         #endregion

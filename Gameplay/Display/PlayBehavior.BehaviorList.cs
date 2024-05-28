@@ -30,7 +30,7 @@ namespace MaTech.Gameplay.Display {
             /// <summary> 适用于using语句，在尚未发起枚举的情况下使用 </summary>
             public DisposableLock LockRAII() => new DisposableLock(this);
 
-            public struct Enumerator : IEnumerator<T>, IDisposable, IEnumerator {
+            public struct Enumerator : IEnumerator<T> {
                 private readonly BehaviorList<T> self;
                 private List<T>.Enumerator inner;
 

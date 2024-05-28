@@ -23,10 +23,10 @@ namespace MaTech.Gameplay.Input {
 
         private bool touchEnabled = false;
 
-        private const int touchCapacity = 10;
+        private const int TouchCapacity = 10;
         
-        private List<int> touchesToPress = new List<int>(touchCapacity);
-        private List<int> touchesPressing = new List<int>(touchCapacity);
+        private List<int> touchesToPress = new List<int>(TouchCapacity);
+        private List<int> touchesPressing = new List<int>(TouchCapacity);
         private bool firstUpdateAfterEnable = false;
 
         private void ResetTouch() {

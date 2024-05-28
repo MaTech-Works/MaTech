@@ -15,7 +15,7 @@ namespace MaTech.Gameplay.Processor {
 
         #region Comparisons
 
-        private const float toleranceFindTimeOffset = -0.5f;
+        private const float ToleranceFindTimeOffset = -0.5f;
 
         /// <summary> 二分查找的标准：carrier是否比beat更晚，绝对无法用来计算数值；会查找列表里最后一个得到false的carrier </summary>
         private bool IsAfterTimeCarrierByBeat(TimeCarrier carrier, Fraction beat) {
@@ -24,7 +24,7 @@ namespace MaTech.Gameplay.Processor {
         
         /// <summary> 二分查找的标准：carrier是否比offset更晚，绝对无法用来计算数值；会查找列表里最后一个得到false的carrier </summary>
         private bool IsAfterTimeCarrierByTime(TimeCarrier carrier, double offset) {
-            return carrier.StartTime + toleranceFindTimeOffset > offset;
+            return carrier.StartTime + ToleranceFindTimeOffset > offset;
         }
         
         #endregion

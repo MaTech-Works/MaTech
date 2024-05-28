@@ -24,7 +24,7 @@ namespace MaTech.Gameplay.Input {
             }
         }
 
-        private const int maxKeyEnum = 512;
+        private const int MaxKeyEnum = 512;
         
         private bool[] keyState;
         private void SetKeyState(KeyCode keyCode, bool isDown) {
@@ -60,7 +60,7 @@ namespace MaTech.Gameplay.Input {
                     SetIndexState(i, false);
                 }
             }
-            keyState = new bool[maxKeyEnum];
+            keyState = new bool[MaxKeyEnum];
             indexState = new bool[keyCount];
         }
 

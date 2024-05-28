@@ -26,7 +26,7 @@ namespace MaTech.Common.Data {
 
         public partial struct Selector<TContext, TEnum0> {
             /// <summary>
-            /// 见 <see cref="MetaTableGenericGeneric{TEnum}.Constraint"/>。
+            /// 见 <see cref="MetaTableGeneric{TEnum}.Constraint"/>。
             /// 赋值时会为当前选中的路径创建MetaTable，类似于Set等方法。
             /// </summary>
             public MetaTableGeneric<TEnum0>.IConstraint? Contract {

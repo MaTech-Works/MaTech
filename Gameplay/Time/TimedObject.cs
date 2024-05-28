@@ -31,24 +31,33 @@ namespace MaTech.Gameplay.Time {
         public ITimePoint StartOrMin => Start ?? TimePoint.MinValue;
         public ITimePoint EndOrMax => End ?? TimePoint.MaxValue;
         
-        public static readonly IComparer<TimedObject> ComparerAnchorBeat = CreateComparer(true, o => o.Anchor);
-        public static readonly IComparer<TimedObject> ComparerAnchorTime = CreateComparer(false, o => o.Anchor);
-        public static readonly IComparer<TimedObject> ComparerStartBeat = CreateComparer(true, o => o.StartOrMin);
-        public static readonly IComparer<TimedObject> ComparerStartTime = CreateComparer(false, o => o.StartOrMin);
-        public static readonly IComparer<TimedObject> ComparerEndBeat = CreateComparer(true, o => o.EndOrMax);
-        public static readonly IComparer<TimedObject> ComparerEndTime = CreateComparer(false, o => o.EndOrMax);
+        public static IComparer<TimedObject> ComparerAnchorBeat => comparers[0];
+        public static IComparer<TimedObject> ComparerAnchorTime => comparers[1];
+        public static IComparer<TimedObject> ComparerStartBeat => comparers[2];
+        public static IComparer<TimedObject> ComparerStartTime => comparers[3];
+        public static IComparer<TimedObject> ComparerEndBeat => comparers[4];
+        public static IComparer<TimedObject> ComparerEndTime => comparers[5];
         
         public static IComparer<TimedObject> GetComparer(TimedObjectOrderBy orderObject, TimePointOrderBy orderTimePoint) {
             switch (orderObject, orderTimePoint) {
-            case (TimedObjectOrderBy.Anchor, TimePointOrderBy.Beat): return ComparerAnchorBeat;
-            case (TimedObjectOrderBy.Anchor, TimePointOrderBy.Time): return ComparerAnchorTime;
-            case (TimedObjectOrderBy.Start, TimePointOrderBy.Beat): return ComparerStartBeat;
-            case (TimedObjectOrderBy.Start, TimePointOrderBy.Time): return ComparerStartTime;
-            case (TimedObjectOrderBy.End, TimePointOrderBy.Beat): return ComparerEndBeat;
-            case (TimedObjectOrderBy.End, TimePointOrderBy.Time): return ComparerEndTime;
+            case (TimedObjectOrderBy.Anchor, TimePointOrderBy.Beat): return comparers[0];
+            case (TimedObjectOrderBy.Anchor, TimePointOrderBy.Time): return comparers[1];
+            case (TimedObjectOrderBy.Start, TimePointOrderBy.Beat): return comparers[2];
+            case (TimedObjectOrderBy.Start, TimePointOrderBy.Time): return comparers[3];
+            case (TimedObjectOrderBy.End, TimePointOrderBy.Beat): return comparers[4];
+            case (TimedObjectOrderBy.End, TimePointOrderBy.Time): return comparers[5];
             default: throw new InvalidOperationException($"TimedObject.GetComparer called with unsupported enum [{orderObject}] and [{orderTimePoint}]");
             }
         }
+
+        private static readonly IComparer<TimedObject>[] comparers = {
+            CreateComparer(true, o => o.Anchor),
+            CreateComparer(false, o => o.Anchor),
+            CreateComparer(true, o => o.StartOrMin),
+            CreateComparer(false, o => o.StartOrMin),
+            CreateComparer(true, o => o.EndOrMax),
+            CreateComparer(false, o => o.EndOrMax),
+        };
 
         private static IComparer<TimedObject> CreateComparer(bool isBeatInsteadOfTime, Func<TimedObject, ITimePoint> whichTimePoint) {
             return new MappedComparer<TimedObject, ITimePoint>(isBeatInsteadOfTime ? TimePoint.ComparerBeat : TimePoint.ComparerTime, whichTimePoint);

@@ -200,8 +200,8 @@ namespace MaTech.Common.Utils {
             return default;
         }
 
-        public static void GetComponentsInScene<T>(this MonoBehaviour mono, [NotNull] List<T> result, bool clearResult = true) => GetComponentsInScene<T>(mono.gameObject.scene, result, clearResult);
-        public static void GetComponentsInScene<T>(this GameObject obj, [NotNull] List<T> result, bool clearResult = true) => GetComponentsInScene<T>(obj.scene, result, clearResult);
+        public static void GetComponentsInScene<T>(this MonoBehaviour mono, [NotNull] List<T> result, bool clearResult = true) => GetComponentsInScene(mono.gameObject.scene, result, clearResult);
+        public static void GetComponentsInScene<T>(this GameObject obj, [NotNull] List<T> result, bool clearResult = true) => GetComponentsInScene(obj.scene, result, clearResult);
         public static void GetComponentsInScene<T>(this UnityScene scene, [NotNull] List<T> result, bool clearResult = true) {
             Assert.IsNotNull(result);
             if (clearResult) result.Clear();

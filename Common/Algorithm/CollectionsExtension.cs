@@ -91,8 +91,10 @@ namespace MaTech.Common.Algorithm {
             }
             return -1;
         }
-        
+
         /// <summary> 使用非列表元素的值 <b>二分搜索</b> 有序列表，在无序列表上不保证返回结果。 </summary>
+        /// <param name="list"></param>
+        /// <param name="value"></param>
         /// <param name="matchOrAfterValue"> 对搜索目标以及所有排列在后面的元素返回true </param>
         /// <returns> 第一个匹配元素的下标，若无则返回-1 </returns>
         public static int IndexOfFirstMatchedValueBinarySearch<T, TValue>(this List<T> list, TValue value, Func<T, TValue, bool> matchOrAfterValue) {
@@ -111,8 +113,10 @@ namespace MaTech.Common.Algorithm {
                 
             return (int)upper;
         }
-        
+
         /// <summary> 使用非列表元素的值 <b>二分搜索</b> 有序列表，在无序列表上不保证返回结果。 </summary>
+        /// <param name="list"></param>
+        /// <param name="value"></param>
         /// <param name="matchOrBeforeValue"> 对搜索目标以及所有排列在前面的元素返回true </param>
         /// <returns> 最后一个匹配元素的下标，若无则返回-1 </returns>
         public static int IndexOfLastMatchedValueBinarySearch<T, TValue>(this List<T> list, TValue value, Func<T, TValue, bool> matchOrBeforeValue) {

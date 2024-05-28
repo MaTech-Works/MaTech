@@ -11,7 +11,7 @@ namespace MaTech.Common.Algorithm {
     /// 一个固定使用List实现的Stack，将RemoveAt(Count-1)封装并提供Empty属性供检查。
     /// </summary>
     public class StackList<T> : List<T> {
-        public StackList() : base() { }
+        public StackList() { }
         public StackList(IEnumerable<T> collection) : base(collection) { }
         public StackList(int capacity) : base(capacity) { }
 

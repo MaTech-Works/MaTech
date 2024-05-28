@@ -52,11 +52,11 @@ namespace MaTech.Common.Algorithm {
             }
 
             public Caster<TSource, TResult>? CreateIfValid<TResult>() {
-                return (Caster<TSource, TResult>?)methodCreate?.MakeGenericMethod(typeof(TResult))?.Invoke(null, null);
+                return (Caster<TSource, TResult>?)methodCreate?.MakeGenericMethod(typeof(TResult)).Invoke(null, null);
             }
 
             public Caster<TResult, TSource>? CreateReversedIfValid<TResult>() {
-                return (Caster<TResult, TSource>?)methodCreateReversed?.MakeGenericMethod(typeof(TResult))?.Invoke(null, null);
+                return (Caster<TResult, TSource>?)methodCreateReversed?.MakeGenericMethod(typeof(TResult)).Invoke(null, null);
             }
         }
     }

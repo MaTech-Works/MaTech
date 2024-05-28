@@ -33,6 +33,7 @@ SOFTWARE.
 
 namespace MaTech.Gameplay.Input.NativeInput {
     public enum RawKey : ushort {
+        // ReSharper disable InconsistentNaming IdentifierTypo
         None = 0x00,
         LeftButton = 0x01,
         RightButton = 0x02,

@@ -16,6 +16,7 @@ namespace MaTech.Common.Utils {
         }
 
         public enum BinaryFormat {
+            // ReSharper disable InconsistentNaming
             UNKNOWN,
             OGG,
             MP3,
@@ -23,24 +24,18 @@ namespace MaTech.Common.Utils {
             PNG,
             JPG,
             ZIP
+            // ReSharper restore InconsistentNaming
         }
 
         public static BinaryFormat DetectFormat(string filename) {
-            FileStream stream;
+            var buffer = new byte[4];
+            
             try {
-                stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                if (stream.Read(buffer, 0, 4) < 4) return BinaryFormat.UNKNOWN;
             } catch (Exception) {
                 return BinaryFormat.UNKNOWN;
             }
-            
-            if (stream.Length < 4) {
-                stream.Close();
-                return BinaryFormat.UNKNOWN;
-            }
-
-            var buffer = new byte[4];
-            stream.Read(buffer, 0, 4);
-            stream.Close();
             
             if (buffer[0] == 'O' && buffer[1] == 'g' && buffer[2] == 'g' && buffer[3] == 'S') return BinaryFormat.OGG;
             if (buffer[0] == 0x89 && buffer[1] == 'P' && buffer[2] == 'N' && buffer[3] == 'G')  return BinaryFormat.PNG;
@@ -99,8 +94,10 @@ namespace MaTech.Common.Utils {
 
         // https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/using-async-for-file-access
         public static async UniTask<string> ReadFileAsString(string path) {
+            await using var _ = UniTask.ReturnToCurrentSynchronizationContext();
+            await UniTask.SwitchToThreadPool();
+            
             const int sizeBuffer = 4096;
-
             await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, sizeBuffer, true);
             
             var buffer = new byte[sizeBuffer];  
@@ -117,14 +114,26 @@ namespace MaTech.Common.Utils {
         }
 
         public static async UniTask<byte[]> ReadFileAsBytes(string path) {
+            await using var _ = UniTask.ReturnToCurrentSynchronizationContext();
             await UniTask.SwitchToThreadPool();
 
-            await using var sourceStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, false);
+            const int sizeBuffer = 4096;
+            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, sizeBuffer, true);
             
-            var buffer = new byte[sourceStream.Length];
-            sourceStream.Read(buffer, 0, buffer.Length);
+            int sizeReadMax = (int)stream.Length;
+            int sizeReadTotal = 0;
             
-            return buffer;
+            var result = new byte[sizeReadMax];
+            
+            while (sizeReadTotal < sizeReadMax)
+            {  
+                int sizeRead = await stream.ReadAsync(result, sizeReadTotal, sizeReadMax);
+                if (sizeRead == 0)
+                    return result;
+                sizeReadTotal += sizeRead;
+            }
+            
+            return result;
         }
     }
 }

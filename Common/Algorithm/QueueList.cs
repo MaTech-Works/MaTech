@@ -13,7 +13,7 @@ namespace MaTech.Common.Algorithm {
     public class QueueList<T> : List<T> {
         private int indexNext;
 
-        public QueueList() : base() { }
+        public QueueList() { }
         public QueueList(IEnumerable<T> collection) : base(collection) { }
         public QueueList(int capacity) : base(capacity) { }
 

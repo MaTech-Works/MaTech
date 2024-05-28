@@ -12,7 +12,8 @@ using MaTech.Common.Data;
 
 namespace MaTech.Gameplay.Time {
     public enum TimePointOrderBy {
-        Beat, Time
+        Beat = 0,
+        Time = 1,
     }
 
     /// <summary> 基于节拍与时间双重定位的乐理时间码（只读接口） </summary>
@@ -32,8 +33,10 @@ namespace MaTech.Gameplay.Time {
 
     /// <summary> 基于节拍与时间双重定位的乐理时间码 </summary>
     public class TimePoint : ITimePoint {
-        public static readonly ITimePoint MinValue = new TimePoint { Beat = Fraction.minValue, Time = TimeUnit.MaxValue };
-        public static readonly ITimePoint MaxValue = new TimePoint { Beat = Fraction.maxValue, Time = TimeUnit.MinValue };
+        private static readonly TimePoint minValue = new() { Beat = Fraction.minValue, Time = TimeUnit.MinValue };
+        private static readonly TimePoint maxValue = new() { Beat = Fraction.maxValue, Time = TimeUnit.MaxValue };
+        public static ITimePoint MinValue => minValue;
+        public static ITimePoint MaxValue => maxValue;
 
         private BeatUnit beat = 0;
         private TimeUnit time = TimeUnit.Zero;
@@ -96,14 +99,17 @@ namespace MaTech.Gameplay.Time {
         private class ComparerTimeImpl : IComparer<ITimePoint> {
             public int Compare(ITimePoint left, ITimePoint right) => left.Time.CompareTo(right.Time);
         }
+        
+        private static readonly IComparer<ITimePoint>[] comparers = { new ComparerBeatImpl(), new ComparerTimeImpl() };
+        private static readonly Comparison<ITimePoint>[] comparisons = { ComparerBeat.Compare, ComparerTime.Compare };
 
-        public static readonly IComparer<ITimePoint> ComparerBeat = new ComparerBeatImpl();
-        public static readonly IComparer<ITimePoint> ComparerTime = new ComparerTimeImpl();
-        public static IComparer<ITimePoint> GetComparer(TimePointOrderBy order) => order == TimePointOrderBy.Beat ? ComparerBeat : ComparerTime;
+        public static IComparer<ITimePoint> ComparerBeat => comparers[(int)TimePointOrderBy.Beat];
+        public static IComparer<ITimePoint> ComparerTime => comparers[(int)TimePointOrderBy.Time];
+        public static IComparer<ITimePoint> GetComparer(TimePointOrderBy order) => comparers[(int)order];
 
-        public static readonly Comparison<ITimePoint> ComparisonBeat = ComparerBeat.Compare;
-        public static readonly Comparison<ITimePoint> ComparisonTime = ComparerTime.Compare;
-        public static Comparison<ITimePoint> GetComparison(TimePointOrderBy order) => order == TimePointOrderBy.Beat ? ComparisonBeat : ComparisonTime;
+        public static Comparison<ITimePoint> ComparisonBeat => comparisons[(int)TimePointOrderBy.Beat];
+        public static Comparison<ITimePoint> ComparisonTime => comparisons[(int)TimePointOrderBy.Time];
+        public static Comparison<ITimePoint> GetComparison(TimePointOrderBy order) => comparisons[(int)order];
 
         public override string ToString() => $"Beat {beat}, Time {time}";
     }
