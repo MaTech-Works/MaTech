@@ -30,21 +30,28 @@ namespace MaTech.Gameplay.Processor {
         /// 输入的effect列表需要按照beat顺序排序，第一个signature表示bar的开始。
         /// </summary>
         public static List<BarInfo> CreateBars(List<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+            // TODO: 封装成EffectTimeline
+            // TODO: 处理Signature和ShowBar的End
+            
+            Fraction barLength = new Fraction(4);
+            bool showBar = false;
+            
             // Extract beat-signature and beat-showBar info from effects
             var listSign = new List<(Fraction, Fraction)>();
             var listShowBar = new List<(Fraction, bool)>();
             foreach (var effect in effects) {
-                if (effect.type == EffectType.Signature) listSign.Add((effect.Start.Beat, effect.value.Fraction));
-                if (effect.type == EffectType.ShowBar) listShowBar.Add((effect.Start.Beat, effect.value.Bool));
+                switch (effect.type.Value) {
+                case EffectType.Signature when effect.Start == null: barLength = effect.value.Fraction; break;
+                case EffectType.ShowBar when effect.Start == null: showBar = effect.value.Bool; break;
+                case EffectType.Signature: listSign.Add((effect.Start.Beat, effect.value.Fraction)); break;
+                case EffectType.ShowBar: listShowBar.Add((effect.Start.Beat, effect.value.Bool)); break;
+                }
             }
             
             listSign.Add((Fraction.maxValue, Fraction.maxValue));
             listShowBar.Add((Fraction.maxValue, true));
             
             var listBar = new List<BarInfo>();
-
-            Fraction barLength = new Fraction(4);
-            bool hidden = false;
             
             Fraction nextSignBeat = listSign[0].Item1;
             Fraction nextShowBarBeat = listShowBar[0].Item1;
@@ -62,12 +69,12 @@ namespace MaTech.Gameplay.Processor {
                     nextSignBeat = listSign[indexSign].Item1;
                 }
                 while (nextShowBarBeat <= currBeat) {
-                    hidden = !listShowBar[indexShowBar].Item2;
+                    showBar = listShowBar[indexShowBar].Item2;
                     ++indexShowBar;
                     Assert.IsTrue(indexShowBar < listShowBar.Count);
                     nextShowBarBeat = listShowBar[indexShowBar].Item1;
                 }
-                listBar.Add(new BarInfo(currBeat, TimeUnit.Zero, hidden));
+                listBar.Add(new BarInfo(currBeat, TimeUnit.Zero, !showBar));
                 if (listBar.Count >= maxBarCount)
                     return listBar;
             }
@@ -87,8 +94,8 @@ namespace MaTech.Gameplay.Processor {
             int barCount = bars.Count;
             int barIndex = 0;
             
-            // TODO: 实现一个通用timeline类，并将顺序多次查值的操作封装起来
-            // TODO: 导入Span.dll，这里用Span<BarInfo>和foreach ref修改bar数据
+            // TODO: 封装成EffectTimeline与多次顺序插值方法
+            // TODO: 导入Span.dll，用Span<BarInfo>和foreach ref修改bar数据
 
             var lastTempo = tempos.First();
             foreach (var tempo in tempos) {

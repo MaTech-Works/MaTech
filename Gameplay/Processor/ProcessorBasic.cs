@@ -92,43 +92,43 @@ namespace MaTech.Gameplay.Processor {
 
         private void ProcessTime() {
             Assert.IsTrue(Tempos.Count > 0);
+            
+            // TODO: 把代码封装成EffectTimeline
 
             // 按照beat顺序排序tempo队列，如果遇到负delay或者负bpm，不处理顺序问题
-            // 这会在tempo同一拍出现第二个时，令位于第二个tempo
-            var timePointsSorted = new QueueList<TempoChange>(Tempos.OrderBy(tp => tp, TimedObject.ComparerStartBeat));
+            var temposSorted = new QueueList<TempoChange>(Tempos.OrderBy(tp => tp, TimedObject.ComparerStartBeat));
 
-            if (Effects != null && Effects.Count > 0) {
+            if (Effects is { Count: > 0 }) {
+                // 将开头和结尾分别列出并排序，先是无头的开始，然后是剩下的，同beat先开始后结束
+                var starts = Effects.Where(effect => effect.Start != null).Select(effect => (effect, beat: effect.Start.Beat, isStart: true));
+                var ends = Effects.Where(effect => effect.End != null).Select(effect => (effect, beat: effect.End.Beat, isStart: false));
+                var effectsSorted = starts.Concat(ends).OrderBy(tuple => tuple.beat).ThenBy(tuple => tuple.isStart ? 0 : 1).ToQueueList();
+
+                timeList.Capacity = temposSorted.Count + effectsSorted.Count;
+                
                 // 为第一个tp前的effect提供参考
                 var startingReferenceTimeCarrier = CreateTimeWithInitEffects(Tempos[0], Effects.Where(e => e.Start == null));
-
-                // 将开头和结尾分别列出并排序，先是无头的开始，然后是剩下的，同beat先开始后结束
-                var starts = Effects.Where(e => ((TimedObject)e).Start != null).Select(e => (Effect: e, Beat: e.Start.Beat, IsStart: true));
-                var ends = Effects.Where(e => e.End != null).Select(e => (Effect: e, Beat: e.End.Beat, IsStart: false));
-                var effectsSorted = starts.Concat(ends).OrderBy(tuple => tuple.Beat).ThenBy(tuple => !tuple.IsStart).ToQueueList();
-
-                // 开摆
-                timeList.Capacity = timePointsSorted.Count + effectsSorted.Count;
 
                 var lastTimeCarrier = startingReferenceTimeCarrier;
                 var nextTimeBeat = startingReferenceTimeCarrier.StartBeat;
                 while (true) {
-                    while (effectsSorted.HasNext && effectsSorted.Peek().Beat < nextTimeBeat) {
+                    while (effectsSorted.HasNext && effectsSorted.Peek().beat < nextTimeBeat) {
                         var next = effectsSorted.Next();
-                        timeList.Add(lastTimeCarrier = CreateTimeFromEffect(next.Effect, lastTimeCarrier, next.IsStart));
+                        timeList.Add(lastTimeCarrier = CreateTimeFromEffect(next.effect, lastTimeCarrier, next.isStart));
                     }
 
-                    if (!timePointsSorted.HasNext) break;
+                    if (!temposSorted.HasNext) break;
 
-                    timeList.Add(lastTimeCarrier = CreateTimeFromTempo(timePointsSorted.Next(), lastTimeCarrier));
-                    nextTimeBeat = timePointsSorted.PeekOrDefault(null)?.Start.Beat ?? Fraction.maxValue;
+                    timeList.Add(lastTimeCarrier = CreateTimeFromTempo(temposSorted.Next(), lastTimeCarrier));
+                    nextTimeBeat = temposSorted.PeekOrDefault()?.Start.Beat ?? Fraction.maxValue;
                 }
             } else {
                 // 只有tp容器的话，直接简化处理
-                timeList.Capacity = timePointsSorted.Count;
+                timeList.Capacity = temposSorted.Count;
 
                 TimeCarrier lastTimeCarrier = null;
-                foreach (var time in timePointsSorted) {
-                    lastTimeCarrier = CreateTimeFromTempo(time, lastTimeCarrier);
+                foreach (var tempo in temposSorted) {
+                    lastTimeCarrier = CreateTimeFromTempo(tempo, lastTimeCarrier);
                     timeList.Add(lastTimeCarrier);
                 }
             }
@@ -164,7 +164,7 @@ namespace MaTech.Gameplay.Processor {
                 return;
             }
 
-            var endBeat = Objects.Last().End.Beat;
+            var endBeat = Objects.Select(o => (o.End ?? o.StartOrMin).Beat).Max();
             var bars = BarUtil.CreateBars(Tempos, Effects, endBeat);
             
             barList = new QueueList<BarCarrier>(bars.Count);

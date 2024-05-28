@@ -9,18 +9,29 @@
 using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay.Data {
-    public class TempoChange : TimedObjectStartOnly {
+    public class TempoChange : TimedObject {
+        private readonly ITimePoint start;
+        
         public double beatLength = 0.5; // seconds per beat
 
+        // ReSharper disable once InconsistentNaming
         public double BPM {
             get => 60 / beatLength;
             set => beatLength = 60 / value;
         }
 
-        public TempoChange(double bpm, ITimePoint? injectedStart = null) : base(injectedStart) => BPM = bpm;
+        public TempoChange(double bpm, ITimePoint? injectedStart = null) {
+            start = injectedStart ?? new TimePoint();
+            BPM = bpm;
+        }
 
-        public TimeUnit CalculateTimeFromBeat(BeatUnit beat) => TimeUnit.FromSeconds((beat.Value - t.Beat.Value) * beatLength).OffsetBy(t.Time);
-        public BeatUnit CalculateBeatFromTime(TimeUnit time) => BeatUnit.FromValue((time.Seconds - t.Time.Seconds) / beatLength).OffsetBy(t.Beat);
+        public override ITimePoint Start => start;
+        public override ITimePoint? End => null;
+        
+        public TimePoint? MutableStart => start as TimePoint;
+
+        public TimeUnit CalculateTimeFromBeat(BeatUnit beat) => TimeUnit.FromSeconds((beat.Value - start.Beat.Value) * beatLength).OffsetBy(start.Time);
+        public BeatUnit CalculateBeatFromTime(TimeUnit time) => BeatUnit.FromValue((time.Seconds - start.Time.Seconds) / beatLength).OffsetBy(start.Beat);
     }
 
     public static class TempoChangeExtensionMethods {

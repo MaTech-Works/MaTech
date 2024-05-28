@@ -55,24 +55,35 @@ namespace MaTech.Gameplay.Data {
         public readonly DataEnum<EffectType> type;
         public readonly Variant value;
         
+        // TODO: 把代码封装成EffectTimeline
+        
         // TODO: 实现插值方法
         // TODO: 将value改为valueStart和valueEnd来对应连续变化的值
         //public readonly Func<> interpolation;
 
         // TODO: 如何对非浮点数据插值？
         // TODO: 将Variant类重命名成Number类
-        public Variant ValueAt(TimeUnit time) => TimeUnit.IsInRangeByValue(time, Start.Time, End.Time) ? value : Variant.None;
-        public Variant ValueAt(BeatUnit beat) => BeatUnit.IsInRangeByFraction(beat, Start.Beat, End.Beat) ? value : Variant.None;
+        public Variant ValueAt(TimeUnit time) => TimeUnit.IsInRangeByValue(time, StartOrMin.Time, EndOrMax.Time) ? value : Variant.None;
+        public Variant ValueAt(BeatUnit beat) => BeatUnit.IsInRangeByFraction(beat, StartOrMin.Beat, EndOrMax.Beat) ? value : Variant.None;
 
-        public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? injectedStart = null, ITimePoint? injectedEnd = null)
-            : base(injectedStart, injectedEnd) {
+        public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? start = null, ITimePoint? end = null) {
             this.type = type;
             this.value = value;
+            this.range = (start, end);
         }
         
-        public Effect(Effect other) : base(other.Start, other.End) {
+        public Effect(Effect other) {
             this.type = other.type;
             this.value = other.value;
+            this.range = other.range;
         }
+
+        private readonly (ITimePoint? start, ITimePoint? end) range;
+
+        public override ITimePoint? Start => range.start;
+        public override ITimePoint? End => range.end;
+
+        public TimePoint? MutableStart => range.start as TimePoint;
+        public TimePoint? MutableEnd => range.end as TimePoint;
     }
 }
