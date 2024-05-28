@@ -1,0 +1,7 @@
+﻿{
+  "name": "xxHash",
+  "rootNamespace": "Standart.Hash.xxHash",
+  "allowUnsafeCode": true,
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

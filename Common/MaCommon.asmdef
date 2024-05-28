@@ -3,7 +3,9 @@
     "rootNamespace": "MaTech.Common",
     "references": [
         "UniTask",
-        "Json.net"
+        "Json.net",
+        "Optional",
+        "xxHash"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
