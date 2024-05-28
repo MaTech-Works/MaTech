@@ -33,13 +33,13 @@ namespace MaTech.Common.Algorithm {
     /// </summary>
     public interface IBoxlessConvertible {
         #if NET7_0_OR_GREATER
-        //static abstract bool IsBoxlessConvertibleToType<TResult>();  // we will use this one day eventually...
+        //static abstract bool IsBoxlessConvertibleToType<TResult>();  // .net 7.0 when?
         #endif
         TResult ToType<TResult>(IFormatProvider? provider);
     }
     
     /// <summary>
-    /// A set of generic methods that mimics System.Convert.ChangeType, while stay boxless in the conversion process, and doing passthrough between two same generic types.
+    /// A set of generic methods that mimics <see cref="M:System.Convert.ChangeType" />, while stay boxless in the conversion process, and doing passthrough between two same generic types.
     /// Inspired from https://stackoverflow.com/a/45508419 and https://stackoverflow.com/a/60395130.
     /// <para/>
     /// Not all conversion cases are covered.
@@ -48,15 +48,14 @@ namespace MaTech.Common.Algorithm {
     /// <item> From enum to any integral type </item>
     /// <item> From any integral type to enum </item>
     /// <item> Between value types supported by non-boxing methods <c>Convert.ToXXX</c> </item>
-    /// <item> From a <c>IConvertible</c> to a type supported by any method in <c>IConvertible</c> except <c>IConvertible.ToType</c> </item>
-    /// <item> From a <c>IBoxlessConvertible</c> to a type supported by non-boxing methods <c>IConvertible.ToXXX</c> (no down-casting is performed for structs input) </item>
+    /// <item> From a <c>IConvertible</c> to a type supported by any method in <c>IConvertible</c> except <c>IConvertible.ToType</c> (which forces boxing) </item>
+    /// <item> From a <c>IBoxlessConvertible</c> (without up-casting struct to this interface) to a supported type according to <c>IBoxlessConvertible.IsBoxlessConvertibleToType</c> </item>
     /// </list>
     /// </summary>
     public static partial class BoxlessConvert {
         // TODO: Support IntPtr and UIntPtr
         // TODO: Support passthrough for assignable
         // TODO: Support unpacking Nullable
-        // TODO: Support IntPtr and UIntPtr
 
         /// Throws when cast is not supported.
         public static class To<TResult> {
