@@ -93,7 +93,7 @@ namespace MaTech.Gameplay.Processor {
         private void UpdateTimeCarrierSpeedAndY(TimeCarrier time, TimeCarrier relative) {
             time.speed = CalculateTimeCarrierSpeed(time);
             time.start.displayY = CalculateYFromTime(time.StartTime, relative ?? time) + time.jumpTime * time.speed;
-            time.noteVelocityScale = (adjustHS && scrollConstant) ? (refBeatLen / time.tempo.beatLength) : 1;
+            time.noteVelocityScale = (adjustNoteVelocity && scrollConstant) ? (refBeatLen / time.tempo.beatLength) : 1;
         }
 
         private void ApplyRangedEffectToTimeCarrier(TimeCarrier time, Effect effect) {

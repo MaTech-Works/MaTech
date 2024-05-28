@@ -35,19 +35,12 @@ namespace MaTech.Gameplay.Processor {
         [SerializeField, ReadOnlyInInspector] protected bool scrollConstant;
         /// <summary> 在ScrollConstant为true时effect指定的scroll值仍然生效；ScrollConstant为false时无效 </summary>
         [SerializeField, ReadOnlyInInspector] protected bool forceScroll;
-        /// <summary> 无视所有effect中的HS数据，但与adjustHS不冲突 </summary>
-        [SerializeField, ReadOnlyInInspector] protected bool ignoreHS;
         /// <summary> 在ScrollConstant为true时，根据BPM大小调整HS，使得原本HS相同、beat间隔相同的两音符的显示间距相同；ScrollConstant为false时无效，因为此时音符的显示间隔是固定的 </summary>
-        [SerializeField, ReadOnlyInInspector] protected bool adjustHS;
+        [SerializeField, ReadOnlyInInspector] protected bool adjustNoteVelocity;
 
         /// <summary> 是否按照默认逻辑生成小节线信息，为false时将不会为<see cref="barList" />准备内容，完全依靠派生类向<see cref="barList" />的输出 </summary>
         [SerializeField] protected bool barEnabled = true;
 
-        /// <summary> 是否按照默认逻辑生成曲目轨道，为false时将不会为<see cref="audioTrack" />准备内容，完全依靠派生类向<see cref="audioTrack" />的输出 </summary>
-        [SerializeField] protected bool audioEnabled = true;
-        /// <summary> 是否将音符的采样也加入到音轨里 </summary>
-        [SerializeField] protected bool noteAsSample = true;
-    
         // 仅在Process时有效的临时变量
         protected QueueList<TimeCarrier> timeList;
         protected QueueList<NoteCarrier> noteList;
