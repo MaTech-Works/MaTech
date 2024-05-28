@@ -7,6 +7,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Serialization;
 
 namespace MaTech.Audio {
     /// <summary>
@@ -14,8 +15,9 @@ namespace MaTech.Audio {
     /// 可以实例化多份，可以播放同个track，但是必须在主线程使用。
     /// </summary>
     public partial class SampleSequencer : MonoBehaviour {
-        [SerializeField] private double bufferTime = 0.5;
-        public double BufferTime => bufferTime;
+        [FormerlySerializedAs("bufferTime")]
+        [SerializeField] private double bufferOffset = 0.5;
+        public double BufferOffset => bufferOffset;
 
         public double Length { get; private set; }
 
