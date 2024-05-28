@@ -8,10 +8,8 @@ namespace Optional
     /// </summary>
     /// <typeparam name="T">The type of the value to be wrapped.</typeparam>
     /// <typeparam name="TException">A exceptional value describing the lack of an actual value.</typeparam>
-#if !NETSTANDARD10
-    [Serializable]
-#endif
-    public struct Option<T, TException> : IEquatable<Option<T, TException>>, IComparable<Option<T, TException>>
+    /// TODO: Support serializable for unity, while marking most methods readonly
+    public readonly struct Option<T, TException> : IEquatable<Option<T, TException>>, IComparable<Option<T, TException>>
     {
         private readonly bool hasValue;
         private readonly T value;

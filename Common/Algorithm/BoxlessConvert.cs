@@ -8,6 +8,7 @@
 
 using System;
 using Optional;
+using Optional.Unsafe;
 
 namespace MaTech.Common.Algorithm {
     /// <summary>

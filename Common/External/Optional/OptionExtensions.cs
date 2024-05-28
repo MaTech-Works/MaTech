@@ -215,5 +215,39 @@ namespace Optional
         /// <returns>A flattened optional.</returns>
         public static Option<T, TException> Flatten<T, TException>(this Option<Option<T, TException>, TException> option) =>
             option.FlatMap(innerOption => innerOption);
+
+        // ============= MaTech additions =============
+
+        public static bool TryGet<T>(in this Option<T> option, out T result) {
+            if (option.HasValue) {
+                result = option.Value;
+                return true;
+            }
+            result = default;
+            return false;
+        }
+        public static bool TryGet<T, E>(in this Option<T, E> option, out T result) {
+            if (option.HasValue) {
+                result = option.Value;
+                return true;
+            }
+            result = default;
+            return false;
+        }
+
+        public static bool TryAssign<T>(in this Option<T> option, ref T target) {
+            if (option.HasValue) {
+                target = option.Value;
+                return true;
+            }
+            return false;
+        }
+        public static bool TryAssign<T, E>(in this Option<T, E> option, ref T target) {
+            if (option.HasValue) {
+                target = option.Value;
+                return true;
+            }
+            return false;
+        }
     }
 }

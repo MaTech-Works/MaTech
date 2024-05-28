@@ -69,15 +69,4 @@ namespace MaTech.Common.Algorithm {
                 $"[BoxlessConvert] Cannot convert null except for identity cast."));
         }
     }
-    internal static class FailedConversionExtensions {
-        public static T ValueOrThrow<T>(in this Option<T, Exception> self) {
-            return self.HasValue ? self.Value : throw self.Exception;
-        }
-        public static void ThrowIfNone<T>(in this Option<T, Exception> self) {
-            if (!self.HasValue) throw self.Exception;
-        }
-        public static void Throw<T>(in this Option<T, Exception> self) {
-            throw self.Exception;
-        }
-    }
 }

@@ -7,7 +7,7 @@ namespace Optional
     /// Represents an optional value.
     /// </summary>
     /// <typeparam name="T">The type of the value to be wrapped.</typeparam>
-    /// TODO: Make it always serializable, while marking most methods readonly
+    /// TODO: Support serializable for unity, while marking most methods readonly
     public readonly struct Option<T> : IEquatable<Option<T>>, IComparable<Option<T>>
     {
         private readonly bool hasValue;

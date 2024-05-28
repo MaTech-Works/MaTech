@@ -167,5 +167,19 @@ namespace Optional.Unsafe
 
             throw new OptionValueMissingException(errorMessageFactory(option.Exception));
         }
+        
+        // ============= MaTech additions =============
+
+        public static T ValueOrThrow<T, E>(in this Option<T, E> option) where E : Exception => option.HasValue ? option.Value : throw option.Exception;
+        
+        public static T AssertSome<T>(in this Option<T> option) => option.HasValue ? option.Value : throw new OptionAssertionException(
+            $"Asserted some on none.");
+        public static void AssertNone<T>(in this Option<T> option) { if (option.HasValue) throw new OptionAssertionException(
+            $"Asserted none on some {option.Value}."); }
+        
+        public static T AssertSome<T, E>(in this Option<T, E> option) => option.HasValue ? option.Value : throw new OptionAssertionException(
+            $"Asserted some on none with exception {option.Exception}.");
+        public static E AssertNone<T, E>(in this Option<T, E> option) => !option.HasValue ? option.Exception : throw new OptionAssertionException(
+            $"Asserted none on some {option.Value}.");
     }
 }
