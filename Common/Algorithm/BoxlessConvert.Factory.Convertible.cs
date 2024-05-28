@@ -1,4 +1,4 @@
-// Copyright (c) 2023, LuiCat (as MaTech)
+// Copyright (c) 2024, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -9,9 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime;
-using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace MaTech.Common.Algorithm {

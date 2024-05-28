@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023, LuiCat (as MaTech)
+﻿// Copyright (c) 2024, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,14 +6,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
 using MaTech.Common.Utils;
 using MaTech.Gameplay.Processor;
-using MaTech.Gameplay.Scoring;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;

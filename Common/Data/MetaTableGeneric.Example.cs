@@ -1,4 +1,4 @@
-// Copyright (c) 2023, LuiCat (as MaTech)
+// Copyright (c) 2024, LuiCat (as MaTech)
 // 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,7 +6,6 @@
 
 using System.Collections.Generic;
 using MaTech.Common.Tools;
-using UnityEditor;
 
 namespace MaTech.Common.Data {
     #if UNITY_EDITOR || DEVELOPMENT_BUILD
