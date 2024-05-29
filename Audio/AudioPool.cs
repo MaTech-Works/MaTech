@@ -39,7 +39,7 @@ namespace MaTech.Audio {
                 var clip = await RequestAudioClip(url);
                 
                 #if UNITY_EDITOR
-                Debug.Log($"Loaded AudioClip {Path.GetFileName(url)}");
+                Debug.Log($"[MaAudio] Loaded AudioClip from file {Path.GetFileName(url)}");
                 #endif
                 
                 listAudio.Add(url, clip);
@@ -64,24 +64,27 @@ namespace MaTech.Audio {
         private async UniTask<AudioClip> RequestAudioClip(string url) {
             if (url == null) return null;
             
+            
             AudioType audioType = GetAudioTypeByPath(url);
-            #if UNITY_STANDALONE
-            if (audioType == AudioType.MPEG) {
-                throw new System.NotImplementedException("MP3 decoders not present in builds. Implement a MP3 decoder here and output the decoded data as an AudioClip.");
-            }
-            #endif
 
             await UniTask.SwitchToMainThread();
             
             #if UNITY_EDITOR
-            if (url.StartsWith("Assets") && !url.Contains("StreamingAssets")) return AssetDatabase.LoadAssetAtPath<AudioClip>(url);
+            if (url.StartsWith("Assets") && !url.Contains("StreamingAssets")) {
+                return AssetDatabase.LoadAssetAtPath<AudioClip>(url);
+            }
             #endif
             
             using var request = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
             await request.SendWebRequest();
             
             if (request.result != UnityWebRequest.Result.Success) {
-                Debug.LogError($"Cannot load audio file \"{url}\"");
+                Debug.LogError($"[MaAudio] Cannot load audio file \"{url}\", audio type {audioType}");
+                #if !UNITY_EDITOR && !UNITY_2021_OR_NEWER
+                if (audioType == AudioType.MPEG) {
+                    Debug.LogError($"MP3 decoder might not exist in older version of Unity due to licensing.");
+                }
+                #endif
                 return null;
             }
             
