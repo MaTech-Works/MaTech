@@ -52,6 +52,8 @@ namespace MaTech.Gameplay.Time {
         public static BeatUnit FromFraction(Fraction fraction) => new BeatUnit(fraction);
         public static BeatUnit FromFraction(int numerator, int denominator) => new BeatUnit(new FractionSimple(numerator, denominator));
         public static BeatUnit FromFraction(int integer, int numerator, int denominator) => new BeatUnit(new Fraction(integer, numerator, denominator));
+        public static BeatUnit FromFractionReduced(int numerator, int denominator) => new BeatUnit(new FractionSimple(numerator, denominator).Reduced);
+        public static BeatUnit FromFractionReduced(int integer, int numerator, int denominator) => new BeatUnit(new Fraction(integer, numerator, denominator).Reduced);
         public static BeatUnit FromValue(double value) => new BeatUnit(value);
         public static BeatUnit FromValueRounded(double value, int denominator) => new BeatUnit(value, denominator);
 
