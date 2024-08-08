@@ -157,7 +157,7 @@ namespace MaTech.Gameplay.Display {
         public bool doNotClearChildrenOnAwake = false;
         public bool bufferAllObjectsAtOnce = false;
         public bool destroyWithoutRecycling = false;
-        public bool destroyBufferedObjectsOnReload = false;
+        public bool destroyPoolObjectsOnReload = false;
         public bool logRealization = false;
 
         [HideInInspector]
@@ -270,7 +270,7 @@ namespace MaTech.Gameplay.Display {
             hashsetCarrierRealized.Clear();
             listObjectRealized.Clear();
 
-            if (destroyBufferedObjectsOnReload) {
+            if (destroyPoolObjectsOnReload) {
                 await UniTask.SwitchToMainThread();
                 foreach (var pool in pools.Values) {
                     pool.DestroyAllBufferedGameObjects();
