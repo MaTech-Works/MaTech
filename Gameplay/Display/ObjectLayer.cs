@@ -203,22 +203,27 @@ namespace MaTech.Gameplay.Display {
             }
         }
 
-        public void CalculateNormalizedRange(TCarrier carrier, bool clamped, out float start, out float end) {
-            start = CalculateNormalizedPosition(carrier.StartY, carrier.scaleY, clamped);
-            end = CalculateNormalizedPosition(carrier.EndY, carrier.scaleY, clamped);
+        public (float start, float end) CalculateProgressRange(TCarrier carrier, bool clampToDisplayWindow) {
+            var start = CalculateProgress(carrier.StartY, carrier, clampToDisplayWindow);
+            var end = CalculateProgress(carrier.EndY, carrier, clampToDisplayWindow);
+            return (start, end);
         }
+        public (double start, double end) CalculateDeltaYRange(TCarrier carrier, bool clampToDisplayWindow) {
+            var start = CalculateDeltaY(carrier.StartY, carrier, clampToDisplayWindow);
+            var end = CalculateDeltaY(carrier.EndY, carrier, clampToDisplayWindow);
+            return (start, end);
+        }
+        
+        public float CalculateProgress(double displayY, TCarrier carrier, bool clampToDisplayWindow)
+            => CalculateProgress(displayY, carrier.scaleY, clampToDisplayWindow);
+        public double CalculateDeltaY(double displayY, TCarrier carrier, bool clampToDisplayWindow)
+            => CalculateDeltaY(displayY, carrier.scaleY, clampToDisplayWindow);
 
-        public float CalculateNormalizedPosition(double displayY, double scaleY, bool clampToDisplayWindow) {
-            return (float)(CalculateDeltaYUnscaled(displayY, scaleY, clampToDisplayWindow) / DisplayWindowUpScaled);
-        }
-        
+        public float CalculateProgress(double displayY, double scaleY, bool clampToDisplayWindow)
+            => (float)(CalculateDeltaY(displayY, scaleY, clampToDisplayWindow) / displayWindowUpY);
         public double CalculateDeltaY(double displayY, double scaleY, bool clampToDisplayWindow) {
-            return CalculateDeltaYUnscaled(displayY, scaleY, clampToDisplayWindow) * speedScale;
-        }
-        
-        public double CalculateDeltaYUnscaled(double displayY, double scaleY, bool clampToDisplayWindow) {
-            var deltaY = (displayY - PlayTime.DisplayY) * scaleY;
-            if (clampToDisplayWindow) deltaY = MathUtil.Clamp(deltaY, DisplayWindowDownScaled, DisplayWindowUpScaled);
+            var deltaY = (displayY - PlayTime.DisplayY) * scaleY * speedScale;
+            if (clampToDisplayWindow) return MathUtil.Clamp(deltaY, displayWindowDownY, displayWindowUpY);
             return deltaY;
         }
 
