@@ -151,9 +151,10 @@ namespace MaTech.Gameplay.Display {
         public double displayWindowUpY = 1;
         [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。")] 
         public double displayWindowDownY = -0.1;
-        
+
         [Header("Debugging")]
-        
+
+        public bool doNotClearChildrenOnAwake = false;
         public bool bufferAllObjectsAtOnce = false;
         public bool destroyWithoutRecycling = false;
         public bool destroyBufferedObjectsOnReload = false;
@@ -452,6 +453,10 @@ namespace MaTech.Gameplay.Display {
         #endregion
         
         #region Unity Event Methods
+
+        void Awake() {
+            if (!doNotClearChildrenOnAwake) transform.DestroyAllChildren();
+        }
         
         void Update() {
             if (updateSelf) UpdateGraphics();
