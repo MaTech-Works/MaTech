@@ -12,7 +12,7 @@ using static MaTech.Gameplay.ChartPlayer;
 
 namespace MaTech.Gameplay.Processor {
     public partial class ProcessorBasic {
-        protected NoteCarrier CreateNoteCarrier(DataEnum<ObjectType> type, TimedObject note, TimePoint? overrideStart = null, TimePoint? overrideEnd = null, TimePoint? overrideAnchor = null) {
+        protected NoteCarrier CreateNoteCarrier(DataEnum<ObjectType> type, TimedObject note, ITimePoint? overrideStart = null, ITimePoint? overrideEnd = null, ITimePoint? overrideAnchor = null) {
             return new NoteCarrier() {
                 // TODO: 实现一种同时计算start和end的CreateTiming方法，正确计算卷轴回退时的Y值极值
                 start = CreateTiming(overrideStart ?? note.Start),
