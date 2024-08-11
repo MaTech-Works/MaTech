@@ -34,7 +34,7 @@ namespace MaTech.Gameplay.Processor {
             // TODO: 处理Signature和ShowBar的End
             
             Fraction barLength = new Fraction(4);
-            bool showBar = false;
+            bool showBar = true;
             
             // Extract beat-signature and beat-showBar info from effects
             var listSign = new List<(Fraction, Fraction)>();
@@ -98,17 +98,16 @@ namespace MaTech.Gameplay.Processor {
             // TODO: 导入Span.dll，用Span<BarInfo>和foreach ref修改bar数据
 
             var lastTempo = tempos.First();
-            foreach (var tempo in tempos) {
+            foreach (var tempo in tempos.Append(null)) {
                 for (; barIndex < barCount; ++barIndex) {
                     var timePoint = bars[barIndex].timePoint;
-                    if (timePoint.Beat.fraction >= tempo.Start.Beat.fraction)
+                    if (timePoint.Beat.fraction >= (tempo?.Start ?? TimePoint.MaxValue).Beat.fraction)
                         break;
                     timePoint.Time = lastTempo.CalculateTimeFromBeat(timePoint.Beat);
-                    barIndex++;
                 }
                 if (barIndex >= barCount)
                     break;
-                lastTempo = tempo;
+                lastTempo = tempo!;
             }
             
             return bars;
