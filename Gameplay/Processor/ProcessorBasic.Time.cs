@@ -78,7 +78,7 @@ namespace MaTech.Gameplay.Processor {
         
         /// <summary> 自动查找TimeCarrier计算offset对应的Y值。见<see cref="FindTimeCarrier" /> </summary>
         public double CalculateY(ITimePoint timePoint, bool findTimeCarrierByBeat = true) {
-            return CalculateYFromTime(timePoint.Time.Seconds, FindTimeCarrier(timePoint));
+            return CalculateYFromTime(timePoint.Time.Seconds, FindTimeCarrier(timePoint, findTimeCarrierByBeat));
         }
         
         #endregion
