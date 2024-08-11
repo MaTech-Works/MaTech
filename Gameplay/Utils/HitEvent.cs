@@ -41,14 +41,14 @@ namespace MaTech.Gameplay.Utils {
             InsideAll,
         }
         
-        public bool Match(NoteHitAction hitAction, HitResult hitResult) {
+        public bool Match(NoteHitAction action, HitResult result) {
             foreach (NoteHitAction allowedAction in allowedActions) {
-                if (allowedAction != hitAction) continue;
+                if (allowedAction != action) continue;
                 switch (matchMethod) {
-                case MatchMethod.Exact when hitResult == matchTarget: break;
-                case MatchMethod.ContainsAll when hitResult.HasAllFlag(matchTarget): break;
-                case MatchMethod.HasAny when hitResult.HasAnyFlag(matchTarget): break;
-                case MatchMethod.InsideAll when matchTarget.HasAllFlag(hitResult): break;
+                case MatchMethod.Exact when result == matchTarget: break;
+                case MatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
+                case MatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
+                case MatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
                 default: continue;
                 }
                 return true;
@@ -56,8 +56,8 @@ namespace MaTech.Gameplay.Utils {
             return false;
         }
 
-        public bool InvokeIfMatch(NoteHitAction hitAction, HitResult hitResult) {
-            if (Match(hitAction, hitResult)) {
+        public bool InvokeIfMatch(NoteHitAction action, HitResult result) {
+            if (Match(action, result)) {
                 onHit.Invoke();
                 return true;
             }
