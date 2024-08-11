@@ -12,8 +12,9 @@ using static MaTech.Gameplay.ChartPlayer;
 
 namespace MaTech.Gameplay.Display {
     public abstract class NoteBehavior : MonoBehaviour, INoteVisual {
-        [SerializeField, ReadOnlyInInspector] protected NoteCarrier carrier;
-        [SerializeField, ReadOnlyInInspector] protected NoteLayer layer;
+        [SerializeField, ReadOnlyInInspector]
+        protected NoteLayer layer;
+        protected NoteCarrier carrier;
 
         [field: SerializeField, ReadOnlyInInspector] public bool IsVisualFinished { get; set; } = false;
         [field: SerializeField, ReadOnlyInInspector] public bool IgnoreDisplayWindow { get; set; } = false;
