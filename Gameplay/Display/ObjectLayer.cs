@@ -203,9 +203,9 @@ namespace MaTech.Gameplay.Display {
             }
         }
 
-        public (float start, float end) CalculateProgressRange(TCarrier carrier, bool clampToDisplayWindow) {
-            var start = CalculateProgress(carrier.StartY, carrier, clampToDisplayWindow);
-            var end = CalculateProgress(carrier.EndY, carrier, clampToDisplayWindow);
+        public (float start, float end) CalculateRatioRange(TCarrier carrier, bool clampToDisplayWindow) {
+            var start = CalculateRatio(carrier.StartY, carrier, clampToDisplayWindow);
+            var end = CalculateRatio(carrier.EndY, carrier, clampToDisplayWindow);
             return (start, end);
         }
         public (double start, double end) CalculateDeltaYRange(TCarrier carrier, bool clampToDisplayWindow) {
@@ -214,12 +214,12 @@ namespace MaTech.Gameplay.Display {
             return (start, end);
         }
         
-        public float CalculateProgress(double displayY, TCarrier carrier, bool clampToDisplayWindow)
-            => CalculateProgress(displayY, carrier.scaleY, clampToDisplayWindow);
+        public float CalculateRatio(double displayY, TCarrier carrier, bool clampToDisplayWindow)
+            => CalculateRatio(displayY, carrier.scaleY, clampToDisplayWindow);
         public double CalculateDeltaY(double displayY, TCarrier carrier, bool clampToDisplayWindow)
             => CalculateDeltaY(displayY, carrier.scaleY, clampToDisplayWindow);
 
-        public float CalculateProgress(double displayY, double scaleY, bool clampToDisplayWindow)
+        public float CalculateRatio(double displayY, double scaleY, bool clampToDisplayWindow)
             => (float)(CalculateDeltaY(displayY, scaleY, clampToDisplayWindow) / displayWindowUpY);
         public double CalculateDeltaY(double displayY, double scaleY, bool clampToDisplayWindow) {
             var deltaY = (displayY - PlayTime.DisplayY) * scaleY * speedScale;
