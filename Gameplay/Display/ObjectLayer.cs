@@ -54,7 +54,7 @@ namespace MaTech.Gameplay.Display {
         
         [Serializable]
         private class PrefabEntry {
-            public DataEnum<ObjectType> type = ObjectType.Generic;
+            public DataEnum<ObjectType> type = ObjectType.None;
             public GameObject? prefab = null;
             public int bufferCountInPool = 50;
             public int maxInstantiationPerFrame = 1;

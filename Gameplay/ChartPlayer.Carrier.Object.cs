@@ -12,7 +12,7 @@ using MaTech.Gameplay.Display;
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
         public enum ObjectType {
-            Generic, // 可以用 DataEnum 扩展定义
+            None, // 可以用 DataEnum 扩展定义
         }
 
         // TODO: 把这个基类与模板参数干掉
