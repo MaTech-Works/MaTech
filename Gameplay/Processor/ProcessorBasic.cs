@@ -158,7 +158,7 @@ namespace MaTech.Gameplay.Processor {
             }
 
             var endBeat = Objects.Select(o => (o.End ?? o.StartOrMin).Beat).Max();
-            var bars = BarUtil.CreateBars(Tempos, Effects, endBeat);
+            var bars = BarUtil.GenerateBars(Tempos, Effects, endBeat);
             
             barList = new QueueList<BarCarrier>(bars.Count);
             foreach (var bar in bars) {

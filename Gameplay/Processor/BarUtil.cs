@@ -26,10 +26,10 @@ namespace MaTech.Gameplay.Processor {
         }
         
         /// <summary>
-        /// 用effect列表生成bar的beat位置，time是没有填写的。
+        /// 用effect列表生成bar的beat位置，time留空。
         /// 输入的effect列表需要按照beat顺序排序，第一个signature表示bar的开始。
         /// </summary>
-        public static List<BarInfo> CreateBars(List<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+        public static List<BarInfo> GenerateBarBeats(List<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
             // TODO: 封装成EffectTimeline
             // TODO: 处理Signature和ShowBar的End
             
@@ -86,8 +86,8 @@ namespace MaTech.Gameplay.Processor {
         /// 用effect和tempo列表生成bar的beat和offset。
         /// 输入的effect和tempo列表需要按照beat顺序排序。
         /// </summary>
-        public static List<BarInfo> CreateBars(List<TempoChange> tempos, List<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
-            List<BarInfo> bars = CreateBars(effects, endBeat, maxBarCount);
+        public static List<BarInfo> GenerateBars(List<TempoChange> tempos, List<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+            List<BarInfo> bars = GenerateBarBeats(effects, endBeat, maxBarCount);
             if (tempos.Count == 0 || bars.Count == 0)
                 return bars;
 
