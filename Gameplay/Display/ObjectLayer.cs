@@ -203,6 +203,12 @@ namespace MaTech.Gameplay.Display {
             }
         }
 
+        public ((double start, double end) deltaY, (float start, float end) ratio) CalculateDeltaYAndRatioRanges(TCarrier carrier, bool clampToDisplayWindow) {
+            var deltaY = CalculateDeltaYRange(carrier, clampToDisplayWindow);
+            var ratio = (DeltaYToRatio(deltaY.start), DeltaYToRatio(deltaY.end));
+            return (deltaY, ratio);
+        }
+
         public (float start, float end) CalculateRatioRange(TCarrier carrier, bool clampToDisplayWindow) {
             var start = CalculateRatio(carrier.StartY, carrier, clampToDisplayWindow);
             var end = CalculateRatio(carrier.EndY, carrier, clampToDisplayWindow);
@@ -213,6 +219,14 @@ namespace MaTech.Gameplay.Display {
             var end = CalculateDeltaY(carrier.EndY, carrier, clampToDisplayWindow);
             return (start, end);
         }
+
+        public (double deltaY, float ratio) CalculateDeltaYAndRatio(double displayY, TCarrier carrier, bool clampToDisplayWindow)
+            => CalculateDeltaYAndRatio(displayY, carrier.scaleY, clampToDisplayWindow);
+        public (double deltaY, float ratio) CalculateDeltaYAndRatio(double displayY, double scaleY, bool clampToDisplayWindow) {
+            var deltaY = CalculateDeltaY(displayY, scaleY, clampToDisplayWindow);
+            var ratio = DeltaYToRatio(deltaY);
+            return (deltaY, ratio);
+        }
         
         public float CalculateRatio(double displayY, TCarrier carrier, bool clampToDisplayWindow)
             => CalculateRatio(displayY, carrier.scaleY, clampToDisplayWindow);
@@ -220,12 +234,14 @@ namespace MaTech.Gameplay.Display {
             => CalculateDeltaY(displayY, carrier.scaleY, clampToDisplayWindow);
 
         public float CalculateRatio(double displayY, double scaleY, bool clampToDisplayWindow)
-            => (float)(CalculateDeltaY(displayY, scaleY, clampToDisplayWindow) / displayWindowUpY);
+            => DeltaYToRatio(CalculateDeltaY(displayY, scaleY, clampToDisplayWindow));
         public double CalculateDeltaY(double displayY, double scaleY, bool clampToDisplayWindow) {
             var deltaY = (displayY - PlayTime.DisplayY) * scaleY * speedScale;
             if (clampToDisplayWindow) return MathUtil.Clamp(deltaY, displayWindowDownY, displayWindowUpY);
             return deltaY;
         }
+        
+        private float DeltaYToRatio(double deltaY) => (float)(deltaY / displayWindowUpY);
 
         public IObjectVisual<TCarrier, TLayer>? FindVisual(TCarrier carrier) => hashsetCarrierRealized.GetOrNull(carrier);
         public T? FindVisual<T>(TCarrier carrier) where T : class, IObjectVisual<TCarrier, TLayer> => FindVisual(carrier) as T;
