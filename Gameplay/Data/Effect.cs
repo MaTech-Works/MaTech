@@ -49,6 +49,7 @@ namespace MaTech.Gameplay.Data {
         Chorus,
         
         // Tips: 可以使用 DataEnum 来扩展额外的 EffectType
+        ExtensionStart = 100
     }
     
     public class Effect : TimedObject {
