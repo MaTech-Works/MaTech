@@ -144,7 +144,7 @@ namespace MaTech.Gameplay.Processor {
         }
 
         private void ProcessBars() {
-            // TODO: 提供方法完成BarUtil.CreateBars到ObjectCarrier的自动转换，令派生类自行调用
+            // todo: 合并NoteLayer和BarLayer后，提供方法完成BarUtil.CreateBars到ObjectCarrier的自动转换，令派生类自行调用
             
             if (!barEnabled) return;
             if (Tempos == null || Effects == null) {

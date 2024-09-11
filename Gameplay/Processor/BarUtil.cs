@@ -29,7 +29,7 @@ namespace MaTech.Gameplay.Processor {
         /// 用effect列表生成bar的beat位置，time留空。
         /// 输入的effect列表需要按照beat顺序排序，第一个signature表示bar的开始。
         /// </summary>
-        public static List<BarInfo> GenerateBarBeats(List<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+        public static List<BarInfo> GenerateBarBeats(IEnumerable<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
             // TODO: 封装成EffectTimeline
             // TODO: 处理Signature和ShowBar的End
             
@@ -86,10 +86,8 @@ namespace MaTech.Gameplay.Processor {
         /// 用effect和tempo列表生成bar的beat和offset。
         /// 输入的effect和tempo列表需要按照beat顺序排序。
         /// </summary>
-        public static List<BarInfo> GenerateBars(List<TempoChange> tempos, List<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+        public static List<BarInfo> GenerateBars(IEnumerable<TempoChange> tempos, IEnumerable<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
             List<BarInfo> bars = GenerateBarBeats(effects, endBeat, maxBarCount);
-            if (tempos.Count == 0 || bars.Count == 0)
-                return bars;
 
             int barCount = bars.Count;
             int barIndex = 0;
@@ -97,8 +95,10 @@ namespace MaTech.Gameplay.Processor {
             // TODO: 封装成EffectTimeline与多次顺序插值方法
             // TODO: 导入Span.dll，用Span<BarInfo>和foreach ref修改bar数据
 
-            var lastTempo = tempos.First();
+            TempoChange? lastTempo = null!;
             foreach (var tempo in tempos.Append(null)) {
+                if (tempo is null) continue;
+                lastTempo ??= tempo;
                 for (; barIndex < barCount; ++barIndex) {
                     var timePoint = bars[barIndex].timePoint;
                     if (timePoint.Beat.fraction >= (tempo?.Start ?? TimePoint.MaxValue).Beat.fraction)
@@ -107,7 +107,7 @@ namespace MaTech.Gameplay.Processor {
                 }
                 if (barIndex >= barCount)
                     break;
-                lastTempo = tempo!;
+                lastTempo = tempo;
             }
             
             return bars;
