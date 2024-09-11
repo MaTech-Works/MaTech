@@ -17,14 +17,16 @@ namespace MaTech.Gameplay.Processor {
 
         private const float ToleranceFindTimeOffset = -0.5f;
 
-        /// <summary> 二分查找的标准：carrier是否比beat更晚，绝对无法用来计算数值；会查找列表里最后一个得到false的carrier </summary>
         private bool IsAfterTimeCarrierByBeat(TimeCarrier carrier, Fraction beat) {
             return carrier.StartBeat > beat;
         }
         
-        /// <summary> 二分查找的标准：carrier是否比offset更晚，绝对无法用来计算数值；会查找列表里最后一个得到false的carrier </summary>
         private bool IsAfterTimeCarrierByTime(TimeCarrier carrier, double offset) {
             return carrier.StartTime + ToleranceFindTimeOffset > offset;
+        }
+        
+        private bool IsAfterTimeCarrierByY(TimeCarrier carrier, double displayY) {
+            return carrier.StartY > displayY;
         }
         
         #endregion
@@ -54,11 +56,14 @@ namespace MaTech.Gameplay.Processor {
         // MS says we need to cache the func objects by ourselves :(
         private Func<TimeCarrier, Fraction, bool> funcIsAfterTimeCarrierByBeat;
         private Func<TimeCarrier, double, bool> funcIsAfterTimeCarrierByTime;
+        private Func<TimeCarrier, double, bool> funcIsAfterTimeCarrierByY;
         private Func<TimeCarrier, Fraction, bool> FuncIsAfterTimeCarrierByBeat => funcIsAfterTimeCarrierByBeat ??= IsAfterTimeCarrierByBeat;
         private Func<TimeCarrier, double, bool> FuncIsAfterTimeCarrierByTime => funcIsAfterTimeCarrierByTime ??= IsAfterTimeCarrierByTime;
+        private Func<TimeCarrier, double, bool> FuncIsAfterTimeCarrierByY => funcIsAfterTimeCarrierByY ??= IsAfterTimeCarrierByY;
 
         public TimeCarrier FindTimeCarrierByBeat(in Fraction beat) => FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByBeat, beat);
         public TimeCarrier FindTimeCarrierByOffset(double offset) => FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByTime, offset);
+        public TimeCarrier FindTimeCarrierByY(double displayY) => FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByY, displayY);
         public TimeCarrier FindTimeCarrier(ITimePoint timePoint, bool findByBeat = true) => findByBeat ?
             FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByBeat, timePoint.Beat) : FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByTime, timePoint.Time.Seconds);
         
