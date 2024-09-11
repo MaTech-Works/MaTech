@@ -10,6 +10,7 @@ using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
+        // todo: 支持在prefab中任意位置接受回调
         public interface IObjectVisual<in TCarrier, in TLayer>
             where TCarrier : ObjectCarrier<TCarrier, TLayer>
             where TLayer : ObjectLayer<TCarrier, TLayer> {
