@@ -62,7 +62,7 @@ namespace MaTech.Gameplay.Processor {
         private Func<TimeCarrier, double, bool> FuncIsAfterTimeCarrierByY => funcIsAfterTimeCarrierByY ??= IsAfterTimeCarrierByY;
 
         public TimeCarrier FindTimeCarrierByBeat(in Fraction beat) => FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByBeat, beat);
-        public TimeCarrier FindTimeCarrierByOffset(double offset) => FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByTime, offset);
+        public TimeCarrier FindTimeCarrierByTime(double time) => FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByTime, time);
         public TimeCarrier FindTimeCarrierByY(double displayY) => FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByY, displayY);
         public TimeCarrier FindTimeCarrier(ITimePoint timePoint, bool findByBeat = true) => findByBeat ?
             FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByBeat, timePoint.Beat) : FindTimeCarrierGeneric(FuncIsAfterTimeCarrierByTime, timePoint.Time.Seconds);
@@ -76,9 +76,9 @@ namespace MaTech.Gameplay.Processor {
             return reference.StartY + (time - reference.StartTime) * reference.speed;
         }
         
-        /// <summary> 自动查找TimeCarrier计算offset对应的Y值。见<see cref="FindTimeCarrierByOffset" /> </summary>
+        /// <summary> 自动查找TimeCarrier计算offset对应的Y值。见<see cref="FindTimeCarrierByTime" /> </summary>
         public double CalculateYFromTime(double time) {
-            return CalculateYFromTime(time, FindTimeCarrierByOffset(time));
+            return CalculateYFromTime(time, FindTimeCarrierByTime(time));
         }
         
         /// <summary> 自动查找TimeCarrier计算offset对应的Y值。见<see cref="FindTimeCarrier" /> </summary>
