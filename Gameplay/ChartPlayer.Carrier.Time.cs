@@ -7,6 +7,7 @@
 #nullable enable
 
 using System;
+using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
 
 namespace MaTech.Gameplay {
@@ -53,6 +54,14 @@ namespace MaTech.Gameplay {
                 effects = other.effects;
                 effectActivated = null;
                 effectDeactivated = null;
+            }
+
+            public Variant EffectValue(DataEnum<EffectType> type) {
+                foreach (var effect in effects) {
+                    if (effect.type == type)
+                        return effect.value;
+                }
+                return Variant.None;
             }
         }
     }
