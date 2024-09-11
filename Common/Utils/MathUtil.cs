@@ -66,6 +66,9 @@ namespace MaTech.Common.Utils {
             return (int)to - (int)from;
         }
 
+        public static bool Near(float a, float b, float delta = float.Epsilon) => Math.Abs(a - b) < delta;
+        public static bool Near(double a, double b, double delta = double.Epsilon) => Math.Abs(a - b) < delta;
+
         /// <summary> 用法同UnityEngine.Mathf.Lerp </summary>
         public static double Lerp(double a, double b, double k) => LerpUnclamped(a, b, Saturate(k));
         /// <summary> 用法同UnityEngine.Mathf.LerpUnclamped </summary>
@@ -100,9 +103,8 @@ namespace MaTech.Common.Utils {
         }
 
         /// <summary> 用法同hlsl的step函数 </summary>
-        public static float Step(float a, float x) {
-            return x >= a ? 1 : 0;
-        }
+        public static float Step(float a, float x) => x >= a ? 1 : 0;
+        public static double Step(double a, double x) => x >= a ? 1 : 0;
 
         // https://web.archive.org/web/20100613230051/http://www.devmaster.net/forums/showthread.php?t=5784
         // x in [-pi, pi], max error 0.001

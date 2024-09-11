@@ -163,6 +163,9 @@ namespace MaTech.Common.Utils {
         /// <summary> Checks if the object is literally not null. Missing references are treated as assigned. </summary>
         public static bool IsAssigned(Object obj) => !ReferenceEquals(obj, null) && obj.GetHashCode() != 0;
 
+        public static T NullifyInvalid<T>(T obj) where T : Object => obj == null ? null : obj;
+        public static T NullifyUnassigned<T>(T obj) where T : Object => obj == null ? null : obj; 
+
         private static readonly List<GameObject> reusedGameObjectList = new List<GameObject>(); // 仅在主线程使用
         private static readonly List<Component> reusedComponentList = new List<Component>(); // 仅在主线程使用
 
