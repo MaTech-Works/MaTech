@@ -29,7 +29,7 @@ namespace MaTech.Gameplay.Processor {
         /// 用effect列表生成bar的beat位置，time留空。
         /// 输入的effect列表需要按照beat顺序排序，第一个signature表示bar的开始。
         /// </summary>
-        public static List<BarInfo> GenerateBarBeats(IEnumerable<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+        public static List<BarInfo> GenerateBarBeats(IList<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
             // TODO: 封装成EffectTimeline
             // TODO: 处理Signature和ShowBar的End
             
@@ -86,7 +86,7 @@ namespace MaTech.Gameplay.Processor {
         /// 用effect和tempo列表生成bar的beat和offset。
         /// 输入的effect和tempo列表需要按照beat顺序排序。
         /// </summary>
-        public static List<BarInfo> GenerateBars(IEnumerable<TempoChange> tempos, IEnumerable<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+        public static List<BarInfo> GenerateBars(IList<TempoChange> tempos, IList<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
             List<BarInfo> bars = GenerateBarBeats(effects, endBeat, maxBarCount);
 
             int barCount = bars.Count;
@@ -96,7 +96,7 @@ namespace MaTech.Gameplay.Processor {
             // TODO: 导入Span.dll，用Span<BarInfo>和foreach ref修改bar数据
 
             TempoChange? lastTempo = null!;
-            foreach (var tempo in tempos.Append(null)) {
+            foreach (var tempo in tempos.Append(tempoAtInfinity)) {
                 if (tempo is null) continue;
                 lastTempo ??= tempo;
                 for (; barIndex < barCount; ++barIndex) {
@@ -113,5 +113,6 @@ namespace MaTech.Gameplay.Processor {
             return bars;
         }
 
+        private static readonly TempoChange tempoAtInfinity = new(double.PositiveInfinity, TimePoint.MaxValue);
     }
 }
