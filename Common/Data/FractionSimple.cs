@@ -63,6 +63,8 @@ namespace MaTech.Common.Data {
         public static explicit operator float(FractionSimple fraction) { return fraction.Float; }
         public static explicit operator double(FractionSimple fraction) { return fraction.Double; }
         
+        public static implicit operator FractionSimple(int integer) => new FractionSimple(integer);
+        
         public FractionSimple Inversed => new FractionSimple(_den, _num);
 
         public FractionSimple Normalized {

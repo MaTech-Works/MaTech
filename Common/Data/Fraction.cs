@@ -82,6 +82,8 @@ namespace MaTech.Common.Data {
         public static implicit operator FractionSimple(Fraction fraction) => new FractionSimple(fraction._num + fraction._int * fraction._den, fraction._den);
         public static implicit operator Fraction(FractionSimple fraction) => new Fraction(0, fraction.Numerator, fraction.Denominator).Normalized;
 
+        public static implicit operator Fraction(int integer) => new Fraction(integer);
+        
         public Fraction Normalized {
             get {
                 if (_den == 0) {
