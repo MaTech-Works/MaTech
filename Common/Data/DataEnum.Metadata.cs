@@ -89,12 +89,13 @@ namespace MaTech.Common.Data {
                 
                 for (uint seed = 0; seed < maxAttempts; ++seed) {
                     int index = unchecked((int)(xxHash32.ComputeHash(name, seed) | 0x80000000u));
-                    var value = BoxlessConvert.To<TEnum>.From(currentEnumIndex);
+                    var value = BoxlessConvert.To<TEnum>.From(index);
                     
                     if (!mapEnumToName.ContainsKey(value)) {
                         if (seed != 0) {
                             Debug.Log($"[DataEnum] Hash collision detected. Unordered enum {name} did {listConflictNameValue.Count} attempts before finding a unique hash.{CollisionText()}");
                         }
+                        return value;
                     }
                     
                     #if UNITY_EDITOR || MATECH_TEST
