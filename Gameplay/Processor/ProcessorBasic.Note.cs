@@ -18,7 +18,7 @@ namespace MaTech.Gameplay.Processor {
                 start = CreateTiming(overrideStart ?? note.Start),
                 end = CreateTiming(overrideEnd ?? note.End),
                 type = type,
-                scaleY = FindTimeCarrier(overrideAnchor ?? note.Anchor).EffectiveNoteVelocity,
+                scaleY = FindTimeCarrier(overrideAnchor ?? note.Anchor).noteScaleY,
             };
         }
         

@@ -28,8 +28,7 @@ namespace MaTech.Gameplay.Data {
             return tempos[index == -1 ? 0 : index].CalculateTimeFromBeat(beat);
         }
 
-        // 从malody移植多模式parser架构的价值不高，其实现也不必与gameplay架构耦合，但是parser里有一些方便的文件处理功能可以日后作为独立功能移植。
-        // TODO: 待移植parser后重新设计此接口
+        // TODO: 重构chart框架并重新设计此接口
         public DummyChartParser CreateParser() => new DummyChartParser();
         public bool FullLoaded => true;
 

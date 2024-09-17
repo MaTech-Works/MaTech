@@ -55,14 +55,10 @@ namespace MaTech.Gameplay.Processor {
             };
 
             // 筛选当前生效的effect列表，生成一个静态的数组之后填写到TimeCarrier里
-            Effect[] effects;
-            if (isStart) {
-                // 优化：若传入的effect无尾，移除无尾的同类型effect
-                effects = relative.effects.Where(x => effect.HasEnd || x.HasEnd || x.type != effect.type).Append(effect).ToArray();
-            } else {
-                // 只需要将自己移除
-                effects = relative.effects.Where(x => x != effect).ToArray();
-            }
+            // 优化：若传入的effect无尾，移除无尾的同类型effect，否则只需要将自己移除
+            Effect[] effects = isStart ?
+                relative.effects.Where(x => effect.HasEnd || x.HasEnd || x.type != effect.type).Append(effect).ToArray() :
+                relative.effects.Where(x => x != effect).ToArray();
 
             // 计算当前所有effect的【区间效果】生效后的状态值
             if (isStart) {
@@ -91,16 +87,15 @@ namespace MaTech.Gameplay.Processor {
         }
 
         private void UpdateTimeCarrierSpeedAndY(TimeCarrier time, TimeCarrier relative) {
+            time.start.displayY = CalculateTimeCarrierDisplayY(time, relative ?? time);
             time.speed = CalculateTimeCarrierSpeed(time);
-            time.start.displayY = CalculateYFromTime(time.StartTime, relative ?? time) + time.jumpTime * time.speed;
-            time.noteVelocityScale = (adjustNoteVelocity && scrollConstant) ? (refBeatLen / time.tempo.beatLength) : 1;
+            time.noteScaleY = CalculateTimeCarrierNoteScaleY(time);
         }
 
         private void ApplyRangedEffectToTimeCarrier(TimeCarrier time, Effect effect) {
             switch (effect.type.Value) {
-            case EffectType.ScrollSpeed: time.scrollVelocity = effect.value.Double; break;
-            case EffectType.NoteSpeed: time.noteVelocity = effect.value.Double; break;
-            case EffectType.Chorus: time.chorus = effect.value.Bool; break;
+            case EffectType.ScrollSpeed: time.effectScrollSpeed = effect.value.Double; break;
+            case EffectType.NoteSpeed: time.effectNoteSpeed = effect.value.Double; break;
             }
         }
 
@@ -108,55 +103,59 @@ namespace MaTech.Gameplay.Processor {
             switch (effect.type.Value) {
             case EffectType.ScrollJump:
                 if (isStart) {
-                    time.jumpTime += effect.value.Double;
+                    time.effectJumpTime += effect.value.Double;
                 } else {
-                    time.jumpTime -= effect.value.Double;
+                    time.effectJumpTime -= effect.value.Double;
                 }
                 break;
             }
         }
 
+        private double CalculateTimeCarrierDisplayY(TimeCarrier time, TimeCarrier relative) {
+            return CalculateYFromTime(time.StartTime, relative) + time.effectJumpTime * time.speed;
+        }
+        
         private double CalculateTimeCarrierSpeed(TimeCarrier time) {
-            if (scrollConstant && !forceScroll) return scaleY;
-            if (scrollConstant) return time.scrollVelocity * scaleY;
-            return time.scrollVelocity * refBeatLen * scaleY / time.tempo.beatLength;
+            double speed = applyScrollSpeedFromEffects ? time.effectScrollSpeed : 1;
+            double scale = NeedScaleScrollSpeedToEvenBeat ? ReferenceBeatLength / time.tempo.beatLength : 1;
+            return speed * scale * scaleY;
+        }
+        
+        private double CalculateTimeCarrierNoteScaleY(TimeCarrier time) {
+            double speed = applyNoteSpeedFromEffects ? time.effectNoteSpeed : 1;
+            double scale = NeedScaleNoteSpeedToEvenBeat ? ReferenceBeatLength / time.tempo.beatLength : 1;
+            return speed * scale;
         }
 
-        private double CalculateRefBeatLen(double percentile = 0.667) {
-            if (Tempos == null || Tempos.Count == 0)
-                throw new ArgumentException("No time points passed to the processor");
+        private double CalculateScalingReferenceBPM() {
+            Assert.IsNotNull(Tempos, "[Processor] Tempo list should not be null to calculate scaling reference BPM.");
+            Assert.IsFalse(Tempos.Count == 0, "[Processor] Tempo list should not be empty to calculate scaling reference BPM.");
 
-            // 只有一个TimePoint，或者不知道音符范围的情况下，返回第一个beatLength
-            int timePointCount = Tempos.Count;
-            if (Objects == null || Objects.Count == 0 || timePointCount == 1)
+            int tempoCount = Tempos.Count;
+            if (Objects == null || Objects.Count == 0 || tempoCount == 1)
                 return Tempos[0].beatLength;
 
-            double minOffset = Objects.Select(o => o.StartOrMin.Time.Seconds).Min();
-            double maxOffset = Objects.Select(o => o.EndOrMax.Time.Seconds).Max();
+            double minTime = Objects.Select(o => o.StartOrMin.Time.Seconds).Min();
+            double maxTime = Objects.Select(o => o.EndOrMax.Time.Seconds).Max();
+            double GetClampedTime(TempoChange tempo) => Math.Min(Math.Max(tempo.Start.Time.Seconds, minTime), maxTime);
 
-            // 两个及以上的TimePoint
-            // 把所有的beatLength与区间长度都扔进列表，然后按照大小排序
-            List<Tuple<double, double>> beatLenList = new List<Tuple<double, double>>(timePointCount);
-            beatLenList.Add(Tuple.Create(Tempos[0].beatLength, Math.Min(Math.Max(Tempos[1].Start.Time.Seconds, minOffset), maxOffset) - minOffset));
-            for (int i = 1, len = timePointCount - 1; i < len; ++i)
+            List<(double bpm, double length)> sortedBPMs = new(tempoCount);
+            for (int i = 0, n = tempoCount - 1; i <= n; ++i)
             {
-                double beginOffset = i == 0 ? minOffset : Math.Min(Math.Max(Tempos[i].Start.Time.Seconds, minOffset), maxOffset);
-                double endOffset = i == timePointCount - 1 ? maxOffset : Math.Min(Math.Max(Tempos[i + 1].Start.Time.Seconds, minOffset), maxOffset);
-                beatLenList.Add(Tuple.Create(Tempos[i].beatLength, endOffset - beginOffset));
+                double timeBegin = i == 0 ? minTime : GetClampedTime(Tempos[i]);
+                double timeEnd = i == n ? maxTime : GetClampedTime(Tempos[i + 1]);
+                sortedBPMs.Add((Tempos[i].BPM, timeEnd - timeBegin));
             }
-            var lastTimePoint = Tempos[timePointCount - 1]; // 因为至少有两个TimePoint，所以不会重复
-            beatLenList.Add(Tuple.Create(lastTimePoint.beatLength, maxOffset - Math.Min(Math.Max(lastTimePoint.Start.Time.Seconds, minOffset), maxOffset)));
-            beatLenList.Sort();
+            sortedBPMs.Sort();
 
-            // 取beatLength自大到小（BPM自小到大）的(percentile*offset)位置的beatLength作为结果
-            double refPosition = (maxOffset - minOffset) * (1.0 - percentile);
-            foreach (var tuple in beatLenList)
+            double remainingLength = (maxTime - minTime) * scaleByTempoPercentile;
+            foreach (var tuple in sortedBPMs)
             {
-                refPosition -= tuple.Item2;
-                if (refPosition < 0)
-                    return tuple.Item1;
+                remainingLength -= tuple.length;
+                if (remainingLength < 0)
+                    return tuple.bpm;
             }
-            return beatLenList[timePointCount - 1].Item1;
+            return sortedBPMs.Last().bpm;
         }
 
         /// <summary>

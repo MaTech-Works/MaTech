@@ -9,6 +9,7 @@ using System.Linq;
 using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
 using MaTech.Common.Tools;
+using MaTech.Common.Utils;
 using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Time;
@@ -26,17 +27,33 @@ namespace MaTech.Gameplay.Processor {
     public abstract partial class ProcessorBasic : Processor {
         private readonly TimeUnit toleranceTimeOffset = TimeUnit.FromMilliseconds(0.99);
 
-        /// <summary> 计算各种速度时的参考用beatLength，由calcRefBeatLen()函数从所有的bpm中选择得到，除非必须切勿更改，有需要可以调整scaleY值 </summary>
-        [SerializeField, ReadOnlyInInspector] protected double refBeatLen;
-        /// <summary> Y值，卷轴速度与音符速度（也就是所有和逻辑距离有关的输出量）的整体缩放大小，默认是1 </summary>
+        /// <summary> 卷轴方向上所有位置与速度值的整体缩放比例 </summary>
         [SerializeField, ReadOnlyInInspector] protected double scaleY = 1;
+        
+        [Tooltip("是否使用Effect数据指定的NoteSpeed值")]
+        [SerializeField, ReadOnlyInInspector] protected bool applyNoteSpeedFromEffects = true;
+        [Tooltip("是否使用Effect数据指定的ScrollSpeed值")]
+        [SerializeField, ReadOnlyInInspector] protected bool applyScrollSpeedFromEffects = true;
 
-        /// <summary> 将缩放前的卷轴速度强制固定为1 </summary>
-        [SerializeField, ReadOnlyInInspector] protected bool scrollConstant;
-        /// <summary> 在ScrollConstant为true时effect指定的scroll值仍然生效；ScrollConstant为false时无效 </summary>
-        [SerializeField, ReadOnlyInInspector] protected bool forceScroll;
-        /// <summary> 在ScrollConstant为true时，根据BPM大小调整HS，使得原本HS相同、beat间隔相同的两音符的显示间距相同；ScrollConstant为false时无效，因为此时音符的显示间隔是固定的 </summary>
-        [SerializeField, ReadOnlyInInspector] protected bool adjustNoteVelocity;
+        [Serializable]
+        protected enum ScaleByTempoMode {
+            [Tooltip("不跟随BPM缩放，无effect时音符保持恒定与常量的运动速度，此时卷轴速度与物件速度在无SV等effect时，速率为每秒")]
+            NoScaling = 0,
+            [Tooltip("是否根据BPM大小缩放NoteSpeed，使无Effect时beat间隔相同的两音符的显示间距相同（类似于taiko在BPM变化时产生超车分层）")]
+            ScaleNoteSpeedToEvenBeat,
+            [Tooltip("是否根据BPM大小缩放ScrollSpeed，使无Effect时beat间隔相同的两音符的显示间距相同（类似于BMS在BPM变化时产生急停缓降）")]
+            ScaleScrollSpeedToEvenBeat,
+        }
+        
+        [SerializeField, ReadOnlyInInspector] protected ScaleByTempoMode scaleByTempo = ScaleByTempoMode.NoScaling;
+        [Tooltip("缩放速度所参考的BPM，填0则使用下一个属性指定的中位数")]
+        [SerializeField, ReadOnlyInInspector] protected double scaleByTempoBPM;
+        [Tooltip("前一个属性填0时，参考此值选择全BPM在时间分布上从小到大的中位数（如0.667约为2/3中位数）")]
+        [SerializeField, ReadOnlyInInspector] protected double scaleByTempoPercentile = 0.667;
+        
+        protected double ReferenceBeatLength { get; private set; }
+        protected bool NeedScaleNoteSpeedToEvenBeat => scaleByTempo is ScaleByTempoMode.ScaleNoteSpeedToEvenBeat;
+        protected bool NeedScaleScrollSpeedToEvenBeat => scaleByTempo is ScaleByTempoMode.ScaleScrollSpeedToEvenBeat;
 
         /// <summary> 是否按照默认逻辑生成小节线信息，为false时将不会为<see cref="barList" />准备内容，完全依靠派生类向<see cref="barList" />的输出 </summary>
         [SerializeField] protected bool barEnabled = true;
@@ -57,10 +74,9 @@ namespace MaTech.Gameplay.Processor {
             timeList = new QueueList<TimeCarrier>();
             noteList = new QueueList<NoteCarrier>();
             barList = null;
-            
-            // Initialize refBeatLen if not yet calculated
-            if (refBeatLen <= 0)
-                refBeatLen = CalculateRefBeatLen();
+
+            if (scaleByTempoBPM == 0) scaleByTempoBPM = CalculateScalingReferenceBPM();
+            ReferenceBeatLength = MathUtil.Near(scaleByTempoBPM, 0) ? 1 : 1 / scaleByTempoBPM;
 
             try {
                 OnPreProcess(); // PreProcess比ProcessTime更早，不能使用FindTimeCarrier系操作
@@ -168,7 +184,7 @@ namespace MaTech.Gameplay.Processor {
                 barList.Add(new BarCarrier() {
                     start = timing,
                     end = timing,
-                    scaleY = timeCarrier.EffectiveNoteVelocity,
+                    scaleY = timeCarrier.noteScaleY,
                 });
             }
         }
