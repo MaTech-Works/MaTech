@@ -7,8 +7,10 @@
 using System;
 using Cysharp.Threading.Tasks;
 using MaTech.Common.Utils;
+using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Processor;
 using MaTech.Gameplay.Time;
+using UnityEngine;
 using UnityEngine.Profiling;
 
 namespace MaTech.Gameplay {
@@ -151,13 +153,11 @@ namespace MaTech.Gameplay {
         }
 
         private void UpdateObjectLayerSettings() {
-            bool overrideLayerJudgeWindow = false;
-            double judgeWindowUp = 0.5;
-            double judgeWindowDown = -0.5;
+            double judgeWindowUp = 0;
+            double judgeWindowDown = 0;
 
             var timing = UnityUtil.IsUnassigned(judgeLogic) ? null : judgeLogic.Timing;
             if (timing != null) {
-                overrideLayerJudgeWindow = true;
                 judgeWindowUp = timing.WindowEarly.Seconds;
                 judgeWindowDown = -timing.WindowLate.Seconds;
             }
@@ -166,26 +166,26 @@ namespace MaTech.Gameplay {
             var effectiveDisplayWindowDown = displayWindowDownY;
 
             foreach (var layer in noteLayers) {
-                if (UnityUtil.IsAssigned(layer)) {
-                    if (overrideLayerJudgeWindow) {
-                        layer.judgeWindowUp = judgeWindowUp;
-                        layer.judgeWindowDown = judgeWindowDown;
-                    }
-                    if (overrideLayerDisplayWindow) {
-                        layer.displayWindowUpY = effectiveDisplayWindowUp;
-                        layer.displayWindowDownY = effectiveDisplayWindowDown;
-                    }
+                if (UnityUtil.IsUnassigned(layer)) continue;
+                if (!layer.overrideJudgeWindow) {
+                    layer.judgeWindowUp = judgeWindowUp;
+                    layer.judgeWindowDown = judgeWindowDown;
+                }
+                if (!layer.overrideDisplayWindow) {
+                    layer.displayWindowUpY = effectiveDisplayWindowUp;
+                    layer.displayWindowDownY = effectiveDisplayWindowDown;
                 }
             }
 
             foreach (var layer in barLayers) {
-                if (UnityUtil.IsAssigned(layer)) {
+                if (UnityUtil.IsUnassigned(layer)) continue;
+                if (!layer.overrideJudgeWindow) {
                     layer.judgeWindowUp = 0;
                     layer.judgeWindowDown = 0;
-                    if (overrideLayerDisplayWindow) {
-                        layer.displayWindowUpY = effectiveDisplayWindowUp;
-                        layer.displayWindowDownY = effectiveDisplayWindowDown;
-                    }
+                }
+                if (!layer.overrideDisplayWindow) {
+                    layer.displayWindowUpY = effectiveDisplayWindowUp;
+                    layer.displayWindowDownY = effectiveDisplayWindowDown;
                 }
             }
             

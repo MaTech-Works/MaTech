@@ -12,6 +12,7 @@ using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
 using MaTech.Common.Utils;
 using MaTech.Gameplay.Processor;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;
@@ -140,16 +141,21 @@ namespace MaTech.Gameplay.Display {
         [SerializeField]
         [Tooltip("逐note实例化的prefab，实现IDisplayObject的mono")]
         private PrefabEntry[] prefabEntries = null!;
-        
+
         [Space]
 
-        [Tooltip("判定时机的最大范围（较晚一侧），在此范围内音符的图形不会被移除。")] 
+        [Tooltip("是否重载判定逻辑给定的最大范围，不选择重载则数值会在运行时自动更新。")]
+        public bool overrideJudgeWindow;
+        [Tooltip("判定时机的最大范围（较晚一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideJudgeWindow")] 
         public double judgeWindowUp = 0.5;
-        [Tooltip("判定时机的最大范围（较早一侧），在此范围内音符的图形不会被移除。")] 
+        [Tooltip("判定时机的最大范围（较早一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideJudgeWindow")] 
         public double judgeWindowDown = -0.5;
-        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。")] 
+        
+        [Tooltip("是否重载ChartPlayer中指定的显示范围，不选择重载则数值会在运行时自动更新。")]
+        public bool overrideDisplayWindow;
+        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideDisplayWindow")] 
         public double displayWindowUpY = 1;
-        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。")] 
+        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideDisplayWindow")] 
         public double displayWindowDownY = -0.1;
 
         [Header("Debugging")]

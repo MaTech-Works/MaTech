@@ -53,11 +53,9 @@ namespace MaTech.Gameplay {
         [Space]
         [Header("Display Options")]
         
-        [Tooltip("Override the display window of assigned NoteLayer and BarLayer to be the provided value below.")]
-        public bool overrideLayerDisplayWindow = true;
-        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。")]
+        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。用于各layer无override时的运行时缺省值。")]
         public double displayWindowUpY = 1;
-        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。")]
+        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。用于各layer无override时的运行时缺省值。")]
         public double displayWindowDownY = -0.1;
 
         [Space]
