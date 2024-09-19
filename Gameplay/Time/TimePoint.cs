@@ -33,10 +33,8 @@ namespace MaTech.Gameplay.Time {
 
     /// <summary> 基于节拍与时间双重定位的乐理时间码 </summary>
     public class TimePoint : ITimePoint {
-        private static readonly TimePoint minValue = new() { Beat = Fraction.minValue, Time = TimeUnit.MinValue };
-        private static readonly TimePoint maxValue = new() { Beat = Fraction.maxValue, Time = TimeUnit.MaxValue };
-        public static ITimePoint MinValue => minValue;
-        public static ITimePoint MaxValue => maxValue;
+        public static TimePoint MinValue { get; } = new() { Beat = Fraction.minValue, Time = TimeUnit.MinValue };
+        public static TimePoint MaxValue { get; } = new() { Beat = Fraction.maxValue, Time = TimeUnit.MaxValue };
 
         private BeatUnit beat = 0;
         private TimeUnit time = TimeUnit.Zero;
