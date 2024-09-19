@@ -14,6 +14,7 @@ using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Scoring;
 using MaTech.Gameplay.Time;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace MaTech.Gameplay {
@@ -30,17 +31,19 @@ namespace MaTech.Gameplay {
         [Space]
         [Header("Play Components")]
         
-        [SerializeField]
-        private Processor.Processor processor;
-
+        [SerializeField] private Processor.Processor processor;
         [SerializeField] private SampleSequencer sequencer;
         [SerializeField] private PlayInput playInput;
         [SerializeField] private JudgeLogicBase judgeLogic;
 
         [Space]
+        [Header("Layers")]
         
-        [SerializeField] private NoteLayer[] noteLayers;
-        [SerializeField] private BarLayer[] barLayers;
+        [InlineButton("CollectLayersFromScene", "Collect Layers Right Now")] 
+        [SerializeField] private bool collectLayersOnLoad = true;
+
+        [SerializeField, DisableIf("collectLayersOnLoad")] private NoteLayer[] noteLayers;
+        [SerializeField, DisableIf("collectLayersOnLoad")] private BarLayer[] barLayers;
 
         [Space]
         [Header("Gameplay Options")]
@@ -266,6 +269,12 @@ namespace MaTech.Gameplay {
             /////////////////////////////////
 
             #region Graphics: The object layers
+
+            if (collectLayersOnLoad) {
+                await UniTask.SwitchToMainThread();
+                CollectLayersFromScene();
+                await UniTask.SwitchToThreadPool();
+            }
 
             if (fullReload) {
                 // Notice that on non-full-reloading, objects originally on the layer are still loaded here,

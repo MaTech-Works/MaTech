@@ -204,5 +204,10 @@ namespace MaTech.Gameplay {
                 }
             }
         }
+        
+        private void CollectLayersFromScene() {
+            noteLayers = FindObjectsByType<NoteLayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            barLayers = FindObjectsByType<BarLayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        }
     }
 }
