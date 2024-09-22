@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using MaTech.Common.Unity;
+using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -30,6 +31,37 @@ namespace MaTech.Common.Utils {
         [Serializable] public class UnityEventVector4 : UnityEvent<Vector4> { }
         [Serializable] public class UnityEventException : UnityEvent<Exception> { }
         [Serializable] public class UnityEventGameObject : UnityEvent<GameObject> { }
+
+        [Serializable, PreviewField]
+        public struct ShaderProperty {
+            public string name;
+            public int ID => Invalid || Empty ? unusedID : Unchanged ? id : id = Shader.PropertyToID(lastName = name);
+            
+            public static ShaderProperty FromName(string name) => new() {
+                id = string.IsNullOrWhiteSpace(name) ? unusedID : Shader.PropertyToID(name),
+                lastName = name,
+                name = name,
+            };
+            
+            public static implicit operator ShaderProperty(string name) => FromName(name);
+            public static implicit operator int(ShaderProperty property) => property.ID;
+            
+            private string lastName;
+            private int id;
+            
+            private bool Invalid => string.IsNullOrWhiteSpace(name);
+            private bool Unchanged => lastName == name;
+            private bool Empty => lastName == null;
+            
+            private static readonly int unusedID = Shader.PropertyToID("_Some_Absolutely_Unused_Property");
+            
+            public override string ToString() {
+                if (Invalid) return "(invalid)";
+                if (Unchanged) return $"{name} (id: {id})";
+                if (Empty) return $"{name} (id empty)";
+                return $"{name} (id dirty)";
+            }
+        }
 
         public static void DestroyAllChildren(this Transform transform) => transform.DestroyChildren();
         public static void DestroyChildren(this Transform transform, int start = 0, int count = -1) {
