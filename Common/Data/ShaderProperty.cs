@@ -33,7 +33,7 @@ namespace MaTech.Common.Data {
         private static readonly int unusedID = Shader.PropertyToID("_Some_Absolutely_Unused_Property");
             
         public override string ToString() {
-            if (Empty) return "(invalid)";
+            if (Empty) return "(empty)";
             if (Unchanged) return $"{name} (id: {id})";
             if (Unknown) return $"{name} (id unknown)";
             return $"{name} (id dirty)";
