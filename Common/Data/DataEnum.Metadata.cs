@@ -93,7 +93,7 @@ namespace MaTech.Common.Data {
                     
                     if (!mapEnumToName.ContainsKey(value)) {
                         if (seed != 0) {
-                            Debug.Log($"[DataEnum] Hash collision detected. Unordered enum {name} did {listConflictNameValue.Count} attempts before finding a unique hash.{CollisionText()}");
+                            Debug.Log($"[DataEnum] Hash collision detected. Unordered enum {name} did {seed} attempts before finding a unique hash.{CollisionText()}");
                         }
                         return value;
                     }
