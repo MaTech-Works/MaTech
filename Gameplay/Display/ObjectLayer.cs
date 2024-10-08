@@ -491,7 +491,7 @@ namespace MaTech.Gameplay.Display {
 
         void OnValidate() {
             for (int i = 0; i < prefabEntries.Length; i++) {
-                if (UnityUtil.IsUnassigned(prefabEntries[i].prefab)) continue;
+                if (prefabEntries[i].prefab == null) continue;
                 if (prefabEntries[i].prefab!.GetComponent<IObjectVisual<TCarrier, TLayer>>() == null) {
                     Debug.LogError($"<b>[{typeof(TLayer).Name}]</b> The object prefab {i} does not contain an IDisplayObject<{typeof(TCarrier).Name}, {typeof(TLayer).Name}> component on the root object", this);
                     prefabEntries[i].prefab = null;
