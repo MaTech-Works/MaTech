@@ -6,9 +6,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using JetBrains.Annotations;
 using MaTech.Common.Unity;
 using UnityEditor;
 using UnityEngine;
@@ -159,9 +159,9 @@ namespace MaTech.Common.Utils {
         }
 
         /// <summary> Checks if the object is literally null. Missing references are treated as assigned. </summary>
-        public static bool IsUnassigned(Object obj) => ReferenceEquals(obj, null) || obj.GetHashCode() == 0;
+        public static bool IsUnassigned([NotNullWhen(false)] Object obj) => ReferenceEquals(obj, null) || obj.GetHashCode() == 0;
         /// <summary> Checks if the object is literally not null. Missing references are treated as assigned. </summary>
-        public static bool IsAssigned(Object obj) => !ReferenceEquals(obj, null) && obj.GetHashCode() != 0;
+        public static bool IsAssigned([NotNullWhen(true)] Object obj) => !ReferenceEquals(obj, null) && obj.GetHashCode() != 0;
 
         public static T NullifyInvalid<T>(T obj) where T : Object => obj == null ? null : obj;
         public static T NullifyUnassigned<T>(T obj) where T : Object => obj == null ? null : obj; 
