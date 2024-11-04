@@ -157,6 +157,6 @@ namespace MaTech.Gameplay.Time {
             return decimals.CompareTo(other.decimals);
         }
 
-        public override string ToString() => $"{Milliseconds}ms";
+        public override string ToString() => $"{milliseconds}ms";
     }
 }
