@@ -9,6 +9,7 @@ using MaTech.Common.Unity;
 using MaTech.Common.Utils;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.Serialization;
 
 namespace MaTech.Gameplay.Input {
     public partial class PlayInput : SinglePerSceneBehaviour<PlayInput>, IPlayController {
@@ -26,7 +27,8 @@ namespace MaTech.Gameplay.Input {
             set => keyCount = value;
         }
         
-        public bool simulateTouchWithMouse;
+        [Tooltip("从鼠标输入额外生成两个触摸点，左键右键各一个；会过滤掉与多指触摸触点位置重合的鼠标输入")]
+        public bool additionalTouchFromMouse;
         public int mouseStartTouchID = 100;
 
         public Exception LastException { get; private set; }

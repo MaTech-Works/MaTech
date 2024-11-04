@@ -65,18 +65,20 @@ namespace MaTech.Gameplay.Input {
         }
 
         private void PollTouchFromUnityInput() {
+            Vector2 mousePosition = UnityEngine.Input.mousePosition;
+            bool isMouseFromTouch = false;
+            
             var touchCount = UnityEngine.Input.touchCount;
             for (int i = 0; i < touchCount; ++i){
                 var touch = UnityEngine.Input.GetTouch(i);
+                isMouseFromTouch |= (mousePosition - touch.position).sqrMagnitude < 1e6f;
                 UpdateFinger(touch.fingerId, touch.position, IsFingerTouchDown(touch.phase));
             }
             
-            #if UNITY_STANDALONE || UNITY_EDITOR
-            if (simulateTouchWithMouse) {
-                UpdateFinger(mouseStartTouchID + 0, UnityEngine.Input.mousePosition, UnityEngine.Input.GetMouseButton(0));
-                UpdateFinger(mouseStartTouchID + 1, UnityEngine.Input.mousePosition, UnityEngine.Input.GetMouseButton(1));
+            if (additionalTouchFromMouse && !isMouseFromTouch) {
+                UpdateFinger(mouseStartTouchID + 0, mousePosition, UnityEngine.Input.GetMouseButton(0));
+                UpdateFinger(mouseStartTouchID + 1, mousePosition, UnityEngine.Input.GetMouseButton(1));
             }
-            #endif
         }
 
         private void UpdateTouchIDRecord() {
