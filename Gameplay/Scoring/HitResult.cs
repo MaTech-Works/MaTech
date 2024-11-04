@@ -5,10 +5,14 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace MaTech.Gameplay.Scoring {
     // TODO: 实现一个BitFlag结构体与简单的二进制加密
-    [Flags]
+    [Flags, DebuggerDisplay("{HitResultEditorNames.ToEditorName(this)}")]
     public enum HitResult {
         None = 0,
         Bit0 = 1 << 0,
@@ -45,25 +49,38 @@ namespace MaTech.Gameplay.Scoring {
         Bit31 = 1 << 31,
     };
 
-    #if UNITY_EDITOR
     /// <summary> HitResult在编辑器里下拉菜单中显示的名字，可以重载 </summary>
     public static class HitResultEditorNames {
-        public static string[] Value {
+        public const int maxCount = 32;
+        
+        public static string[] Array {
             get => overriddenNames ?? internalNames;
             set => overriddenNames = value;
+        }
+
+        public static string NameOfBit(int i) => overriddenNames?.ElementAtOrDefault(i) ?? internalNames.ElementAtOrDefault(i);
+
+        public static string ToEditorName(this HitResult result) {
+            return string.Join(", ", SelectValidBits(result).Select(i => NameOfBit(i)));
         }
 
         private static string[] overriddenNames;
         private static readonly string[] internalNames;
 
         static HitResultEditorNames() {
-            internalNames = new string[32];
-            for (int i = 0; i < 32; ++i) {
-                internalNames[i] = ((HitResult)i).ToString();
+            internalNames = new string[maxCount];
+            for (int i = 0; i < maxCount; ++i) {
+                internalNames[i] = ((HitResult)(1 << i)).ToString();
+            }
+        }
+
+        private static IEnumerable<int> SelectValidBits(HitResult result) {
+            for (int i = 0; i < maxCount; ++i) {
+                if (result.HasAnyFlag((HitResult)(1 << i)))
+                    yield return i;
             }
         }
     }
-    #endif
     
     public static class EnumFlagBoilerplates {
         public static bool HasAnyFlag(this HitResult self, HitResult any) => (self & any) != 0;

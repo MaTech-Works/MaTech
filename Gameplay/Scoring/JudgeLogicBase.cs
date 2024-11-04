@@ -98,7 +98,7 @@ namespace MaTech.Gameplay.Scoring {
         /// </summary>
         protected void HandleNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit judgeTime, HitResult result) {
             if (DebugLogHistory.IsActive) {
-                DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit, action {action}, result {result}");
+                DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit, action {action}, result {result.ToEditorName()}");
             }
             
             // Note and Behavior callbacks
