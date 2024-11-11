@@ -53,12 +53,12 @@ namespace MaTech.Gameplay.Display {
     
         /// 音符成绩计算结束后调用。
         public interface IScoreUpdate {
-            void OnUpdateScore(IMetaVisitable<ScoreType> scoreSnapshot);
+            void OnUpdateScore(IMetaVisitable<ScoreType> score);
         }
         
         /// 在即将触发PlayBehavior.OnFinish前调用。
         public interface IScoreResult {
-            void OnFinishWithScore(bool isFailed, IMetaVisitable<ScoreType> scoreSnapshot);
+            void OnFinishWithScore(bool isFailed, IMetaVisitable<ScoreType> score);
         }
     }
 }
