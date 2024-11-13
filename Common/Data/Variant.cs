@@ -73,9 +73,7 @@ namespace MaTech.Common.Data {
         public readonly bool IsStringWhiteSpace => IsString && string.IsNullOrWhiteSpace((string)o);
         public readonly bool IsObject => Type == VariantType.Object;
 
-        public readonly T To<T>(IFormatProvider provider = null) => BoxlessConvert.To<T>.From(this, provider);
-
-        public override readonly string ToString() => ToString(null, null);
+        public readonly override string ToString() => ToString(null, null);
 
         public static Variant FromEnum(MetaEnum value) => new Variant(value);
         public static Variant FromEnum<TEnum>(DataEnum<TEnum> value) where TEnum : unmanaged, Enum, IConvertible => new Variant(MetaEnum.FromEnum(value));
@@ -83,11 +81,11 @@ namespace MaTech.Common.Data {
         public readonly MetaEnum ToEnum() => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
         public readonly DataEnum<TEnum>? ToEnum<TEnum>() where TEnum : unmanaged, Enum, IConvertible => ToEnum().As<TEnum>();
         
-        public static Variant FromObject<T>(T value) where T : class => new Variant(value);
-        public readonly T ToObject<T>() where T : class => ToObject() as T;
-        public readonly T GetObject<T>() where T : class => o as T;
+        public static Variant From<T>(T value) where T : class => new Variant(value);
+        public readonly T To<T>() where T : class => ToObject() as T;
+        public readonly T As<T>() where T : class => o as T;
         
-        public static Variant Box<T>(T value) where T : struct => new Variant((object)value);
+        public static Variant Box<T>(T value) where T : struct => new Variant(value);
         public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
 
         public static implicit operator Variant(bool value) => new Variant(value);

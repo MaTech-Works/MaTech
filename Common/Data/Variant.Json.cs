@@ -67,7 +67,7 @@ namespace MaTech.Common.Data {
                 case JsonToken.Raw:
                 case JsonToken.Date:
                 case JsonToken.Bytes:
-                    variant = Variant.FromObject(serializer.Deserialize(reader));
+                    variant = Variant.From(serializer.Deserialize(reader));
                     break;
 
                 case JsonToken.StartArray:
