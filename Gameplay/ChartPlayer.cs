@@ -223,7 +223,7 @@ namespace MaTech.Gameplay {
                     } else {
                         Debug.LogError("<b>[ChartPlayer]</b> Replay is requested without a replay file.");
                     }
-                } else */ if (playInfo.NeedAutoPlay) {
+                } else */ if (playInfo.AutoPlay) {
                     if (judgeLogic.AutoPlayController != null) {
                         Controller = judgeLogic.AutoPlayController;
                     } else {

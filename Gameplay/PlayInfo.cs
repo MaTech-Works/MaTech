@@ -19,7 +19,7 @@ namespace MaTech.Gameplay {
         
         int? RandomSeed { get; }
 
-        bool NeedAutoPlay { get; }
+        bool AutoPlay { get; }
         ReplayFile Replay { get; }
     }
 
