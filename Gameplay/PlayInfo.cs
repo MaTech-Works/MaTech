@@ -27,7 +27,7 @@ namespace MaTech.Gameplay {
         Summary = 0, Description, Comment,
         Title = 10, Musician, Artist, Designer, Album, Package,
         Music = 20, Image, Video, Cover, Animation, Scene,
-        Difficulty = 30, Level, Style,
+        Difficulty = 30, Level, Style, Player, Avatar, Course, Rank, Skill, Experience,
         StartTime = 40, EndTime, Length,
         Tempo = 50, MinTempo, MaxTempo, MeanTempo,
         NoteCount = 60, AccuracyDenominator, MaxCombo, MaxScore,
