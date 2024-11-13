@@ -14,12 +14,14 @@ namespace MaTech.Gameplay {
         Chart Chart { get; }
 
         public enum MetaType {
-            Summary, Comment,
-            Title, Artist, Author, Difficulty, Level, Style,
-            TitleRomanized, ArtistRomanized, AuthorRomanized,
-            StartTime, EndTime, Length,
-            Tempo, MinTempo, MaxTempo, MeanTempo,
-            NoteCount, AccuracyDenominator, MaxCombo, MaxScore
+            Summary = 0, Description, Comment,
+            Title = 10, Musician, Artist, Mapper, Album, Package,
+            Music = 20, Cover, Image, Video,
+            Difficulty = 30, Level, Style,
+            StartTime = 40, EndTime, Length,
+            Tempo = 50, MinTempo, MaxTempo, MeanTempo,
+            NoteCount = 60, AccuracyDenominator, MaxCombo, MaxScore,
+            ExtensionStart = 100
         }
         
         IMeta<MetaType> Metadata { get; }
