@@ -15,8 +15,8 @@ namespace MaTech.Gameplay {
 
         public enum MetaType {
             Summary = 0, Description, Comment,
-            Title = 10, Musician, Artist, Mapper, Album, Package,
-            Music = 20, Cover, Image, Video,
+            Title = 10, Musician, Artist, Designer, Album, Package,
+            Music = 20, Image, Video, Cover, Animation, Scene,
             Difficulty = 30, Level, Style,
             StartTime = 40, EndTime, Length,
             Tempo = 50, MinTempo, MaxTempo, MeanTempo,
