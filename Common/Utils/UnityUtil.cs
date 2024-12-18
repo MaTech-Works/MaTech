@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using MaTech.Common.Algorithm;
 using MaTech.Common.Unity;
 using UnityEditor;
 using UnityEngine;
@@ -148,6 +149,18 @@ namespace MaTech.Common.Utils {
         public static Vector3 GetAnchoredWorldPosition(this RectTransform rectTransform, Vector2 ratio) {
             return rectTransform.localToWorldMatrix.MultiplyPoint(rectTransform.GetAnchoredLocalPosition(ratio));
         }
+
+        public static Rect Flip(this Rect rect) => new Rect(rect.y, rect.x, rect.height, rect.width);
+
+        public static float MapXY(this Rect rect, float value) => MathUtil.LinearMap(rect.xMin, rect.xMax, rect.yMin, rect.yMax, value);
+        public static float MapYX(this Rect rect, float value) => MathUtil.LinearMap(rect.yMin, rect.yMax, rect.xMin, rect.xMax, value);
+        public static float MapXY(this Rect rect, float value, IInterpolator interpolator) => MathUtil.CurveMap(interpolator ?? Interpolators.linear, rect.xMin, rect.xMax, rect.yMin, rect.yMax, value);
+        public static float MapYX(this Rect rect, float value, IInterpolator interpolator) => MathUtil.CurveMap(interpolator ?? Interpolators.linear, rect.yMin, rect.yMax, rect.xMin, rect.xMax, value);
+        
+        public static float SubXY(this Rect rect, float value, IInterpolator interpolator) {
+            return MathUtil.InverseLerpUnclamped(rect.yMin, rect.yMax, (float)(interpolator ?? Interpolators.linear).Map(MathUtil.LerpUnclamped(rect.xMin, rect.xMax, value)));
+        }
+        public static float SubYX(this Rect rect, float value, IInterpolator interpolator) => rect.Flip().SubXY(value, interpolator);
 
         public static Vector4 ToVector(this Rect rect) {
             return new Vector4(rect.xMin, rect.yMin, rect.xMax, rect.yMax);
