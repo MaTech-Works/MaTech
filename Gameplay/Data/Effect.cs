@@ -64,7 +64,7 @@ namespace MaTech.Gameplay.Data {
 
         // TODO: 如何对非浮点数据插值？
         // TODO: 将Variant类重命名成Number类
-        public Variant ValueAt(TimeUnit time) => TimeUnit.IsInRangeByValue(time, StartOrMin.Time, EndOrMax.Time) ? value : Variant.None;
+        public Variant ValueAt(TimeUnit time) => TimeUnit.InRange(time, StartOrMin.Time, EndOrMax.Time) ? value : Variant.None;
         public Variant ValueAt(BeatUnit beat) => BeatUnit.IsInRangeByFraction(beat, StartOrMin.Beat, EndOrMax.Beat) ? value : Variant.None;
 
         public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? start = null, ITimePoint? end = null) {
