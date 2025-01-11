@@ -5,10 +5,14 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using MaTech.Gameplay.Time;
+using UnityEditor;
+using static UnityEngine.Time;
 
 namespace MaTech.Gameplay {
     public static class PlayTime {
         public static bool IsPlaying { get; private set; }
+        
+        // todo: always use TimeUnit struct here
 
         public static double AudioTime { get; private set; }
         public static double ChartTime { get; private set; }
@@ -38,6 +42,24 @@ namespace MaTech.Gameplay {
             
             public void SetPlaying(bool playing) => IsPlaying = playing;
 
+        }
+        
+        public enum TimeSource {
+            UnityTimeScaled = 0, UnityTimeUnscaled,
+            AudioTime = 10, ChartTime, VisualTime, JudgeTime, ScrollTime
+        }
+
+        public static TimeUnit Select(TimeSource source) {
+            return source switch {
+                TimeSource.UnityTimeScaled => TimeUnit.FromSeconds(timeAsDouble),
+                TimeSource.UnityTimeUnscaled => TimeUnit.FromSeconds(unscaledTimeAsDouble),
+                TimeSource.AudioTime => TimeUnit.FromSeconds(AudioTime),
+                TimeSource.ChartTime => TimeUnit.FromSeconds(ChartTime),
+                TimeSource.VisualTime => TimeUnit.FromSeconds(DisplayTime),
+                TimeSource.JudgeTime => JudgeTime,
+                TimeSource.ScrollTime => TimeUnit.FromSeconds(DisplayY),
+                _ => TimeUnit.Zero
+            };
         }
     }
 }
