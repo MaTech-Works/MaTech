@@ -122,7 +122,6 @@ namespace MaTech.Gameplay.Time {
         
         public static TimeUnit FromMilliseconds(double ms) => new(ms);
         public static TimeUnit FromSeconds(double seconds) => new(seconds * 1000);
-        public static TimeUnit FromMinutes(double minutes) => new(minutes * 60 * 1000);
         public static TimeUnit FromTimeSpan(TimeSpan timeSpan) => new(timeSpan.TotalMilliseconds);
 
         public TimeUnit Negate() => new(-integer, -decimals);
