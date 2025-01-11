@@ -9,7 +9,7 @@ using MaTech.Gameplay.Scoring;
 using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay.Utils {
-    public class HitEventBehavior : PlayBehavior, PlayBehavior.INoteHitResult {
+    public class HitEvents : PlayBehavior, PlayBehavior.INoteHitResult {
         public HitEvent[] hitEvents;
 
         public void OnHitNote(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime, HitResult result) {

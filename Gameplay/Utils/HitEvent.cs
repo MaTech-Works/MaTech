@@ -28,17 +28,10 @@ namespace MaTech.Gameplay.Utils {
         
         [Serializable]
         public enum MatchMethod {
-            [Tooltip("要求判定结果和目标完全一样，没有缺少与多余，才会触发事件")]
-            Exact,
-        
-            [Tooltip("判定结果和目标有任意的重合（有交集），就会触发事件")]
-            HasAny,
-        
-            [Tooltip("判定结果完全包含目标时触发事件")]
-            ContainsAll,
-        
-            [Tooltip("目标完全包含判定结果时触发事件")]
-            InsideAll,
+            [Tooltip("要求判定结果和目标完全一样，没有缺少与多余，才会触发事件")] Exact,
+            [Tooltip("判定结果和目标有任意的重合（有交集），就会触发事件")] HasAny,
+            [Tooltip("判定结果完全包含目标时触发事件")] ContainsAll,
+            [Tooltip("目标完全包含判定结果时触发事件")] InsideAll,
         }
         
         public bool Match(NoteHitAction action, HitResult result) {
