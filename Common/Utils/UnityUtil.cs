@@ -26,6 +26,7 @@ namespace MaTech.Common.Utils {
         [Serializable] public class UnityEventFloat : UnityEvent<float> { }
         [Serializable] public class UnityEventDouble : UnityEvent<double> { }
         [Serializable] public class UnityEventString : UnityEvent<string> { }
+        [Serializable] public class UnityEventColor : UnityEvent<Color> { }
         [Serializable] public class UnityEventVector2 : UnityEvent<Vector2> { }
         [Serializable] public class UnityEventVector3 : UnityEvent<Vector3> { }
         [Serializable] public class UnityEventVector4 : UnityEvent<Vector4> { }
