@@ -1,6 +1,6 @@
 {
     "name": "MaCommon",
-    "rootNamespace": "MaTech.Common",
+    "rootNamespace": "",
     "references": [
         "UniTask",
         "Json.net",

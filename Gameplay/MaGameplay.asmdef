@@ -1,6 +1,6 @@
 {
     "name": "MaGameplay",
-    "rootNamespace": "MaTech.Gameplay",
+    "rootNamespace": "",
     "references": [
         "UniTask",
         "MaCommon",
