@@ -17,10 +17,38 @@ using static MaTech.Gameplay.Scoring.JudgeLogicBase;
 
 namespace MaTech.Gameplay.Utils {
     [Serializable]
+    public struct HitEventCondition {
+        public NoteHitAction[] allowedActions;
+        public HitResult matchTarget;
+        public MatchMethod matchMethod;
+
+        [Serializable]
+        public enum MatchMethod {
+            [Tooltip("要求判定结果和目标完全一样，没有缺少与多余，才会触发事件")] Exact,
+            [Tooltip("判定结果和目标有任意的重合（有交集），就会触发事件")] HasAny,
+            [Tooltip("判定结果完全包含目标时触发事件")] ContainsAll,
+            [Tooltip("目标完全包含判定结果时触发事件")] InsideAll,
+        }
+        
+        public bool Match(NoteHitAction action, HitResult result) {
+            foreach (NoteHitAction allowedAction in allowedActions) {
+                if (allowedAction != action) continue;
+                switch (matchMethod) {
+                case MatchMethod.Exact when result == matchTarget: break;
+                case MatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
+                case MatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
+                case MatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
+                default: continue;
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+    
+    [Serializable]
     public class HitEvent {
         public NoteHitAction[] allowedActions;
-        
-        [FormerlySerializedAs("matchTiming")]
         public HitResult matchTarget;
         public MatchMethod matchMethod;
 
@@ -60,17 +88,22 @@ namespace MaTech.Gameplay.Utils {
 
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(HitEvent))]
+    [CustomPropertyDrawer(typeof(HitEventCondition))]
     public class HitEventDrawer : PropertyDrawer {
         private readonly List<DataEnum<NoteHitAction>> cachedEnums = new List<DataEnum<NoteHitAction>>(10);
         private readonly Dictionary<NoteHitAction, bool> cachedEnumState = new Dictionary<NoteHitAction, bool>(10);
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-            SerializedProperty eventProperty = property.FindPropertyRelative("onHit");
-
-            return EditorGUI.GetPropertyHeight(SerializedPropertyType.Boolean, null)
-                   + EditorGUI.GetPropertyHeight(SerializedPropertyType.Enum, null)
-                   + EditorGUI.GetPropertyHeight(eventProperty)
-                   + 16;
+            if (property.FindPropertyRelative("onHit") is { } onHit) {
+                return EditorGUI.GetPropertyHeight(SerializedPropertyType.Boolean, null)
+                    + EditorGUI.GetPropertyHeight(SerializedPropertyType.Enum, null)
+                    + EditorGUI.GetPropertyHeight(onHit)
+                    + 16;
+            } else {
+                return EditorGUI.GetPropertyHeight(SerializedPropertyType.Boolean, null)
+                    + EditorGUI.GetPropertyHeight(SerializedPropertyType.Enum, null)
+                    + 16;
+            }
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
@@ -109,11 +142,11 @@ namespace MaTech.Gameplay.Utils {
             EditorGUIUtility.labelWidth = 86;
             EditorGUI.PropertyField(matchRect, matchProperty);
 
-            SerializedProperty hitEventProperty = property.FindPropertyRelative("onHit");
-            Rect hitEventRect = position;
-            hitEventRect.xMin += 12;
-
-            EditorGUI.PropertyField(hitEventRect, hitEventProperty);
+            if (property.FindPropertyRelative("onHit") is { } onHit) {
+                Rect hitEventRect = position;
+                hitEventRect.xMin += 12;
+                EditorGUI.PropertyField(hitEventRect, onHit);
+            }
 
             EditorGUI.EndProperty();
         }
