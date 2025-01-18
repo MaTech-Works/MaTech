@@ -27,6 +27,7 @@ namespace MaTech.Gameplay.Scoring {
             Linked, // 被其他音符连锁触发
         };
 
+        // todo: merge into NoteHitAction with all callbacks and events
         public enum EmptyHitAction {
             Unknown = -1, // 无法判别交互形式（如不支持的input操作）时使用
             Auto = 0, // 无对应输入操作时使用

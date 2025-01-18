@@ -15,7 +15,9 @@ namespace MaTech.Gameplay {
             None, // 可以用 DataEnum 扩展定义
         }
 
-        // TODO: 把这个基类与模板参数干掉
+        // todo: 把这个基类与模板参数干掉
+        // todo: 重命名成VisualData或类似名称
+        // todo: 与Processor和ObjectLayer解耦
         public class ObjectCarrier<TCarrier, TLayer> : Carrier
             where TCarrier : ObjectCarrier<TCarrier, TLayer>
             where TLayer : ObjectLayer<TCarrier, TLayer> {
