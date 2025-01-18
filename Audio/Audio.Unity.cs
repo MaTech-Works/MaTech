@@ -12,16 +12,6 @@ namespace MaTech.Audio {
     public static partial class MaAudio {
         public static bool IsLoadedForUnity { get; private set; } = false;
         public static bool IsDebugLogEnabled { get; private set; } = false;
-
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD || MAAUDIO_DEBUG_LOG  
-        [AOT.MonoPInvokeCallback(typeof(Logger))]
-        private static void Log(string s) => Debug.Log("[MaAudio Native] " + s);
-        static MaAudio() {
-            Debug.Log("MaAudio native debug logging enabled.");
-            DebugLogFunction = Log;
-            IsDebugLogEnabled = true;
-        }
-        #endif
         
         public static bool LoadForUnity() {
             if (!Create(AudioSettings.outputSampleRate)) {
@@ -71,11 +61,6 @@ namespace MaTech.Audio {
             isFocusLost = !focused;
             Paused = isFocusLost || isEditorPaused;
         }
-
-        #if MAAUDIO_LOAD_ON_STARTUP
-        [RuntimeInitializeOnLoadMethod]
-        private static void RuntimeInitializeOnLoad() => ReloadForUnity();
-        #endif
         
         #if UNITY_EDITOR
         private static readonly Action<PauseState> onEditorPause = (state) => {
@@ -83,5 +68,37 @@ namespace MaTech.Audio {
             Paused = isFocusLost || isEditorPaused;
         };
         #endif
+
+        public static class Initializer {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD || MAAUDIO_DEBUG_LOG  
+            [AOT.MonoPInvokeCallback(typeof(Logger))]
+            private static void Log(string s) => Debug.Log("[MaAudio Native] " + s);
+            private static void InitLog() {
+                Debug.Log("MaAudio native debug logging enabled.");
+                DebugLogFunction = Log;
+                IsDebugLogEnabled = true;
+            }
+            #else
+            private static void InitLog() {}
+            #endif
+            
+            #if MAAUDIO_LOAD_ON_STARTUP
+            private static void InitAudio() => ReloadForUnity();
+            #else
+            private static void InitAudio() {}
+            #endif
+
+            private static void Initialize() {
+                InitLog();
+                InitAudio();
+            }
+
+            #if UNITY_EDITOR
+            [RuntimeInitializeOnLoadMethod]
+            private static void RuntimeInitialize() => Initialize();
+            #else
+            static Initializer() => Initialize();
+            #endif
+        }
     }
 }
