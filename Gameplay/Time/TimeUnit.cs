@@ -97,7 +97,8 @@ namespace MaTech.Gameplay.Time {
         public double Seconds => Milliseconds * 0.001;
 
         public int MillisecondsRounded => integer;
-        public int SecondsRounded => integer / 1000;
+        public int MillisecondsFloored => integer + (decimals < 0 ? -1 : 0);
+        public int MillisecondsCeiling => integer + (decimals > 0 ? 1 : 0);
         
         private TimeUnit(double ms) {
             integer = MathUtil.RoundToInt(ms);
