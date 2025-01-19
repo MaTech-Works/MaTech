@@ -12,6 +12,8 @@ using static MaTech.Common.Utils.UnityUtil;
 
 namespace MaTech.Gameplay.Utils {
     public class LifetimeTimeSource : MonoBehaviour {
+        // todo: editor play and reset button
+        
         [Serializable]
         public enum LifetimeStart {
             Awake, Start, OnEnable
