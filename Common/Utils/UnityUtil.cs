@@ -290,10 +290,16 @@ namespace MaTech.Common.Utils {
             return new Vector2(self.x * other.x - self.y * other.y, self.x * other.y + self.y * other.x);
         }
 
-        public static Vector2 LerpUnclamped(this Vector2 self, Vector2 a, Vector2 b) {
-            return new Vector2(Mathf.LerpUnclamped(a.x, b.x, self.x), Mathf.LerpUnclamped(a.y, b.y, self.y));
+        public static Vector2 Lerp(this Vector2 self, Vector2 a, Vector2 b) {
+            return new Vector2(MathUtil.Lerp(a.x, b.x, self.x), MathUtil.Lerp(a.y, b.y, self.y));
         }
-
+        public static Vector2 InverseLerp(this Vector2 self, Vector2 a, Vector2 b) {
+            return new Vector2(MathUtil.InverseLerp(a.x, b.x, self.x), MathUtil.InverseLerp(a.y, b.y, self.y));
+        }
+        
+        public static Vector2 LerpUnclamped(this Vector2 self, Vector2 a, Vector2 b) {
+            return new Vector2(MathUtil.LerpUnclamped(a.x, b.x, self.x), MathUtil.LerpUnclamped(a.y, b.y, self.y));
+        }
         public static Vector2 InverseLerpUnclamped(this Vector2 self, Vector2 a, Vector2 b) {
             return new Vector2(MathUtil.InverseLerpUnclamped(a.x, b.x, self.x), MathUtil.InverseLerpUnclamped(a.y, b.y, self.y));
         }
@@ -323,20 +329,29 @@ namespace MaTech.Common.Utils {
             return new Vector2Int(MathUtil.RoundToInt(value.x, mode), MathUtil.RoundToInt(value.y, mode));
         }
 
-        public static Vector2 PointToNormalizedUnclamped(in this Rect rect, Vector2 point) {
-            return point.InverseLerpUnclamped(rect.min, rect.max);
-        }
-        public static Vector2 NormalizedToPointUnclamped(in this Rect rect, Vector2 point) {
-            return point.LerpUnclamped(rect.min, rect.max);
-        }
-        
-        public static Rect ScaleBy(in this Rect rect, Vector2 scale) {
-            return new Rect(rect.position * scale, rect.size * scale);
-        }
-        public static Rect NormalizeTo(in this Rect rect, Vector2 size) {
-            return new Rect(rect.position / size, rect.size / size);
-        }
+        public static Rect MinMaxRect(in Vector2 min, in Vector2 max) => Rect.MinMaxRect(min.x, min.y, max.x, max.y);
 
+        public static Rect ScaleUpBy(in this Rect rect, in Vector2 scale) => new(rect.position * scale, rect.size * scale);
+        public static Rect ScaleDownBy(in this Rect rect, in Vector2 scale) => new(rect.position / scale, rect.size / scale);
+
+        public static Rect ShrinkBorder(in this Rect rect, in Vector4 offsetLBRT) => rect.ShrinkBorder(new(offsetLBRT.x, offsetLBRT.w), new(offsetLBRT.z, offsetLBRT.y));
+        public static Rect ShrinkBorder(in this Rect rect, in Vector2 offsetMin, in Vector2 offsetMax) => MinMaxRect(rect.min + offsetMin, rect.max - offsetMax);
+
+        public static Vector2 InterpolateIn(in this Vector2 point, Rect range) => point.LerpUnclamped(range.min, range.max);
+        public static Vector2 NormalizeBy(in this Vector2 point, Rect range) => point.InverseLerpUnclamped(range.min, range.max);
+        public static Vector2 ClampTo(in this Vector2 point, Rect range) => Vector2.Max(Vector2.Min(point, range.max), range.min);
+        public static Vector2 Clamp01(in this Vector2 point) => Vector2.Max(Vector2.Min(point, Vector2.one), Vector2.zero);
+
+        public static Rect InterpolateIn(in this Rect rect, Rect range) => new(rect.position.LerpUnclamped(range.min, range.max), rect.size * range.size);
+        public static Rect NormalizeBy(in this Rect rect, Rect range) => new(rect.position.InverseLerpUnclamped(range.min, range.max), rect.size / range.size);
+        public static Rect ClampTo(in this Rect rect, Rect range) => MinMaxRect(rect.min.ClampTo(range), rect.max.ClampTo(range));
+        public static Rect Clamp01(in this Rect rect) => MinMaxRect(rect.min.Clamp01(), rect.max.Clamp01());
+
+        public static Vector2 PointToNormalizedUnclamped(in this Rect range, in Vector2 point) => point.NormalizeBy(range);
+        public static Vector2 NormalizedToPointUnclamped(in this Rect range, in Vector2 point) => point.InterpolateIn(range);
+
+        public static Vector2 PixelSize(this Texture2D texture) => new(texture.width, texture.height);
+        
         public static float GetBeginTime(this AnimationCurve curve) => curve.keys.FirstOrDefault().time;
         public static float GetEndTime(this AnimationCurve curve) => curve.keys.LastOrDefault().time;
 
