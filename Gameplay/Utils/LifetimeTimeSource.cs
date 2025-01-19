@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using MaTech.Common.Utils;
 using MaTech.Gameplay.Time;
 using UnityEngine;
 using static MaTech.Common.Utils.UnityUtil;
@@ -24,6 +25,8 @@ namespace MaTech.Gameplay.Utils {
         public UnityEventFloat onLateUpdate;
 
         private TimeUnit timeStart;
+        
+        // todo: support loop time here rather than relying on curve methods; proceed timeStart ahead on each loop
 
         void Awake() { if (lifetimeStart is LifetimeStart.Awake) timeStart = PlayTime.Select(timeSource); }
         void Start() { if (lifetimeStart is LifetimeStart.Start) timeStart = PlayTime.Select(timeSource); }
