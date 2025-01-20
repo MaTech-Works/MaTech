@@ -12,11 +12,11 @@ using UnityEngine;
 
 namespace MaTech.Common.Tools {
     public class DebugLogHistory : MonoBehaviour {
-        #if UNITY_EDITOR
         private static readonly Dictionary<string, List<string>> history = new();
         private static readonly List<DebugLogHistory> instances = new();
 
-        public static bool IsActive => instances.Count > 0;
+        public static bool HasInstances => instances.Count > 0;
+        public static bool IsActive => instances.Exists(o => o.isActiveAndEnabled);
 
         public static void PushHistory(string key, string text) {
             lock (history) {
@@ -43,15 +43,15 @@ namespace MaTech.Common.Tools {
         private int nextLogIndex = 0;
         private float nextLogTime = 0;
 
-        void Start() {
+        void OnEnable() {
             nextLogTime = Time.unscaledTime;
         }
 
-        void OnEnable() {
+        void Awake() {
             instances.Add(this);
         }
 
-        void OnDisable() {
+        void OnDestroy() {
             instances.Remove(this);
         }
 
@@ -83,14 +83,5 @@ namespace MaTech.Common.Tools {
                     nextLogTime = targetTime;
             }
         }
-        
-        #else
-        public static bool IsActive => false;
-        [System.Diagnostics.Conditional("CALL_ALWAYS_IGNORED")]
-        public static void PushHistory(string key, string text) {}
-        [System.Diagnostics.Conditional("CALL_ALWAYS_IGNORED")]
-        public static void ClearHistory(string key) {}
-        #endif
-
     }
 }
