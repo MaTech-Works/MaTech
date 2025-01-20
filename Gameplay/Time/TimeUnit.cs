@@ -57,7 +57,6 @@ namespace MaTech.Gameplay.Time {
         public static BeatUnit FromValue(double value) => new(value);
         public static BeatUnit FromValueRounded(double value, int denominator) => new(value, denominator);
 
-        // TODO: 改用operator实现运算
         public BeatUnit OffsetBy(in BeatUnit offset) => new(this, offset);
         public BeatUnit Negate() => new(Fraction.zero - fraction, 1 - decimals);
 
@@ -86,7 +85,10 @@ namespace MaTech.Gameplay.Time {
         public static implicit operator BeatUnit(double value) => new(value);
         public static implicit operator BeatUnit(Fraction value) => new(value);
 
-        public override string ToString() => $"{fraction} ({Value:f3})";
+        public override string ToString() {
+            float delta = decimals - fraction.DecimalFloat;
+            return MathUtil.Near(delta, 0) ? $"{fraction}" : $"{fraction} ({(delta > 0 ? "+" : "-")}{delta:f3})";
+        }
     }
 
     public readonly struct TimeUnit : IComparable<TimeUnit> {
