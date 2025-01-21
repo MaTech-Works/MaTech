@@ -305,6 +305,7 @@ namespace MaTech.Gameplay {
             timeSetter.UpdateTime(timeTrackStart, true);
             
             await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnLoad(SourcePlayInfo));
+            await UniTask.SwitchToMainThread();
             
             loaded = true;
             playCount = 0;
@@ -325,6 +326,7 @@ namespace MaTech.Gameplay {
             
             await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnUnload(SourcePlayInfo));
             await sequencer.Track.Unload();
+            await UniTask.SwitchToMainThread();
             
             Controller = null;
             loaded = false;
