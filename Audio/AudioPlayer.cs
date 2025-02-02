@@ -7,18 +7,26 @@
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MaTech.Audio {
     public class AudioPlayer : MonoBehaviour {
-
         [SerializeField]
         private AudioClip audioClip;
 
-        public bool mute;
-        public bool playOnAwake;
-        public bool loop;
+        [FormerlySerializedAs("volume")]
+        public float volumeOnPlay = 1;
+        
+        [Space]
+        public ushort channelIndex = 0;
+        public bool autoChannel = true;
 
-        public float volume = 1;
+        [Space]
+        public bool mute;
+        public bool loop;
+        
+        [Space]
+        public bool playOnAwake;
 
         private IntPtr audioData;
 
@@ -28,15 +36,15 @@ namespace MaTech.Audio {
         }
 
         public void Play() {
-            MaAudio.Play(audioData, volume, MaAudio.Mixer.Instant, MaAudio.ChannelAutoAssign);
+            MaAudio.Channel channelNew = MaAudio.Play(audioData, volumeOnPlay, MaAudio.Mixer.Instant, autoChannel ? MaAudio.ChannelAutoAssign : channelIndex);
+            if (channelNew.IsValid) channelIndex = channelNew.index;
         }
     
-        public async void Start() {
+        public async void Awake() {
             await LoadAudio();
             if (playOnAwake) {
                 Play();
             }
         }
-    
     }
 }
