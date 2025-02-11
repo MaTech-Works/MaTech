@@ -20,10 +20,6 @@ namespace MaTech.Audio {
         [Space]
         public ushort channelIndex = 0;
         public bool autoChannel = true;
-
-        [Space]
-        public bool mute;
-        public bool loop;
         
         [Space]
         public bool playOnAwake;
