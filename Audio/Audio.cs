@@ -44,7 +44,7 @@ namespace MaTech.Audio {
         #region Audio System
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MaAudio_Create")]
-        public static extern bool Create(int sampleRate); // note: call MaAudio.LoadForUnity to register extra handling for Unity
+        public static extern bool Create(int sampleRate = 0); // note: call MaAudio.LoadForUnity to register extra handling for Unity
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MaAudio_Destroy")]
         public static extern bool Destroy(); // note: call MaAudio.UnloadForUnity to register extra handling for Unity

@@ -10,11 +10,11 @@ using UnityEngine;
 
 namespace MaTech.Audio {
     public static partial class MaAudio {
-        public static bool IsLoadedForUnity { get; private set; } = false;
-        public static bool IsDebugLogEnabled { get; private set; } = false;
+        public static bool IsLoadedForUnity { get; private set; }
+        public static bool IsDebugLogEnabled { get; private set; }
         
         public static bool LoadForUnity() {
-            if (!Create(AudioSettings.outputSampleRate)) {
+            if (!Create()) {
                 Debug.LogError(IsDebugLogEnabled ? "Cannot create MaAudio." : "Cannot create MaAudio. Enable debug logging on native plugin to see more details.");
                 return false;
             }
@@ -93,12 +93,8 @@ namespace MaTech.Audio {
                 InitAudio();
             }
 
-            #if UNITY_EDITOR
             [RuntimeInitializeOnLoadMethod]
             private static void RuntimeInitialize() => Initialize();
-            #else
-            static Initializer() => Initialize();
-            #endif
         }
     }
 }
