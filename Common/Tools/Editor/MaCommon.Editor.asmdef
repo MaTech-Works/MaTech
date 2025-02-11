@@ -1,6 +1,6 @@
 {
     "name": "MaCommon.Editor",
-    "rootNamespace": "MaTech.Common.Editor",
+    "rootNamespace": "",
     "references": [
         "MaCommon"
     ],
