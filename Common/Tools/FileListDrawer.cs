@@ -78,5 +78,11 @@ namespace MaTech.Common.Tools {
             }
         }
     }
+
+    public static class FileListDrawerExtension {
+        public static string ToLinuxPath(this string path) {
+            return path.Replace('\\', '/');
+        }
+    }
     #endif
 }
