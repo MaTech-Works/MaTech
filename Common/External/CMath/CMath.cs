@@ -37,9 +37,9 @@ SOFTWARE.
 // ReSharper disable CompareOfFloatsByEqualityOperator
 // ReSharper disable InconsistentNaming
 
-using math = MaTech.Common.Algorithm.CMath;
+using math = MaTech.Common.External.CMath;
 
-namespace MaTech.Common.Algorithm {
+namespace MaTech.Common.External {
     /// <summary>
     /// Implements several <a href="http://en.cppreference.com/w/c/numeric/math">C Standard</a> mathematical functions that are missing from the .NET framework.
     /// </summary>
