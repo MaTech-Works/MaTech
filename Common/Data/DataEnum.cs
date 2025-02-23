@@ -56,9 +56,10 @@ namespace MaTech.Common.Data {
         public readonly int UnderlyingValue => BoxlessConvert.To<int>.From(Value);
         
         public static implicit operator TEnum(DataEnum<TEnum> x) => x.Value;
-        public static implicit operator DataEnum<TEnum>(TEnum x) => new DataEnum<TEnum>(x);
-        public static implicit operator DataEnum<TEnum>(int x) => new DataEnum<TEnum>(x);
-
+        public static implicit operator DataEnum<TEnum>(TEnum x) => new(x);
+        public static implicit operator DataEnum<TEnum>(int x) => new(x);
+        public static implicit operator DataEnum<TEnum>(string name) => DefineUnorderedEnum(name); // unordered; define ordered with new("name") or new("name", index)
+        
         public DataEnum(TEnum x) { Value = x; }
         public DataEnum(int x) { Value = BoxlessConvert.To<TEnum>.From(x); }
         public DataEnum(string name, int index) { Value = DefineEnumWithIndex(name, index); }
@@ -67,8 +68,8 @@ namespace MaTech.Common.Data {
 
     public static class DataEnum {
         public static TEnum WithIndex<TEnum>(string name, int index) where TEnum : unmanaged, Enum, IConvertible => DataEnum<TEnum>.DefineEnumWithIndex(name, index);
-        public static TEnum Ordered<TEnum>(string name) where TEnum : unmanaged, Enum, IConvertible => DataEnum<TEnum>.DefineOrderedEnum(name);
         public static TEnum Unordered<TEnum>(string name) where TEnum : unmanaged, Enum, IConvertible => DataEnum<TEnum>.DefineUnorderedEnum(name);
+        public static TEnum Ordered<TEnum>(string name) where TEnum : unmanaged, Enum, IConvertible => DataEnum<TEnum>.DefineOrderedEnum(name);
         
         public static int MaxUnorderedHashAttempts { get; set; } = 10;
     }
