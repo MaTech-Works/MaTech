@@ -16,13 +16,10 @@ namespace MaTech.Common.Data {
     [Serializable]
     [JsonConverter(typeof(FractionJsonConverter))]
     public struct Fraction : IComparable<Fraction>, IEquatable<Fraction> {
-        // todo: make immutable? readonly struct cannot be serializable
-        // todo: normalize on construct by default
-
-        public static readonly Fraction invalid = new Fraction();
-        public static readonly Fraction zero = new Fraction(0);
-        public static readonly Fraction maxValue = new Fraction(int.MaxValue);
-        public static readonly Fraction minValue = new Fraction(int.MinValue);
+        public static readonly Fraction invalid = default;
+        public static readonly Fraction zero = new(0);
+        public static readonly Fraction maxValue = new(int.MaxValue);
+        public static readonly Fraction minValue = new(int.MinValue);
 
         // ReSharper disable InconsistentNaming
         [SerializeField]
@@ -40,108 +37,94 @@ namespace MaTech.Common.Data {
             _num = 0;
             _den = 1;
         }
-
-        public Fraction(int integer, FractionSimple decimalPart) {
-            _int = integer;
-            _num = decimalPart.Numerator;
-            _den = decimalPart.Denominator;
-        }
-
+        
         public Fraction(int integer, int numerator, int denominator) {
             _int = integer;
             _num = numerator;
             _den = denominator;
         }
-
-        public void Set(int integer, int numerator, int denominator) {
-            _int = integer;
-            _num = numerator;
-            _den = denominator;
-        }
-
-        public void SetSigned(int integer, int numerator, int denominator) {
-            _int = integer;
-            _num = Math.Sign(denominator) * numerator;
-            _den = Math.Abs(denominator);
-        }
-
+        
         public int Integer { get => _int; set => _int = value; }
         public int Numerator { get => _num; set => _num = value; }
         public int Denominator { get => _den; set => _den = value; }
 
+        public bool IsZero => _int == 0 && _num == 0;
+        public bool IsValid => _den != 0;
+        public bool IsInvalid => _den == 0;
+
         public float Float => _int + (float)_num / _den;
         public double Double => _int + (double)_num / _den;
 
-        public FractionSimple Decimal => new FractionSimple(_num, _den);
+        public FractionSimple Decimal => new(_num, _den);
         public float DecimalFloat => (float)_num / _den;
         public double DecimalDouble => (double)_num / _den;
+        
+        public FractionSimple Improper => new(_num + _int * _den, _den);
+        
+        public static bool operator true(Fraction fraction) => fraction.IsValid;
+        public static bool operator false(Fraction fraction) => fraction.IsInvalid;
 
         public static explicit operator float(Fraction fraction) => fraction.Float;
         public static explicit operator double(Fraction fraction) => fraction.Double;
 
-        public static implicit operator FractionSimple(Fraction fraction) => new FractionSimple(fraction._num + fraction._int * fraction._den, fraction._den);
-        public static implicit operator Fraction(FractionSimple fraction) => new Fraction(0, fraction.Numerator, fraction.Denominator).Normalized;
+        public static implicit operator FractionSimple(Fraction fraction) => fraction.Improper;
+        public static implicit operator Fraction(FractionSimple fraction) => fraction.Mixed;
 
-        public static implicit operator Fraction(int integer) => new Fraction(integer);
-        
-        public Fraction Normalized {
-            get {
-                if (_den == 0) {
-                    return invalid;
-                }
-                Fraction result = this;
-                result._int += _num / _den;
-                result._num %= _den;
-                if (result._num < 0) {
-                    result._int--;
-                    result._num += _den;
-                }
-                return result;
+        public static implicit operator Fraction(int integer) => new(integer);
+        public static implicit operator Fraction((int integer, int numerator, int denominator) t) => new(t.integer, t.numerator, t.denominator);
+
+        public void Validate() => this = Validated;
+        public void Normalize() {
+            if (_den == 0) return;
+            _int += _num / _den;
+            _num %= _den;
+            if (_den < 0) {
+                _num = -_num;
+                _den = -_den;
+            }
+            if (_num < 0) {
+                _int--;
+                _num += _den;
             }
         }
-        public Fraction Reduced {
-            get {
-                if (_den == 0) {
-                    return invalid;
-                }
-                int t = MathUtil.GCD(_num, _den);
-                return new Fraction(_int, _num / t, _den / t);
-            }
+        public void Reduce() {
+            if (_den == 0) return;
+            int t = MathUtil.GCD(_num, _den);
+            _num /= t; _den /= t;
+        }
+        public void Simplify() {
+            Normalize();
+            Reduce();
         }
 
-        public int Rounded => _den == 0 ? 0 : ((FractionSimple)this).Rounded;
-        public int Ceiling => _den == 0 ? 0 : ((FractionSimple)this).Ceiling;
-
-        public static Fraction operator+(Fraction x, Fraction y) => (FractionSimple)x + (FractionSimple)y;
-        public static Fraction operator-(Fraction x, Fraction y) => (FractionSimple)x - (FractionSimple)y;
-        public static Fraction operator*(Fraction x, Fraction y) => (FractionSimple)x * (FractionSimple)y;
-        public static Fraction operator/(Fraction x, Fraction y) => (FractionSimple)x / (FractionSimple)y;
+        public Fraction Validated => IsValid ? this : invalid;
+        public Fraction Normalized { get { var clone = this; clone.Normalize(); return clone; } }
+        public Fraction Reduced { get { var clone = this; clone.Reduce(); return clone; } }
+        public Fraction Simplified { get { var clone = this; clone.Simplify(); return clone; } }
         
-        public static Fraction operator+(Fraction x, int value) {
-            if (x._den == 0) return invalid;
-            return new Fraction(x._int + value, x._num, x._den);
-        }
+        public Fraction Inversed => Improper.Inversed;
+        
+        public int Floored => Improper.Floored;
+        public int Rounded => Improper.Rounded;
+        public int Ceiling => Improper.Ceiling;
 
-        public static Fraction operator-(Fraction x, int value) {
-            if (x._den == 0) return invalid;
-            return new Fraction(x._int - value, x._num, x._den);
-        }
-
-        public static Fraction operator*(Fraction x, int scale) {
-            if (x._den == 0) return invalid;
-            return new Fraction(x._int * scale, x._num * scale, x._den).Normalized;
-        }
-
-        public static Fraction operator/(Fraction x, int denominator) {
-            if (x._den == 0) return invalid;
-            return new Fraction(0, x._int * x._den + x._num, x._den * denominator).Normalized;
-        }
+        public static Fraction operator+(Fraction x, Fraction y) => x.Improper + y.Improper;
+        public static Fraction operator-(Fraction x, Fraction y) => x.Improper - y.Improper;
+        public static Fraction operator*(Fraction x, Fraction y) => x.Improper * y.Improper;
+        public static Fraction operator/(Fraction x, Fraction y) => x.Improper / y.Improper;
+        
+        public static Fraction operator+(Fraction x, int value) => Valid(x._int + value, x._num, x._den);
+        public static Fraction operator-(Fraction x, int value) => Valid(x._int - value, x._num, x._den);
+        public static Fraction operator*(Fraction x, int value) => Normal(x._int * value, x._num * value, x._den);
+        public static Fraction operator/(Fraction x, int value) => Normal(0, x._int * x._den + x._num, x._den * value);
+        
+        public static Fraction operator+(int value, Fraction x) => Valid(x._int + value, x._num, x._den);
+        public static Fraction operator-(int value, Fraction x) => Valid(x._int - value, x._num, x._den);
+        public static Fraction operator*(int value, Fraction x) => Normal(x._int * value, x._num * value, x._den);
+        public static Fraction operator/(int value, Fraction x) => Normal(0, x._den * value, x._num + x._int * x._den); // == Normalize(1 / x.Simple);
 
         public static Fraction Max(Fraction x, Fraction y) => x > y ? x : y;
         public static Fraction Min(Fraction x, Fraction y) => x < y ? x : y;
-
-        public bool IsZero => _int == 0 && _num == 0;
-        public bool IsValid => _den != 0;
 
         public int CompareTo(Fraction other) {
             long x = _den == 0 ? long.MaxValue : ((long)_int * _den + _num) * other._den;
@@ -158,8 +141,16 @@ namespace MaTech.Common.Data {
         public static bool operator!=(Fraction x, Fraction y) => x._den != 0 && y._den != 0 && x.CompareTo(y) != 0;
 
         public override bool Equals(object obj) => obj is Fraction other && Equals(other);
-        public override int GetHashCode() => ((FractionSimple)this).GetHashCode();
-
+        public override int GetHashCode() => Improper.GetHashCode();
+        
+        public static Fraction New(int integer, int numerator, int denominator) => new(integer, numerator, denominator);
+        public static Fraction Valid(int integer, int numerator, int denominator) => denominator == 0 ? invalid : new(integer, numerator, denominator);
+        public static Fraction Normal(int integer, int numerator, int denominator) => new Fraction(integer, numerator, denominator).Normalized;
+        public static Fraction Reduce(int integer, int numerator, int denominator) => new Fraction(integer, numerator, denominator).Reduced;
+        public static Fraction Simple(int integer, int numerator, int denominator) => new Fraction(integer, numerator, denominator).Simplified;
+        
+        public static Fraction Division(int division) => new(0, 1, division);
+        
         /// <summary>
         /// 用连分数法寻找分母在含 maxDenominator 以内离 value 最近的分数
         /// </summary>
@@ -194,69 +185,5 @@ namespace MaTech.Common.Data {
 
         public override string ToString() => $"{_int} {_num}/{_den}";
         public int[] ToArray() => new[] { _int, _num, _den };
-    }
-
-    public class FractionJsonConverter : JsonConverter {
-        public override bool CanConvert(Type objectType) => objectType == typeof(Fraction) || objectType == typeof(FractionSimple);
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
-            switch (value) {
-            case FractionSimple fs:
-                serializer.Serialize(writer, fs.ToArray());
-                break;
-            case Fraction f:
-                serializer.Serialize(writer, f.ToArray());
-                break;
-            }
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
-            if (reader.TokenType == JsonToken.Null) {
-                return FractionOfType(objectType, FractionSimple.invalid);
-            }
-
-            var arrInt = ReadIntArrayForFraction(reader);
-            if (arrInt.Count == 2) {
-                var value = new FractionSimple(arrInt[0], arrInt[1]);
-                return FractionOfType(objectType, value);
-            }
-            if (arrInt.Count == 3) {
-                var value = new Fraction(arrInt[0], arrInt[1], arrInt[2]);
-                return FractionOfType(objectType, value);
-            }
-
-            throw reader is IJsonLineInfo lineInfo ?
-                new JsonSerializationException($"Cannot read beat value '{reader.Path}'. It needs to be an array of 2 or 3 integers.", reader.Path, lineInfo.LineNumber, lineInfo.LinePosition, null) :
-                new JsonSerializationException($"Cannot read beat value '{reader.Path}'. It needs to be an array of 2 or 3 integers.");
-        }
-
-        private object FractionOfType(Type type, Fraction value) => type == typeof(Fraction) ? value : (FractionSimple)value;
-        private object FractionOfType(Type type, FractionSimple value) => type == typeof(Fraction) ? (Fraction)value : value;
-
-        public static List<int> ReadIntArrayForFraction([NotNull] JsonReader reader) {
-            List<int> arrInt = new List<int>(3);
-
-            reader.AssumeToken(JsonToken.StartArray);
-
-            reader.ReadAndAssumeToken(JsonToken.Integer);
-            Assert.IsNotNull(reader.Value);
-            arrInt.Add((int)(long)reader.Value);
-
-            reader.ReadAndAssumeToken(JsonToken.Integer);
-            Assert.IsNotNull(reader.Value);
-            arrInt.Add((int)(long)reader.Value);
-
-            reader.ReadAndAssertSuccess();
-
-            if (reader.TokenType == JsonToken.Integer) {
-                Assert.IsNotNull(reader.Value);
-                arrInt.Add((int)(long)reader.Value);
-                reader.ReadAndAssumeToken(JsonToken.EndArray);
-            } else {
-                reader.AssumeToken(JsonToken.EndArray);
-            }
-
-            return arrInt;
-        }
     }
 }
