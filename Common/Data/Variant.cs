@@ -101,6 +101,11 @@ namespace MaTech.Common.Data {
         
         public static Variant Box<T>(T value) where T : struct => new Variant(value);
         public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
+        
+        // todo: a nested Box<T> and thread local reuse boxes and remove boxed methods?
+        // todo: a ref method, how to do it for class, mixed struct, 16-byte unmanaged struct, and trivial types all?
+        //public ref T Ref<T>() where T : class { } 
+        //public ref T RefBoxed<T>() where T : struct { } 
 
         public static implicit operator Variant(bool value) => new Variant(value);
         public static implicit operator Variant(int value) => new Variant(value);
