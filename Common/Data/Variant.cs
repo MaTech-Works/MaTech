@@ -34,9 +34,9 @@ namespace MaTech.Common.Data {
         [field: SerializeField]
         public VariantType Type { get; private set; }
 
-        [SerializeField] private FractionSimple f;
-        [SerializeField] private double d;
-        [OdinSerialize] private object o;
+        private FractionSimple f;
+        private double d;
+        private object o;
 
         public static Variant None => default;
 
