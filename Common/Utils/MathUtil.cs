@@ -58,9 +58,13 @@ namespace MaTech.Common.Utils {
         public static int DeltaWrapped(uint from, uint to) => (int)unchecked(to - from);
         public static long DeltaWrapped(ulong from, ulong to) => (long)unchecked(to - from);
 
+        // ReSharper disable CompareOfFloatsByEqualityOperator
+        public static bool Exactly(this float a, float b) => a == b;
+        public static bool Exactly(this double a, double b) => a == b;
+        // ReSharper restore CompareOfFloatsByEqualityOperator
 
-        public static bool Near(float a, float b, float delta = float.Epsilon) => Math.Abs(a - b) < delta;
-        public static bool Near(double a, double b, double delta = double.Epsilon) => Math.Abs(a - b) < delta;
+        public static bool Near(this float a, float b, float delta = float.Epsilon) => Math.Abs(a - b) < delta;
+        public static bool Near(this double a, double b, double delta = double.Epsilon) => Math.Abs(a - b) < delta;
         
         public static float Lerp(float a, float b, float k) => Mathf.Lerp(a, b, k); 
         public static float LerpUnclamped(float a, float b, float k) => Mathf.LerpUnclamped(a, b, k); 

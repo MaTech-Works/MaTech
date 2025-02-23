@@ -87,7 +87,7 @@ namespace MaTech.Gameplay.Time {
 
         public override string ToString() {
             float delta = decimals - fraction.DecimalFloat;
-            return MathUtil.Near(delta, 0) ? $"{fraction}" : $"{fraction} ({(delta > 0 ? "+" : "-")}{delta:f3})";
+            return delta.Near(0) ? $"{fraction}" : $"{fraction} ({(delta > 0 ? "+" : "-")}{delta:f3})";
         }
     }
 

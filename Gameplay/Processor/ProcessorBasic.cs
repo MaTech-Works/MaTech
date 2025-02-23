@@ -76,7 +76,7 @@ namespace MaTech.Gameplay.Processor {
             barList = null;
 
             if (scaleByTempoBPM == 0) scaleByTempoBPM = CalculateScalingReferenceBPM();
-            ReferenceBeatLength = MathUtil.Near(scaleByTempoBPM, 0) ? 1 : 1 / scaleByTempoBPM;
+            ReferenceBeatLength = scaleByTempoBPM.Near(0) ? 1 : 1 / scaleByTempoBPM;
 
             try {
                 OnPreProcess(); // PreProcess比ProcessTime更早，不能使用FindTimeCarrier系操作
