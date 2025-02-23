@@ -17,15 +17,14 @@ namespace MaTech.Gameplay.Time {
 
         public double Value => fraction.Integer + decimals;
 
-        // TODO: 简化private构造函数的定义种类，把变种计算移动到static的工厂方法里
         private BeatUnit(int value) {
             fraction = new Fraction(value);
             decimals = 0;
         }
 
-        private BeatUnit(Fraction value) {
-            fraction = value;
-            decimals = value.DecimalFloat;
+        private BeatUnit(in Fraction value) {
+            fraction = value.Simplified;
+            decimals = fraction.DecimalFloat;
         }
 
         private BeatUnit(double value) {
@@ -38,8 +37,8 @@ namespace MaTech.Gameplay.Time {
             decimals = (float)(value - fraction.Integer);
         }
         
-        private BeatUnit(Fraction value, float knownDecimals) {
-            fraction = value;
+        private BeatUnit(in Fraction value, float knownDecimals) {
+            fraction = value.Simplified;
             decimals = knownDecimals;
         }
 
@@ -60,22 +59,18 @@ namespace MaTech.Gameplay.Time {
         public BeatUnit OffsetBy(in BeatUnit offset) => new(this, offset);
         public BeatUnit Negate() => new(Fraction.zero - fraction, 1 - decimals);
 
-        public static bool IsInRangeByFraction(in BeatUnit beat, in BeatUnit rangeStart, in BeatUnit rangeEnd, bool includeStart = true, bool includeEnd = false) {
-            bool afterStart = includeStart ? beat.fraction >= rangeStart.fraction : beat.fraction > rangeStart.fraction;
-            bool beforeEnd = includeEnd ? beat.fraction <= rangeEnd.fraction : beat.fraction < rangeEnd.fraction;
+        public static bool InRange(in BeatUnit value, in BeatUnit start, in BeatUnit end, bool excludeStart = false, bool excludeEnd = false, bool compareWithDecimals = false) {
+            int compareToStart = value.CompareTo(start, compareWithDecimals);
+            int compareToEnd = value.CompareTo(end, compareWithDecimals);
+            bool afterStart = excludeStart ? compareToStart > 0 : compareToStart >= 0;
+            bool beforeEnd = excludeEnd ? compareToEnd < 0 : compareToEnd <= 0;
             return afterStart && beforeEnd;
         }
 
-        public static bool IsInRangeByValue(in BeatUnit beat, in BeatUnit rangeStart, in BeatUnit rangeEnd, bool includeStart = true, bool includeEnd = false) {
-            double value = beat.Value, valueStart = rangeStart.Value, valueEnd = rangeEnd.Value;
-            bool afterStart = includeStart ? value >= valueStart : value > valueStart;
-            bool beforeEnd = includeEnd ? value <= valueEnd : value < valueEnd;
-            return afterStart && beforeEnd;
-        }
-
-        public int CompareTo(BeatUnit other) { // cannot use in parameter for IComparable
-            if (CompareUtil.TryCompareTo(fraction.Integer, other.fraction.Integer, out var result)) return result;
-            return decimals.CompareTo(other.decimals);
+        public int CompareTo(BeatUnit other) => CompareTo(other, true);
+        public int CompareTo(in BeatUnit other, bool compareWithDecimals) {
+            if (CompareUtil.TryCompareTo(fraction, other.fraction, out var result)) return result;
+            return compareWithDecimals ? decimals.CompareTo(other.decimals) : 0;
         }
 
         public static implicit operator int(in BeatUnit obj) => obj.fraction.Integer;

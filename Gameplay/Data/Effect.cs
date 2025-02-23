@@ -62,10 +62,9 @@ namespace MaTech.Gameplay.Data {
         // TODO: 将value改为valueStart和valueEnd来对应连续变化的值
         //public readonly Func<> interpolation;
 
-        // TODO: 如何对非浮点数据插值？
-        // TODO: 将Variant类重命名成Number类
+        // TODO: 将Variant类替换为一种通用可插值的实现，或者在Variant侧为大部分类型实现插值方法与扩展（缓存func）
         public Variant ValueAt(TimeUnit time) => TimeUnit.InRange(time, StartOrMin.Time, EndOrMax.Time) ? value : Variant.None;
-        public Variant ValueAt(BeatUnit beat) => BeatUnit.IsInRangeByFraction(beat, StartOrMin.Beat, EndOrMax.Beat) ? value : Variant.None;
+        public Variant ValueAt(BeatUnit beat) => BeatUnit.InRange(beat, StartOrMin.Beat, EndOrMax.Beat) ? value : Variant.None;
 
         public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? start = null, ITimePoint? end = null) {
             this.type = type;
