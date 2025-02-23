@@ -20,16 +20,21 @@ namespace MaTech.Common.Data {
     }
 
     /// A boolean, an integer, a float-point, a fraction, a string, an object, or nothing ("None" type).
-    /// 
+    /// <br/>
     /// String and Object typed values are non-null; null values are of None type.
-    /// 
     /// Numeral types can be converted between each other.
-    /// Every type can convert to a string by formatting or an object by boxing.
-    ///
+    /// Every type can convert to a string via formatting, as well as to an object by boxing or taken as-is.
+    /// <br/>
     /// The equality method compares the type and value strictly, not tolerant to float-point errors.
-    ///
-    /// TODO: 分裂出Number类，并移除对于string和object的支持
-    /// TODO: 重构成新Variant类，支持4字节内任意类型的struct，用object成员记录类型
+    /// 
+    /// <!--
+    /// todo: 是否支持常见类型的反向转型？
+    /// todo: 提取一个Rational结构（Fraction + fixed point decimal），将数字转型方法移动过去并支持转型至各标量类型
+    /// todo: 支持16字节内任意类型的unmanaged类型，用object成员记录类型，并用IBoxlessConvert支持可扩展的默认转型
+    /// todo: 支持IMeta/IMetaVisitable接口，提取类型信息与相应转型后数据
+    /// todo: 实现序列化与编辑器支持（思考：在需要readonly struct的地方提供基于Variant的额外编辑器支持）
+    /// todo: 实现Box<T>与静态类Boxer<T>重用箱子，缓存每种类型的装箱拆箱过程（参数传入整个Variant，无箱struct给一个全局类型信息，object原样传出）
+    /// -->
     [Serializable]
     [JsonConverter(typeof(JsonConverter))]
     public partial struct Variant : IEquatable<Variant>, IConvertible, IBoxlessConvertible, IFormattable {
@@ -53,6 +58,8 @@ namespace MaTech.Common.Data {
         }
 
         public static Variant None => default;
+        
+        // todo: rename getters to ToXX and remove try- prefix on optional getters
 
         public readonly bool Bool => IsNumeralOrBoolean ? !f.IsZero : (o != null);
         public readonly int Int => f.Rounded;
@@ -74,32 +81,34 @@ namespace MaTech.Common.Data {
         public readonly Option<string> TryString => Type == VariantType.String ? Option.Some((string)o) : Option.None<string>();
         public readonly Option<object> TryObject => Type == VariantType.Object ? Option.Some(o) : Option.None<object>();
 
-        public readonly bool IsNone => Type == VariantType.None;
-        public readonly bool IsBoolean => Type == VariantType.Bool;
-        public readonly bool IsInteger => Type == VariantType.Int;
-        public readonly bool IsFloatPoint => Type == VariantType.Float || Type == VariantType.Double;
-        public readonly bool IsEnum => Type == VariantType.Enum;
-        public readonly bool IsFraction => Type == VariantType.Fraction || Type == VariantType.FractionSimple;
+        public readonly bool IsNone => Type is VariantType.None;
+        public readonly bool IsBoolean => Type is VariantType.Bool;
+        public readonly bool IsInteger => Type is VariantType.Int;
+        public readonly bool IsFloat => Type is VariantType.Float;
+        public readonly bool IsDouble => Type is VariantType.Double;
+        public readonly bool IsFloatPoint => Type is VariantType.Float or VariantType.Double;
+        public readonly bool IsEnum => Type is VariantType.Enum;
+        public readonly bool IsFraction => Type is VariantType.Fraction or VariantType.FractionSimple;
         public readonly bool IsNumeral => IsInteger || IsFloatPoint || IsFraction;
         public readonly bool IsNumeralOrBoolean => IsNumeral || IsBoolean;
-        public readonly bool IsString => Type == VariantType.String;
+        public readonly bool IsString => Type is VariantType.String;
         public readonly bool IsStringEmpty => IsString && string.IsNullOrEmpty((string)o);
         public readonly bool IsStringWhiteSpace => IsString && string.IsNullOrWhiteSpace((string)o);
-        public readonly bool IsObject => Type == VariantType.Object;
+        public readonly bool IsObject => Type is VariantType.Object;
 
         public readonly override string ToString() => ToString(null, null);
 
-        public static Variant FromEnum(MetaEnum value) => new Variant(value);
-        public static Variant FromEnum<TEnum>(DataEnum<TEnum> value) where TEnum : unmanaged, Enum, IConvertible => new Variant(MetaEnum.FromEnum(value));
-        public static Variant FromEnum<TEnum>(TEnum value) where TEnum : unmanaged, Enum, IConvertible => new Variant(MetaEnum.FromEnum(value));
+        public static Variant FromEnum(MetaEnum value) => new(value);
+        public static Variant FromEnum<TEnum>(DataEnum<TEnum> value) where TEnum : unmanaged, Enum, IConvertible => new(MetaEnum.FromEnum(value));
+        public static Variant FromEnum<TEnum>(TEnum value) where TEnum : unmanaged, Enum, IConvertible => new(MetaEnum.FromEnum(value));
         public readonly MetaEnum ToEnum() => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
         public readonly DataEnum<TEnum>? ToEnum<TEnum>() where TEnum : unmanaged, Enum, IConvertible => ToEnum().As<TEnum>();
         
-        public static Variant From<T>(T value) where T : class => new Variant(value);
+        public static Variant From<T>(T value) where T : class => new(value);
         public readonly T To<T>() where T : class => ToObject() as T;
         public readonly T As<T>() where T : class => o as T;
         
-        public static Variant Box<T>(T value) where T : struct => new Variant(value);
+        public static Variant Box<T>(T value) where T : struct => new(value);
         public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
         
         // todo: a nested Box<T> and thread local reuse boxes and remove boxed methods?
@@ -107,14 +116,14 @@ namespace MaTech.Common.Data {
         //public ref T Ref<T>() where T : class { } 
         //public ref T RefBoxed<T>() where T : struct { } 
 
-        public static implicit operator Variant(bool value) => new Variant(value);
-        public static implicit operator Variant(int value) => new Variant(value);
-        public static implicit operator Variant(float value) => new Variant(value);
-        public static implicit operator Variant(double value) => new Variant(value);
-        public static implicit operator Variant(MetaEnum value) => new Variant(value);
-        public static implicit operator Variant(Fraction value) => new Variant(value);
-        public static implicit operator Variant(FractionSimple value) => new Variant(value);
-        public static implicit operator Variant(string value) => new Variant(value);
+        public static implicit operator Variant(bool value) => new(value);
+        public static implicit operator Variant(int value) => new(value);
+        public static implicit operator Variant(float value) => new(value);
+        public static implicit operator Variant(double value) => new(value);
+        public static implicit operator Variant(MetaEnum value) => new(value);
+        public static implicit operator Variant(Fraction value) => new(value);
+        public static implicit operator Variant(FractionSimple value) => new(value);
+        public static implicit operator Variant(string value) => new(value);
 
         readonly bool IConvertible.ToBoolean(IFormatProvider provider) => Bool;
 
