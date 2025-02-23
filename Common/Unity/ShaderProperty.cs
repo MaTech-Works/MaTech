@@ -8,7 +8,7 @@ using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace MaTech.Common.Data {
+namespace MaTech.Common.Unity {
     [Serializable, InlineProperty]
     public struct ShaderProperty {
         public string name;
