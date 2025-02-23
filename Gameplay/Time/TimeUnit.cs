@@ -11,9 +11,11 @@ using MaTech.Common.Data;
 using MaTech.Common.Utils;
 
 namespace MaTech.Gameplay.Time {
+    // todo: rename to BeatValue
     public readonly struct BeatUnit : IComparable<BeatUnit> {
         public readonly Fraction fraction;
         public readonly float decimals;
+        // todo: implement Rational struct and replace with it here
 
         public double Value => fraction.Integer + decimals;
 
@@ -56,6 +58,7 @@ namespace MaTech.Gameplay.Time {
         public static BeatUnit FromValue(double value) => new(value);
         public static BeatUnit FromValueRounded(double value, int denominator) => new(value, denominator);
 
+        // todo: replace with arithmetic operators
         public BeatUnit OffsetBy(in BeatUnit offset) => new(this, offset);
         public BeatUnit Negate() => new(Fraction.zero - fraction, 1 - decimals);
 
@@ -86,9 +89,11 @@ namespace MaTech.Gameplay.Time {
         }
     }
 
+    // todo: rename to TimeValue
     public readonly struct TimeUnit : IComparable<TimeUnit> {
         private readonly int integer;
         private readonly float decimals;
+        // todo: implement Rational/Fixed struct and replace with it here
 
         public double Milliseconds => integer + decimals;
         public double Seconds => Milliseconds * 0.001;
@@ -122,6 +127,7 @@ namespace MaTech.Gameplay.Time {
         public static TimeUnit FromSeconds(double seconds) => new(seconds * 1000);
         public static TimeUnit FromTimeSpan(TimeSpan timeSpan) => new(timeSpan.TotalMilliseconds);
 
+        // todo: arithmetic operators
         public TimeUnit Negate() => new(-integer, -decimals);
         public TimeUnit ScaleBy(float rate) => FromMilliseconds((double)integer * rate).OffsetBy(FromMilliseconds((double)decimals * rate));
         public TimeUnit OffsetBy(in TimeUnit offset) => new(this, offset);
