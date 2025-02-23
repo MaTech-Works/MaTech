@@ -55,19 +55,9 @@ namespace MaTech.Common.Utils {
         public static float Saturate(float value) => value < 0 ? 0 : value > 1 ? 1 : value;
         public static double Saturate(double value) => value < 0 ? 0 : value > 1 ? 1 : value;
 
-        /// <summary>
-        /// 两个无符号整数间的的有符号差距，返回数学意义上的(to-from)。（仅在差距不超有符号整数范围时有效）
-        /// </summary>
-        public static long OffsetBetween(ulong from, ulong to) {
-            return (long)to - (long)from;
-        }
+        public static int DeltaWrapped(uint from, uint to) => (int)unchecked(to - from);
+        public static long DeltaWrapped(ulong from, ulong to) => (long)unchecked(to - from);
 
-        /// <summary>
-        /// 两个无符号整数间的的有符号差距，返回数学意义上的(to-from)。（仅在差距不超有符号整数范围时有效）
-        /// </summary>
-        public static int OffsetBetween(uint from, uint to) {
-            return (int)to - (int)from;
-        }
 
         public static bool Near(float a, float b, float delta = float.Epsilon) => Math.Abs(a - b) < delta;
         public static bool Near(double a, double b, double delta = double.Epsilon) => Math.Abs(a - b) < delta;
