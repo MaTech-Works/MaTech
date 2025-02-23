@@ -8,7 +8,6 @@ using System;
 using MaTech.Common.Algorithm;
 using Newtonsoft.Json;
 using Optional;
-using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -31,7 +30,6 @@ namespace MaTech.Common.Data {
     [Serializable]
     [JsonConverter(typeof(JsonConverter))]
     public partial struct Variant : IEquatable<Variant>, IConvertible, IBoxlessConvertible, IFormattable {
-        [field: SerializeField]
         public VariantType Type { get; private set; }
 
         private FractionSimple f;
