@@ -88,7 +88,7 @@ namespace MaTech.Common.Data {
                 #endif
                 
                 for (uint seed = 0; seed < maxAttempts; ++seed) {
-                    int index = unchecked((int)(xxHash32.ComputeHash(name, seed) | 0x80000000u));
+                    int index = (int)(xxHash32.ComputeHash(name, seed) | 0x80000000u);
                     var value = BoxlessConvert.To<TEnum>.From(index);
                     
                     if (!mapEnumToName.ContainsKey(value)) {

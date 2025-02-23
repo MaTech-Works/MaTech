@@ -5,7 +5,6 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using MaTech.Gameplay.Time;
-using UnityEditor;
 using static UnityEngine.Time;
 
 namespace MaTech.Gameplay {

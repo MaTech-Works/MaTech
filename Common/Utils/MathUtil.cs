@@ -110,7 +110,7 @@ namespace MaTech.Common.Utils {
             return sign * Mathf.Exp(Mathf.LerpUnclamped(logA, logB, k));
         }
 
-        /// <summary> 用法同hlsl的step函数 </summary>
+        /// <summary> 用法与参数定义同hlsl的step函数，第一个参数是阈值 </summary>
         public static float Step(float a, float x) => x >= a ? 1 : 0;
         public static double Step(double a, double x) => x >= a ? 1 : 0;
 
