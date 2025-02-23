@@ -5,10 +5,13 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using MaTech.Common.Algorithm;
 using Newtonsoft.Json;
 using Optional;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Scripting;
 
 namespace MaTech.Common.Data {
@@ -35,6 +38,19 @@ namespace MaTech.Common.Data {
         private FractionSimple f;
         private double d;
         private object o;
+
+        [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 16)]
+        private struct UnmanagedMemory {
+            static UnmanagedMemory() => Assert.IsTrue(Marshal.SizeOf<UnmanagedMemory>() <= 4);
+
+            public const int MaxSize = 16;
+            public static bool Fit<T>() => Unsafe.SizeOf<T>() <= MaxSize && !RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+
+            public T? As<T>() where T : unmanaged => Fit<T>() ? Unsafe.As<UnmanagedMemory, T>(ref this) : null;
+            public void Set<T>(in T value) where T : unmanaged { if (Fit<T>()) Unsafe.As<UnmanagedMemory, T>(ref this) = value; }
+            
+            // todo: make serializable (add hidden fields) and apply to Variant
+        }
 
         public static Variant None => default;
 
