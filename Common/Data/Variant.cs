@@ -38,7 +38,7 @@ namespace MaTech.Common.Data {
         [SerializeField] private double d;
         [OdinSerialize] private object o;
 
-        public static Variant None => new Variant();
+        public static Variant None => default;
 
         public readonly bool Bool => IsNumeralOrBoolean ? !f.IsZero : (o != null);
         public readonly int Int => f.Rounded;
