@@ -130,8 +130,9 @@ namespace MaTech.Gameplay.Time {
         // todo: arithmetic operators
         public TimeUnit Negate() => new(-integer, -decimals);
         public TimeUnit ScaleBy(float rate) => FromMilliseconds((double)integer * rate).OffsetBy(FromMilliseconds((double)decimals * rate));
-        public TimeUnit OffsetBy(int ms) => new(integer + ms, decimals);
         public TimeUnit OffsetBy(in TimeUnit offset) => new(this, offset);
+        
+        public TimeUnit OffsetByMilliseconds(int ms) => new(integer + ms, decimals);
         
         public TimeUnit DeltaSince(in TimeUnit timeEarlier) => new(this, timeEarlier.Negate());
         
