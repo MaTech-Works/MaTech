@@ -77,9 +77,9 @@ namespace MaTech.Gameplay.Scoring {
         /// <summary>
         /// 处理按键或触控输入，详见 PlayInput 类。
         /// </summary>
-        public abstract void OnIndexedInput(int index, bool isDown, TimeUnit judgeTime);
-        public abstract void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime);
-        public abstract void OnTouchInput(PlayInput.Finger finger, TimeUnit judgeTime);
+        public virtual void OnIndexedInput(int index, bool isDown, TimeUnit judgeTime) {}
+        public virtual void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {}
+        public virtual void OnTouchInput(PlayInput.Finger finger, TimeUnit judgeTime) {}
 
         public override void OnFinish(bool isFailed) => Score.Finish(isFailed);
 
