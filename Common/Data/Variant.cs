@@ -105,7 +105,6 @@ namespace MaTech.Common.Data {
         public readonly DataEnum<TEnum>? ToEnum<TEnum>() where TEnum : unmanaged, Enum, IConvertible => ToEnum().As<TEnum>();
         
         public static Variant From<T>(T value) where T : class => new(value);
-        public readonly T To<T>() where T : class => ToObject() as T;
         public readonly T As<T>() where T : class => o as T;
         
         public static Variant Box<T>(T value) where T : struct => new(value);
@@ -115,6 +114,9 @@ namespace MaTech.Common.Data {
         // todo: a ref method, how to do it for class, mixed struct, 16-byte unmanaged struct, and trivial types all?
         //public ref T Ref<T>() where T : class { } 
         //public ref T RefBoxed<T>() where T : struct { } 
+        
+        // todo: a To<T> method with BoxlessConvert
+        //public Optional<T> To<T>() { } 
 
         public static implicit operator Variant(bool value) => new(value);
         public static implicit operator Variant(int value) => new(value);
