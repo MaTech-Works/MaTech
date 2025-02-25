@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace MaTech.Gameplay.Scoring {
     // TODO: 实现一个BitFlag结构体与简单的二进制加密
-    [Flags, DebuggerDisplay("{HitResultEditorNames.ToEditorName(this)}")]
+    [Flags, DebuggerDisplay("{HitResultInfo.ToEditorName(this)}")]
     public enum HitResult {
         None = 0,
         Bit0 = 1 << 0,
@@ -48,10 +48,10 @@ namespace MaTech.Gameplay.Scoring {
         Bit30 = 1 << 30,
         Bit31 = 1 << 31,
     };
-
+    
     /// <summary> HitResult在编辑器里下拉菜单中显示的名字，可以重载 </summary>
-    public static class HitResultEditorNames {
-        public const int maxCount = 32;
+    public static class HitResultInfo {
+        public const int MaxCount = 32;
         
         public static string[] Array {
             get => overriddenNames ?? internalNames;
@@ -67,15 +67,15 @@ namespace MaTech.Gameplay.Scoring {
         private static string[] overriddenNames;
         private static readonly string[] internalNames;
 
-        static HitResultEditorNames() {
-            internalNames = new string[maxCount];
-            for (int i = 0; i < maxCount; ++i) {
+        static HitResultInfo() {
+            internalNames = new string[MaxCount];
+            for (int i = 0; i < MaxCount; ++i) {
                 internalNames[i] = ((HitResult)(1 << i)).ToString();
             }
         }
 
         private static IEnumerable<int> SelectValidBits(HitResult result) {
-            for (int i = 0; i < maxCount; ++i) {
+            for (int i = 0; i < MaxCount; ++i) {
                 if (result.HasAnyFlag((HitResult)(1 << i)))
                     yield return i;
             }
@@ -87,5 +87,18 @@ namespace MaTech.Gameplay.Scoring {
         public static bool HasAllFlag(this HitResult self, HitResult all) => (self & all) == all;
         public static bool HasAnyFlagExcept(this HitResult self, HitResult any, HitResult except) => (self & any) != 0 && (self & except) == 0;
         public static bool HasAllFlagExcept(this HitResult self, HitResult all, HitResult except) => (self & all) == all && (self & except) == 0;
+        
+        public static HitResult MaskWith(this HitResult result, HitResult mask) => result & mask;
+        public static HitResult Remove(this HitResult result, HitResult mask) => result & ~mask;
+        
+        public static int CountEach(this HitResult result, Func<HitResult, bool> predicate = null) {
+            int count = 0;
+            for (int i = 0; i < HitResultInfo.MaxCount; ++i) {
+                var flag = (HitResult)(1 << i);
+                if (result.HasAnyFlag(flag))
+                    count += predicate?.Invoke(flag) ?? true ? 1 : 0;
+            }
+            return count;
+        }
     }
 }

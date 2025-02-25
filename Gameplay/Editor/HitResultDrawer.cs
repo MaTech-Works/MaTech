@@ -14,7 +14,7 @@ namespace MaTech.Gameplay.Editor {
     public class HitResultDrawer : PropertyDrawer {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             EditorGUI.BeginChangeCheck();
-            var maskValue = EditorGUI.MaskField(position, label, property.intValue, HitResultEditorNames.Array);
+            var maskValue = EditorGUI.MaskField(position, label, property.intValue, HitResultInfo.Array);
             if (EditorGUI.EndChangeCheck())
             {
                 property.intValue = maskValue;
