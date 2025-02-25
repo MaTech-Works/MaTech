@@ -75,7 +75,7 @@ namespace MaTech.Gameplay {
             }
         }
 
-        private void OnScoreInput(MetaTable<ScoreType> scoreSnapshot, TimeUnit judgeTime) {
+        private void OnScoreUpdate(MetaTable<ScoreType> scoreSnapshot, TimeUnit judgeTime) {
             if (judgeLogic == null) return;
             lock (listPendingInput) {
                 pendingScoreSnapshot = scoreSnapshot;
