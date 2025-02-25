@@ -51,7 +51,7 @@ namespace MaTech.Gameplay.Display {
             void OnHitEmpty(JudgeLogicBase.EmptyHitAction action, TimeUnit judgeTime);
         }
     
-        /// 音符成绩计算结束后调用。
+        /// 判定更新成绩时调用。
         public interface IScoreUpdate {
             void OnUpdateScore(IMetaVisitable<ScoreType> score);
         }

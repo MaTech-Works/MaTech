@@ -107,13 +107,13 @@ namespace MaTech.Common.Data {
         public static Variant From<T>(T value) where T : class => new(value);
         public readonly T As<T>() where T : class => o as T;
         
+        // todo: in theory we can cache boxer func for each type and hide boxing process, in the end not having separate method for generic struct and class
         public static Variant Box<T>(T value) where T : struct => new(value);
         public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
         
         // todo: a nested Box<T> and thread local reuse boxes and remove boxed methods?
         // todo: a ref method, how to do it for class, mixed struct, 16-byte unmanaged struct, and trivial types all?
-        //public ref T Ref<T>() where T : class { } 
-        //public ref T RefBoxed<T>() where T : struct { } 
+        //public ref T Ref<T>() { } 
         
         // todo: a To<T> method with BoxlessConvert
         //public Optional<T> To<T>() { } 
