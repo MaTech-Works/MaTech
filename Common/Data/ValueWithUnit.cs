@@ -7,11 +7,11 @@
 using System;
 
 namespace MaTech.Common.Data {
-    public interface IValueUnit<TValue> {
-        public Variant ApplyTo(in TValue value);
+    public interface IValueUnit {
+        public Variant ApplyTo(in Variant value);
     }
 
-    public readonly struct ScalarUnit : IValueUnit<Variant> {
+    public readonly struct ScalarUnit : IValueUnit {
         public readonly Variant scale;
         
         // todo: replace with the Rational struct and remove these math boilerplates
@@ -42,23 +42,22 @@ namespace MaTech.Common.Data {
     
     // todo: more units like TimeUnit or BeatUnit? (notice that we have been using these names to describe actual values; to be renamed first)
     
-    public readonly struct ValueWithUnit<TValue, TUnit> where TUnit : IValueUnit<TValue>, new() {
-        public TValue Value { get; }
+    public readonly struct ValueWithUnit<TUnit> where TUnit : IValueUnit, new() {
+        public Variant Base { get; }
         public TUnit Unit { get; }
         
-        public Type UnitType => typeof(TUnit);
-        public Variant Scaled => Unit.ApplyTo(Value);
+        public Variant Value => Unit.ApplyTo(Base);
 
-        public ValueWithUnit(in TValue value, in TUnit unit = default) {
-            Value = value;
+        public ValueWithUnit(in Variant baseValue, in TUnit unit = default) {
+            Base = baseValue;
             Unit = unit ?? defaultUnit;
         }
         
-        public static implicit operator float(in ValueWithUnit<TValue, TUnit> v) => v.Scaled.Float;
-        public static implicit operator double(in ValueWithUnit<TValue, TUnit> v) => v.Scaled.Double;
-        public static implicit operator Fraction(in ValueWithUnit<TValue, TUnit> v) => v.Scaled.Fraction;
-        public static implicit operator FractionSimple(in ValueWithUnit<TValue, TUnit> v) => v.Scaled.FractionSimple;
-        public static implicit operator Variant(in ValueWithUnit<TValue, TUnit> v) => v.Scaled;
+        public static implicit operator float(in ValueWithUnit<TUnit> v) => v.Value.Float;
+        public static implicit operator double(in ValueWithUnit<TUnit> v) => v.Value.Double;
+        public static implicit operator Fraction(in ValueWithUnit<TUnit> v) => v.Value.Fraction;
+        public static implicit operator FractionSimple(in ValueWithUnit<TUnit> v) => v.Value.FractionSimple;
+        public static implicit operator Variant(in ValueWithUnit<TUnit> v) => v.Value;
 
         private static readonly TUnit defaultUnit = new();
     }
