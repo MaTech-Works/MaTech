@@ -70,28 +70,25 @@ namespace MaTech.Common.Data {
         public static implicit operator FractionSimple(int integer) => new FractionSimple(integer);
         public static implicit operator FractionSimple((int numerator, int denominator) t) => new(t.numerator, t.denominator);
         
-        public void Validate() => this = Validated;
-        public void Normalize() => this = Normalized;
-        public void Reduce() {
+        private void Reduce() {
             if (_den == 0) return;
             int t = MathUtil.GCD(_num, _den);
             _num /= t; _den /= t;
-        }
-        public void Simplify() {
-            Normalize();
-            Reduce();
         }
 
         public FractionSimple Validated => IsValid ? this : invalid;
         public FractionSimple Normalized => _den >= 0 ? Validated : new(-_num, -_den);
         public FractionSimple Reduced { get { var clone = this; clone.Reduce(); return clone; } }
-        public FractionSimple Simplified { get { var clone = this; clone.Simplify(); return clone; } }
+        public FractionSimple Simplified { get { var clone = Normalized; clone.Reduce(); return clone; } }
 
-        public FractionSimple Inversed => new(_den, _num);
+        public FractionSimple Negated => Valid(-_num, _den);
+        public FractionSimple Inversed => Valid(_den, _num);
         
         public int Floored => _den == 0 ? 0 : _num / _den;
         public int Rounded => _den == 0 ? 0 : (_num + _den / 2) / _den;
         public int Ceiling => _den == 0 ? 0 : (_num + _den - 1) / _den;
+        
+        public static FractionSimple operator-(FractionSimple x) => x.Negated;
 
         public static FractionSimple operator+(FractionSimple x, FractionSimple y) => Simple(x._num * y._den + y._num * x._den, x._den * y._den);
         public static FractionSimple operator-(FractionSimple x, FractionSimple y) => Simple(x._num * y._den - y._num * x._den, x._den * y._den);

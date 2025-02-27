@@ -13,6 +13,9 @@ using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace MaTech.Common.Data {
+    // todo: rename to FractionMixed and consider to rename fields to n,a,b
+    // todo: add readonly to most methods and properties
+    // todo: make all arithmetics checked
     [Serializable]
     [JsonConverter(typeof(FractionJsonConverter))]
     public struct Fraction : IComparable<Fraction>, IEquatable<Fraction> {
@@ -73,8 +76,7 @@ namespace MaTech.Common.Data {
         public static implicit operator Fraction(int integer) => new(integer);
         public static implicit operator Fraction((int integer, int numerator, int denominator) t) => new(t.integer, t.numerator, t.denominator);
 
-        public void Validate() => this = Validated;
-        public void Normalize() {
+        private void Normalize() {
             if (_den == 0) return;
             _int += _num / _den;
             _num %= _den;
@@ -87,27 +89,26 @@ namespace MaTech.Common.Data {
                 _num += _den;
             }
         }
-        public void Reduce() {
+        private void Reduce() {
             if (_den == 0) return;
             int t = MathUtil.GCD(_num, _den);
             _num /= t; _den /= t;
-        }
-        public void Simplify() {
-            Normalize();
-            Reduce();
         }
 
         public Fraction Validated => IsValid ? this : invalid;
         public Fraction Normalized { get { var clone = this; clone.Normalize(); return clone; } }
         public Fraction Reduced { get { var clone = this; clone.Reduce(); return clone; } }
-        public Fraction Simplified { get { var clone = this; clone.Simplify(); return clone; } }
+        public Fraction Simplified { get { var clone = this; clone.Normalize(); clone.Reduce(); return clone; } }
         
+        public Fraction Negated => Improper.Negated;
         public Fraction Inversed => Improper.Inversed;
         
         public int Floored => Improper.Floored;
         public int Rounded => Improper.Rounded;
         public int Ceiling => Improper.Ceiling;
 
+        public static Fraction operator-(Fraction x) => x.Negated;
+        
         public static Fraction operator+(Fraction x, Fraction y) => x.Improper + y.Improper;
         public static Fraction operator-(Fraction x, Fraction y) => x.Improper - y.Improper;
         public static Fraction operator*(Fraction x, Fraction y) => x.Improper * y.Improper;
