@@ -7,9 +7,9 @@
 using System;
 using Cysharp.Threading.Tasks;
 using MaTech.Common.Utils;
+using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Processor;
-using MaTech.Gameplay.Time;
 using UnityEngine;
 using UnityEngine.Profiling;
 

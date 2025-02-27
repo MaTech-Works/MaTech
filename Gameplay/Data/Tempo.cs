@@ -6,8 +6,6 @@
 
 #nullable enable
 
-using MaTech.Gameplay.Time;
-
 namespace MaTech.Gameplay.Data {
     public class TempoChange : TimedObject {
         private readonly ITimePoint start;

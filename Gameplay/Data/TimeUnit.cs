@@ -10,7 +10,7 @@ using System;
 using MaTech.Common.Data;
 using MaTech.Common.Utils;
 
-namespace MaTech.Gameplay.Time {
+namespace MaTech.Gameplay.Data {
     // todo: rename to BeatValue
     public readonly struct BeatUnit : IComparable<BeatUnit> {
         public readonly Fraction fraction;

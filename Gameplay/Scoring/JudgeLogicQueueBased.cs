@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using MaTech.Common.Algorithm;
-using MaTech.Gameplay.Time;
+using MaTech.Gameplay.Data;
 using static MaTech.Gameplay.ChartPlayer;
 
 namespace MaTech.Gameplay.Scoring {

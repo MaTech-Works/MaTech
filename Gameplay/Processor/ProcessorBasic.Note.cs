@@ -5,7 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using MaTech.Common.Data;
-using MaTech.Gameplay.Time;
+using MaTech.Gameplay.Data;
 using static MaTech.Gameplay.ChartPlayer;
 
 #nullable enable

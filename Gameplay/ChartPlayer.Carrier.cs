@@ -8,7 +8,7 @@
 
 using System.Collections.Generic;
 using MaTech.Common.Data;
-using MaTech.Gameplay.Time;
+using MaTech.Gameplay.Data;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {

@@ -5,9 +5,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Scoring;
-using MaTech.Gameplay.Time;
 using UnityEngine;
 using static MaTech.Gameplay.ChartPlayer;
 using static MaTech.Gameplay.Scoring.JudgeLogicBase;

@@ -4,9 +4,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Scoring;
-using MaTech.Gameplay.Time;
 using UnityEngine;
 
 namespace MaTech.Gameplay {

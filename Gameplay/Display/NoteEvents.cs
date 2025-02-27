@@ -6,8 +6,8 @@
 
 using System;
 using MaTech.Common.Tools;
+using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Scoring;
-using MaTech.Gameplay.Time;
 using MaTech.Gameplay.Utils;
 using UnityEngine;
 using UnityEngine.Events;

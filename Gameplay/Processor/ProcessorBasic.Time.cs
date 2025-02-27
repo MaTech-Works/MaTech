@@ -6,7 +6,7 @@
 
 using System;
 using MaTech.Common.Data;
-using MaTech.Gameplay.Time;
+using MaTech.Gameplay.Data;
 using static MaTech.Gameplay.ChartPlayer;
 
 namespace MaTech.Gameplay.Processor {

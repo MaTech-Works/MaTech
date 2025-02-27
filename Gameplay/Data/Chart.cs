@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using MaTech.Audio;
 using MaTech.Common.Algorithm;
-using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay.Data {
     public class Chart {

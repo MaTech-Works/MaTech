@@ -5,7 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using MaTech.Common.Tools;
-using MaTech.Gameplay.Time;
+using MaTech.Gameplay.Data;
 
 namespace MaTech.Gameplay.Scoring {
     public abstract partial class JudgeLogicBase {

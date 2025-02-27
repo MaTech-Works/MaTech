@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using MaTech.Common.Algorithm;
 
-namespace MaTech.Gameplay.Time {
+namespace MaTech.Gameplay.Data {
     public enum TimedObjectOrderBy {
         Anchor, Start, End
     }

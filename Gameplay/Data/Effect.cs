@@ -7,7 +7,6 @@
 #nullable enable
 
 using MaTech.Common.Data;
-using MaTech.Gameplay.Time;
 
 namespace MaTech.Gameplay.Data {
     public enum EffectType {

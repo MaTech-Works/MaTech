@@ -5,10 +5,12 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using Optional;
 
 namespace MaTech.Common.Data {
     public interface IValueUnit {
         public Variant ApplyTo(in Variant value);
+        public Option<T> To<T>();
     }
 
     public readonly struct ScalarUnit : IValueUnit {
@@ -40,24 +42,27 @@ namespace MaTech.Common.Data {
         public static readonly ScalarUnit sec = WithDivision(60);
     }
     
-    // todo: more units like TimeUnit or BeatUnit? (notice that we have been using these names to describe actual values; to be renamed first)
+    // todo: more units like TimeUnit or BeatUnit (notice that we have been using these names to describe actual values; to be renamed first)
+    // todo: rename .Value and ApplyTo to something hinting morphing the unit into nothing and get a pure value, then rename ValueWithUnit to Value
     
     public readonly struct ValueWithUnit<TUnit> where TUnit : IValueUnit, new() {
         public Variant Base { get; }
         public TUnit Unit { get; }
-        
-        public Variant Value => Unit.ApplyTo(Base);
+
+        //public ValueWithUnit<T> To<T>(Morph<TUnit, T> morph) where T : IValueUnit, new() => default;
+        //public Option<T> To<T>() => default;
+        public Variant ToVariant => Unit.ApplyTo(Base);
 
         public ValueWithUnit(in Variant baseValue, in TUnit unit = default) {
             Base = baseValue;
             Unit = unit ?? defaultUnit;
         }
         
-        public static implicit operator float(in ValueWithUnit<TUnit> v) => v.Value.Float;
-        public static implicit operator double(in ValueWithUnit<TUnit> v) => v.Value.Double;
-        public static implicit operator Fraction(in ValueWithUnit<TUnit> v) => v.Value.Fraction;
-        public static implicit operator FractionSimple(in ValueWithUnit<TUnit> v) => v.Value.FractionSimple;
-        public static implicit operator Variant(in ValueWithUnit<TUnit> v) => v.Value;
+        public static implicit operator float(in ValueWithUnit<TUnit> v) => v.ToVariant.Float;
+        public static implicit operator double(in ValueWithUnit<TUnit> v) => v.ToVariant.Double;
+        public static implicit operator Fraction(in ValueWithUnit<TUnit> v) => v.ToVariant.Fraction;
+        public static implicit operator FractionSimple(in ValueWithUnit<TUnit> v) => v.ToVariant.FractionSimple;
+        public static implicit operator Variant(in ValueWithUnit<TUnit> v) => v.ToVariant;
 
         private static readonly TUnit defaultUnit = new();
     }

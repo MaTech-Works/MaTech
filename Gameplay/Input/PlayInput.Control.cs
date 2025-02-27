@@ -6,7 +6,7 @@
 
 using System;
 using MaTech.Common.Algorithm;
-using MaTech.Gameplay.Time;
+using MaTech.Gameplay.Data;
 using UnityEngine;
 using UnityEngine.Profiling;
 

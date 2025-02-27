@@ -7,7 +7,7 @@
 #nullable enable
 
 using MaTech.Common.Data;
-using MaTech.Gameplay.Time;
+using MaTech.Gameplay.Data;
 
 namespace MaTech.Gameplay.Scoring {
     public enum ScoreType {
