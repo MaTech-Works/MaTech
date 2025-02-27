@@ -17,8 +17,7 @@ namespace MaTech.Common.Data {
     // todo: add readonly to most methods and properties
     // todo: make all arithmetics checked
     [Serializable]
-    [JsonConverter(typeof(FractionJsonConverter))]
-    public struct Fraction : IComparable<Fraction>, IEquatable<Fraction> {
+    public partial struct Fraction : IComparable<Fraction>, IEquatable<Fraction> {
         public static readonly Fraction invalid = default;
         public static readonly Fraction zero = new(0);
         public static readonly Fraction maxValue = new(int.MaxValue);

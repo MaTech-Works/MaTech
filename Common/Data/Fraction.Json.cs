@@ -13,6 +13,9 @@ using Newtonsoft.Json;
 using UnityEngine.Assertions;
 
 namespace MaTech.Common.Data {
+    [JsonConverter(typeof(FractionJsonConverter))] public partial struct Fraction { }
+    [JsonConverter(typeof(FractionJsonConverter))] public partial struct FractionSimple { }
+
     // todo: move implementation to a separate IMeta serialization module and make Json.net optional
     public class FractionJsonConverter : JsonConverter {
         public override bool CanConvert(Type objectType) => objectType == typeof(Fraction) || objectType == typeof(FractionSimple);

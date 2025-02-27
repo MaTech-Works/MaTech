@@ -14,8 +14,7 @@ using UnityEngine.Assertions;
 
 namespace MaTech.Common.Data {
     [Serializable]
-    [JsonConverter(typeof(FractionJsonConverter))]
-    public struct FractionSimple : IComparable<FractionSimple>, IEquatable<FractionSimple> {
+    public partial struct FractionSimple : IComparable<FractionSimple>, IEquatable<FractionSimple> {
         // todo: make immutable? readonly struct cannot be serializable
         // todo: normalize on construct by default
 
