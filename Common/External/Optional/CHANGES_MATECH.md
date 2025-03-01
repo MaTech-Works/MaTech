@@ -4,4 +4,4 @@
 - Removed CLSCompliant attributes and assembly info
 - Merged Optional.Utilities assembly and discarded all others
 - Converted text encoding of file LICENSE from Windows-1252 to UTF-8
-- ValueOrThrow, AssertXXX, and TryXXX extension methods
+- TupleSome, InvokeSome, AssertXXX, and TryXXX extension methods

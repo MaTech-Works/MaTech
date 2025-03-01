@@ -170,6 +170,7 @@ namespace Optional.Unsafe
         
         // ============= MaTech additions =============
 
+        /// <summary> Just throw the exception E rather than a new OptionValueMissingException when none </summary>
         public static T ValueOrThrow<T, E>(in this Option<T, E> option) where E : Exception => option.HasValue ? option.Value : throw option.Exception;
         
         public static T AssertSome<T>(in this Option<T> option) => option.HasValue ? option.Value : throw new OptionAssertionException(
