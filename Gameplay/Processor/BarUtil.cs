@@ -100,7 +100,7 @@ namespace MaTech.Gameplay.Processor {
                 lastTempo ??= tempo;
                 for (; barIndex < barCount; ++barIndex) {
                     var timePoint = bars[barIndex].timePoint;
-                    if (timePoint.Beat.fraction >= (tempo?.Start ?? TimePoint.MaxValue).Beat.fraction)
+                    if (timePoint.Beat.Fraction >= (tempo?.Start ?? TimePoint.MaxValue).Beat.Fraction)
                         break;
                     timePoint.Time = lastTempo.CalculateTimeFromBeat(timePoint.Beat);
                 }
