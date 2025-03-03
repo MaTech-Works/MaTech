@@ -20,8 +20,8 @@ namespace MaTech.Gameplay.Data {
         public readonly List<TimedObject> objects = new List<TimedObject>();
 
         public readonly SampleTrack sampleTrack = new SampleTrack();
-
-        private readonly Func<TempoChange, BeatUnit, bool> funcMatchTempo = (tempo, beat) => tempo.StartOrMin.Beat.fraction <= beat.fraction;
+        
+        private readonly Func<TempoChange, BeatUnit, bool> funcMatchTempo = (tempo, beat) => tempo.SafeStart.Beat.Fraction <= beat.Fraction;
         public TimeUnit CalculateTimeFromBeat(BeatUnit beat) {
             if (tempos.Count == 0) return TimeUnit.MinValue;
             int index = tempos.IndexOfLastMatchedValue(beat, funcMatchTempo);

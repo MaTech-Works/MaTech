@@ -40,10 +40,10 @@ namespace MaTech.Gameplay.Processor {
             var listShowBar = new List<(Fraction, bool)>();
             foreach (var effect in effects) {
                 switch (effect.type.Value) {
-                case EffectType.Signature when effect.Start == null: barLength = effect.value.Fraction; break;
-                case EffectType.ShowBar when effect.Start == null: showBar = effect.value.Bool; break;
-                case EffectType.Signature: listSign.Add((effect.Start.Beat, effect.value.Fraction)); break;
-                case EffectType.ShowBar: listShowBar.Add((effect.Start.Beat, effect.value.Bool)); break;
+                case EffectType.Signature when effect.Start == null: barLength = effect.value.start.Fraction; break;
+                case EffectType.ShowBar when effect.Start == null: showBar = effect.value.start.Bool; break;
+                case EffectType.Signature: listSign.Add((effect.Start.Beat, effect.value.start.Fraction)); break;
+                case EffectType.ShowBar: listShowBar.Add((effect.Start.Beat, effect.value.start.Bool)); break;
                 }
             }
             

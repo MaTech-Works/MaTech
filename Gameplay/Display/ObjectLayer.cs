@@ -107,6 +107,7 @@ namespace MaTech.Gameplay.Display {
             
             /// <summary> 循环全object种类，每次给一种类型buffer一个实例，直到pool内数额足够（无视每帧buffer额度） </summary>
             public void BufferGameObjectsUntilFull(int? overrideTotalCount = null) {
+                if (!Application.isPlaying) return; // Unity seems to be executing tasks after play stopped
                 int targetCount = overrideTotalCount ?? prefabEntry.bufferCountInPool;
                 for (int count = bufferedGameObjects.Count; count < targetCount; ++count) {
                     BufferSingleGameObject();
@@ -116,6 +117,7 @@ namespace MaTech.Gameplay.Display {
             /// <summary> 循环全object种类，每次给一种类型buffer一个实例，直到pool内数额足够，或者到达本帧buffer额度上限 </summary>
             /// <returns> 若buffer在budget限度内完全填满返回true，否则返回false </returns>
             public bool BufferGameObjectsForFrame(bool resetInstantiationCount = true) {
+                if (!Application.isPlaying) return false; // Unity seems to be executing tasks after play stopped
                 if (resetInstantiationCount) instantiationCountThisFrame = 0;
                 while (bufferedGameObjects.Count < prefabEntry.bufferCountInPool) {
                     if (!CanInstantiateInBudgetThisFrame) return false;
@@ -217,18 +219,18 @@ namespace MaTech.Gameplay.Display {
         }
 
         public (float start, float end) CalculateRatioRange(TCarrier carrier, bool clampToDisplayWindow) {
-            var start = CalculateRatio(carrier.StartY, carrier, clampToDisplayWindow);
-            var end = CalculateRatio(carrier.EndY, carrier, clampToDisplayWindow);
+            var start = CalculateRatio(carrier.StartRoll, carrier, clampToDisplayWindow);
+            var end = CalculateRatio(carrier.EndRoll, carrier, clampToDisplayWindow);
             return (start, end);
         }
         public (double start, double end) CalculateDeltaYRange(TCarrier carrier, bool clampToDisplayWindow) {
-            var start = CalculateDeltaY(carrier.StartY, carrier, clampToDisplayWindow);
-            var end = CalculateDeltaY(carrier.EndY, carrier, clampToDisplayWindow);
+            var start = CalculateDeltaY(carrier.StartRoll, carrier, clampToDisplayWindow);
+            var end = CalculateDeltaY(carrier.EndRoll, carrier, clampToDisplayWindow);
             return (start, end);
         }
 
         public (double deltaY, float ratio) CalculateDeltaYAndRatio(double displayY, TCarrier carrier, bool clampToDisplayWindow)
-            => CalculateDeltaYAndRatio(displayY, carrier.scaleY, clampToDisplayWindow);
+            => CalculateDeltaYAndRatio(displayY, carrier.scale, clampToDisplayWindow);
         public (double deltaY, float ratio) CalculateDeltaYAndRatio(double displayY, double scaleY, bool clampToDisplayWindow) {
             var deltaY = CalculateDeltaY(displayY, scaleY, clampToDisplayWindow);
             var ratio = DeltaYToRatio(deltaY);
@@ -236,9 +238,9 @@ namespace MaTech.Gameplay.Display {
         }
         
         public float CalculateRatio(double displayY, TCarrier carrier, bool clampToDisplayWindow)
-            => CalculateRatio(displayY, carrier.scaleY, clampToDisplayWindow);
+            => CalculateRatio(displayY, carrier.scale, clampToDisplayWindow);
         public double CalculateDeltaY(double displayY, TCarrier carrier, bool clampToDisplayWindow)
-            => CalculateDeltaY(displayY, carrier.scaleY, clampToDisplayWindow);
+            => CalculateDeltaY(displayY, carrier.scale, clampToDisplayWindow);
 
         public float CalculateRatio(double displayY, double scaleY, bool clampToDisplayWindow)
             => DeltaYToRatio(CalculateDeltaY(displayY, scaleY, clampToDisplayWindow));
@@ -273,10 +275,10 @@ namespace MaTech.Gameplay.Display {
             if (!isActionAndFuncCached) {
                 cachedCarrierSelectCondition = carrier => pools.ContainsKey(carrier.type);
                 cachedIterateStopConditions = new Func<TCarrier, bool>[] {
-                    carrier => carrier.DisplayYStart(DisplayWindowUpScaled) > PlayTime.DisplayY, // UpY Forward
-                    carrier => carrier.DisplayYStart(DisplayWindowUpScaled) < PlayTime.DisplayY, // UpY Backward
-                    carrier => carrier.DisplayYEnd(DisplayWindowDownScaled) > PlayTime.DisplayY, // DownY Forward
-                    carrier => carrier.DisplayYEnd(DisplayWindowDownScaled) < PlayTime.DisplayY, // DownY Backward
+                    carrier => carrier.RollOnWindow(DisplayWindowUpScaled, true) > PlayTime.DisplayY, // UpY Forward
+                    carrier => carrier.RollOnWindow(DisplayWindowUpScaled, true) < PlayTime.DisplayY, // UpY Backward
+                    carrier => carrier.RollOnWindow(DisplayWindowDownScaled, false) > PlayTime.DisplayY, // DownY Forward
+                    carrier => carrier.RollOnWindow(DisplayWindowDownScaled, false) < PlayTime.DisplayY, // DownY Backward
                     carrier => carrier.StartTime - judgeWindowUp > PlayTime.JudgeTime.Seconds,   // UpTime Forward
                 };
                 cachedRealizationAction = RealizeCarrierIfInRange;
@@ -358,11 +360,7 @@ namespace MaTech.Gameplay.Display {
                 IterateBackward(listCarrierUpY, cachedIterateStopConditions[1], cachedRealizationAction);
                 IterateBackward(listCarrierDownY, cachedIterateStopConditions[3], cachedRealizationAction);
             }
-            IterateForward(listCarrierUpTime, cachedIterateStopConditions[4], carrier => {
-                if (IsCarrierInRange(carrier) && !IsCarrierRealized(carrier)) {
-                    RealizeObject(carrier);
-                }
-            });
+            IterateForward(listCarrierUpTime, cachedIterateStopConditions[4], cachedRealizationAction);
             
             lastDisplayY = PlayTime.DisplayY;
             
@@ -393,9 +391,9 @@ namespace MaTech.Gameplay.Display {
 
         private void SortCarriers() {
             // 排序后carrier会按顺序经过这些边界位置；经过这些边界位置的carrier均需测试是否需要实例化音符。
-            ProcessorBasic.SortCarriers<TCarrier, TLayer>(listCarrierUpY, DisplayWindowUpScaled);
-            ProcessorBasic.SortCarriers<TCarrier, TLayer>(listCarrierDownY, DisplayWindowDownScaled);
-            ShellSort.Hibbard(listCarrierUpTime, Carrier.ComparerStartOffset);
+            ProcessorBasic.SortCarriers<TCarrier, TLayer>(listCarrierUpY, true, DisplayWindowUpScaled);
+            ProcessorBasic.SortCarriers<TCarrier, TLayer>(listCarrierDownY, false, DisplayWindowDownScaled);
+            ShellSort.Hibbard(listCarrierUpTime, Carrier.ComparerStartTime);
         }
         
         private void IterateForward(PointerList<TCarrier> list, Func<TCarrier, bool> stopCondition, Action<TCarrier> actionOnForward) {
@@ -446,7 +444,7 @@ namespace MaTech.Gameplay.Display {
             listObjectRealized.Add(tuple);
             hashsetCarrierRealized.Add(carrier, tuple.visual);
 
-            if (logRealization) Debug.Log($"Realize {carrier.StartY:F2} - {carrier.EndY:F2} at {PlayTime.DisplayY:F2} (delta: {carrier.DeltaYStart(PlayTime.DisplayY):F2} - {carrier.DeltaYEnd(PlayTime.DisplayY):F2})");
+            if (logRealization) Debug.Log($"Realize {carrier.StartRoll:F2} - {carrier.EndRoll:F2} at {PlayTime.DisplayY:F2} (delta: {carrier.ScaledDeltaRoll(PlayTime.DisplayY, true):F2} - {carrier.ScaledDeltaRoll(PlayTime.DisplayY, false):F2})");
         }
 
         private void VirtualizeObject(ObjectTuple tuple) {
@@ -460,7 +458,7 @@ namespace MaTech.Gameplay.Display {
             tuple.visual.FinishVisual();
             pool.RecycleGameObject(tuple.obj);
             
-            if (logRealization) Debug.Log($"Virtualize {tuple.carrier.StartY:F2} - {tuple.carrier.EndY:F2} at {PlayTime.DisplayY:F2} (delta: {tuple.carrier.DeltaYStart(PlayTime.DisplayY):F2} - {tuple.carrier.DeltaYEnd(PlayTime.DisplayY):F2})");
+            if (logRealization) Debug.Log($"Virtualize {tuple.carrier.StartRoll:F2} - {tuple.carrier.EndRoll:F2} at {PlayTime.DisplayY:F2} (delta: {tuple.carrier.ScaledDeltaRoll(PlayTime.DisplayY, true):F2} - {tuple.carrier.ScaledDeltaRoll(PlayTime.DisplayY, false):F2})");
         }
 
         #endregion
@@ -475,7 +473,7 @@ namespace MaTech.Gameplay.Display {
 
         private bool IsCarrierInRange(TCarrier carrier) {
             return (carrier.StartTime <= PlayTime.JudgeTime.Seconds + judgeWindowUp && carrier.EndTime >= PlayTime.JudgeTime.Seconds + judgeWindowDown) ||
-                   (carrier.DeltaYStart(PlayTime.DisplayY) <= DisplayWindowUpScaled * EpsilonK && carrier.DeltaYEnd(PlayTime.DisplayY) >= DisplayWindowDownScaled * EpsilonK);
+                   (carrier.ScaledDeltaRoll(PlayTime.DisplayY, true) <= DisplayWindowUpScaled * EpsilonK && carrier.ScaledDeltaRoll(PlayTime.DisplayY, false) >= DisplayWindowDownScaled * EpsilonK);
         }
         
         #endregion

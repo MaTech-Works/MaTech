@@ -115,11 +115,9 @@ namespace MaTech.Gameplay {
         private void UpdateTime() {
             if (timeSetter == null) return;
 
-            double lastDisplayTime = PlayTime.DisplayTime;
-
             if (rewinding) {
-                var deltaTimeIn = UnityEngine.Time.time - unityTimeLastResume;
-                var deltaTimeOut = timeCurveResumeRewind.Evaluate((UnityEngine.Time.time - unityTimeLastResume));
+                var deltaTimeIn = Time.time - unityTimeLastResume;
+                var deltaTimeOut = timeCurveResumeRewind.Evaluate(Time.time - unityTimeLastResume);
                 timeSetter.UpdateTime(audioTimeLastResume + deltaTimeOut, true);
                 if (deltaTimeIn > timeCurveResumeRewind.GetEndTime()) {
                     sequencer.Seek(audioTimeLastResume + deltaTimeOut);
@@ -131,21 +129,9 @@ namespace MaTech.Gameplay {
                 timeSetter.UpdateTime(sequencer.PlayTime, true);
             }
 
-            double displayTime = PlayTime.DisplayTime;
-            if (timeList.IndexNext > 1 && displayTime < lastDisplayTime) { // rewinded
-                int i = timeList.IndexNext - 1;
-                while (i > 0 && displayTime < timeList[i].StartTime) --i;
-                timeList.IndexNext = i;
-                currTime = timeList.Next();
-                nextTime = timeList.PeekOrDefault();
-            } else {
-                while (nextTime != null && displayTime >= nextTime.StartTime) {
-                    currTime = timeList.Next();
-                    nextTime = timeList.PeekOrDefault();
-                }
+            if (rewinding || playing) {
+                timeSetter.UpdateDisplayY(processor.CurrentRoll);
             }
-
-            timeSetter.UpdateDisplayY(ProcessorBasic.CalculateYFromTime(displayTime, currTime));
         }
         
         private void UpdateSettings() {

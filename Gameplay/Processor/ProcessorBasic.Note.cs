@@ -15,10 +15,9 @@ namespace MaTech.Gameplay.Processor {
         protected NoteCarrier CreateNoteCarrier(DataEnum<ObjectType> type, TimedObject note, ITimePoint? overrideStart = null, ITimePoint? overrideEnd = null, ITimePoint? overrideAnchor = null) {
             return new NoteCarrier {
                 type = type,
-                // TODO: 实现一种同时计算start和end的CreateTiming方法，正确计算卷轴回退时的Y值极值
-                start = CreateTiming(overrideStart ?? note.StartOrMin),
-                end = CreateTiming(overrideEnd ?? note.EndOrMax),
-                scaleY = (overrideAnchor ?? note.Anchor) is {} anchor ? FindTimeCarrier(anchor).noteScaleY : 1.0f
+                start = SampleTiming(overrideStart ?? note.SafeStart),
+                end = SampleTiming(overrideEnd ?? note.SafeEnd),
+                scale = SampleNoteSpeed(overrideAnchor ?? note.Anchor),
             };
         }
         

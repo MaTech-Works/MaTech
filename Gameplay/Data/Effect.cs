@@ -6,7 +6,14 @@
 
 #nullable enable
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
+using MaTech.Common.Utils;
+using Optional.Unsafe;
 
 namespace MaTech.Gameplay.Data {
     public enum EffectType {
@@ -24,14 +31,13 @@ namespace MaTech.Gameplay.Data {
         NoteSpeed,
         /// <summary>
         /// 卷轴瞬间跳跃：float（兼容 int，Fraction）
-        /// 记作时间单位。以当前的卷轴速度，在区间开头和结尾将卷轴瞬间移动一定距离（让音符在瞬移后的位置继续排列）；开头向时间的正方向瞬移，结尾向时间的负方向瞬移。
-        /// 这个的效果比较难理解，建议不要轻易更改代码实现。
+        /// 记作时间单位。在无视卷轴速度的情况下，将卷轴（roll值）偏移一定距离；若开头结尾非0，则在开头结尾瞬移。单位与roll相同。
         /// </summary>
-        ScrollJump, 
+        ScrollOffset,
 
         /// <summary>
         /// 小节线间隔：Fraction（兼容 int，float；当为 float 时，用连分数算法，替代为底数 1000 以内的最接近的分数）
-        /// 以 beat 单位指定小节线之间的间隔；在指令出现时，以指令的 beat 位置重新开始放置新小节线。
+        /// 以 beat 单位指定小节线之间的间隔；在指令出现时，以指令开始的 beat 位置重新开始放置新小节线，无需范围。
         /// 当数值为 float 时，使用连分数算法寻找底数 1000 以内的最接近的分数作为实际使用值。
         /// </summary>
         Signature,
@@ -53,36 +59,110 @@ namespace MaTech.Gameplay.Data {
     
     public class Effect : TimedObject {
         public readonly DataEnum<EffectType> type;
-        public readonly Variant value;
-        
-        // TODO: 把代码封装成EffectTimeline
-        
-        // TODO: 实现插值方法
-        // TODO: 将value改为valueStart和valueEnd来对应连续变化的值
-        //public readonly Func<> interpolation;
+        public readonly (Variant start, Variant end) value;
+        public readonly (ITimePoint? start, ITimePoint? end) range;
+        public readonly IInterpolator? interpolator;
+        public readonly Variant keyword;
 
-        // TODO: 将Variant类替换为一种通用可插值的实现，或者在Variant侧为大部分类型实现插值方法与扩展（缓存func）
-        public Variant ValueAt(TimeUnit time) => TimeUnit.InRange(time, StartOrMin.Time, EndOrMax.Time) ? value : Variant.None;
-        public Variant ValueAt(BeatUnit beat) => BeatUnit.InRange(beat, StartOrMin.Beat, EndOrMax.Beat) ? value : Variant.None;
+        /// <summary> Fallbacks when no effect exists or resolves to None on sampling effects </summary>
+        public static Dictionary<DataEnum<EffectType>, Effect> GlobalFallbacks { get; } = new();
+        public static void AddGlobalFallback(in DataEnum<EffectType> type, in Variant value) {
+            GlobalFallbacks[type] = new(type, value, (TimePoint.MinValue, TimePoint.MaxValue));
+        }
 
-        public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? start = null, ITimePoint? end = null) {
+        static Effect() {
+            AddGlobalFallback(EffectType.ScrollSpeed, 1.0);
+            AddGlobalFallback(EffectType.NoteSpeed, 1.0);
+            AddGlobalFallback(EffectType.ScrollOffset, 0.0);
+            AddGlobalFallback(EffectType.Signature, 4);
+            AddGlobalFallback(EffectType.ShowBar, true);
+        }
+
+        public delegate Variant Sampler<T>(in Effect effect, in T value) where T : struct;
+        public static Sampler<T> SpeedSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in T t) => effect.SpeedAt(t);
+        public static Sampler<T> ValueSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in T t) => effect.ValueAt(t);
+        public static Sampler<Range<T>> DeltaSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in Range<T> range) => effect.Delta(range);
+        public static Sampler<Range<T>> IntegralSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in Range<T> range) => effect.Integrate(range);
+        
+        public Variant Sample<T>(Sampler<T> sampler, in T t) where T : struct => sampler(this, t);
+        
+        // todo: accumulated effects, e.g. additive offset and multiplicative scales (!!! and be warned of multiplicative integral !!!)
+        //public readonly IAccumulator<Variant> accumulator;
+        //public static readonly FuncAccumulator<Variant> replace = new((in Variant a, in Variant b) => b);
+        //public static readonly FuncAccumulator<Variant> add = new((in Variant a, in Variant b) => a.Double + b.Double);
+        //public static readonly FuncAccumulator<Variant> multiply = new((in Variant a, in Variant b) => a.Double * b.Double);
+
+        public bool Match(in Variant keyword) => this.keyword == keyword;
+        public bool Match(in Variant keyword, Func<Variant, Variant, bool> match) => match(this.keyword, keyword);
+        
+        public Variant SpeedAt<T>(in T t) where T : struct, ITimeUnit<T> => SpeedAt(ClampedRatioOf(t), BeatRange.Length());
+        public Variant SpeedAt(double t, double? w = null) {
+            if (!value.start.IsNumeral || !value.end.IsNumeral) return Variant.None;
+            double k = interpolator?.Derivative(t) ?? 0.0f;
+            double v0 = value.start.Double, v1 = value.end.Double;
+            return k * (v1 - v0) / (w ?? 1);
+        }
+
+        public Variant ValueAt<T>(in T t) where T : struct, ITimeUnit<T> => ValueAt(ClampedRatioOf(t));
+        public Variant ValueAt(double t) {
+            double k = interpolator?.Map(t) ?? 0.0f;
+            if (value.start.IsNumeral && value.end.IsNumeral) {
+                return MathUtil.Lerp(value.start.Double, value.end.Double, k);
+            }
+            return k >= 0.5 ? value.end : value.start;
+        }
+        
+        public Variant Delta<T>(in Range<T> range) where T : struct, ITimeUnit<T> => Delta(range.start, range.end);
+        public Variant Delta<T>(in T start, in T end) where T : struct, ITimeUnit<T> => DeltaBetween(ValueAt(end), ValueAt(start));
+        public static Variant DeltaBetween(in Variant start, in Variant end) => start.IsNumeral && end.IsNumeral ? end.Double - start.Double : Variant.None;
+        
+        public Variant Integrate<T>(in Range<T> range) where T : struct, ITimeUnit<T> => Integrate(range.start, range.end);
+        public Variant Integrate<T>(in T start, in T end) where T : struct, ITimeUnit<T> => Integrate(ClampedRatioOf(start), ClampedRatioOf(end), ClampedLength<T>((start, end)));
+        public Variant Integrate(double t0, double t1, double? tw = null) {
+            if (!value.start.IsNumeral || !value.end.IsNumeral) return Variant.None;
+            double v0 = value.start.Double, v1 = value.end.Double;
+            return (v0 + (v1 - v0) * (interpolator?.Average(t0, t1) ?? 0.0)) * (tw ?? t1 - t0); // use Average since it handles divide by 0
+        }
+        
+        private Range<T> Range<T>() where T : struct, ITimeUnit<T> => rangeMap.Get<Range<T>>(this).ValueOrDefault();
+        private double ClampedRatioOf<T>(in T t) where T : struct, ITimeUnit<T> => Range<T>().RatioOf(t, clamped: true);
+        private double ClampedLength<T>(in Range<T> range) where T : struct, ITimeUnit<T> => Range<T>().Clamp(range).Length().Value;
+
+        private static readonly GenericMap<Effect> rangeMap = new(map => map.Add(effect => effect.TimeRange).Add(effect => effect.BeatRange));
+        
+        public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? time, IInterpolator? interpolator = null, Variant keyword = default) {
             this.type = type;
+            this.range = (time, time);
+            this.value = (value, value);
+            this.interpolator = interpolator;
+            this.keyword = keyword;
+        }
+        
+        public Effect(DataEnum<EffectType> type, in Variant value, (ITimePoint?, ITimePoint?) range, IInterpolator? interpolator = null, Variant keyword = default) {
+            this.type = type;
+            this.range = range;
+            this.value = (value, value);
+            this.interpolator = interpolator;
+            this.keyword = keyword;
+        }
+        
+        public Effect(DataEnum<EffectType> type, in (Variant, Variant) value, (ITimePoint?, ITimePoint?) range, IInterpolator? interpolator = null, Variant keyword = default) {
+            this.type = type;
+            this.range = range;
             this.value = value;
-            this.range = (start, end);
+            this.interpolator = interpolator;
+            this.keyword = keyword;
         }
         
         public Effect(Effect other) {
-            this.type = other.type;
-            this.value = other.value;
-            this.range = other.range;
+            range = other.range;
+            type = other.type;
+            value = other.value;
+            interpolator = other.interpolator;
+            keyword = other.keyword;
         }
-
-        private readonly (ITimePoint? start, ITimePoint? end) range;
-
+        
         public override ITimePoint? Start => range.start;
         public override ITimePoint? End => range.end;
-
-        public TimePoint? MutableStart => range.start as TimePoint;
-        public TimePoint? MutableEnd => range.end as TimePoint;
     }
 }

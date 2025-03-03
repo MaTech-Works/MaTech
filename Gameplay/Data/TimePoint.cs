@@ -17,6 +17,7 @@ namespace MaTech.Gameplay.Data {
     }
 
     /// <summary> 基于节拍与时间双重定位的乐理时间码（只读接口） </summary>
+    /// todo: rename to ITimeMarker
     public interface ITimePoint {
         /// <summary> 根据 BPM (Beat Per Minutes) 定义的节拍值，一拍通常是一个四分音符 </summary>
         public BeatUnit Beat { get; }
@@ -32,9 +33,10 @@ namespace MaTech.Gameplay.Data {
     }
 
     /// <summary> 基于节拍与时间双重定位的乐理时间码 </summary>
+    /// todo: rename to TimeMarker
     public class TimePoint : ITimePoint {
-        public static TimePoint MinValue { get; } = new() { Beat = Fraction.minValue, Time = TimeUnit.MinValue };
-        public static TimePoint MaxValue { get; } = new() { Beat = Fraction.maxValue, Time = TimeUnit.MaxValue };
+        public static TimePoint MinValue { get; } = new() { Beat = BeatUnit.MinValue, Time = TimeUnit.MinValue };
+        public static TimePoint MaxValue { get; } = new() { Beat = BeatUnit.MaxValue, Time = TimeUnit.MaxValue };
 
         private BeatUnit beat = 0;
         private TimeUnit time = TimeUnit.Zero;

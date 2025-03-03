@@ -38,5 +38,6 @@ namespace MaTech.Gameplay.Processor {
         /// </summary>
         public abstract void Process();
 
+        public virtual double CurrentRoll => PlayTime.DisplayTime;
     }
 }

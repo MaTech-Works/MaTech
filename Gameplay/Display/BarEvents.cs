@@ -51,8 +51,8 @@ namespace MaTech.Gameplay.Display {
         }
 
         void IObjectVisual<BarCarrier, BarLayer>.UpdateVisual() {
-            var ratio = Layer.CalculateRatio(Carrier.StartY, Carrier, clampToDisplayWindow);
-            var deltaY = Layer.CalculateDeltaY(Carrier.StartY, Carrier, clampToDisplayWindow);
+            var ratio = Layer.CalculateRatio(Carrier.StartRoll, Carrier, clampToDisplayWindow);
+            var deltaY = Layer.CalculateDeltaY(Carrier.StartRoll, Carrier, clampToDisplayWindow);
             events.onUpdateRatio.Invoke(ratio);
             events.onUpdateDeltaY.Invoke((float)deltaY);
         }

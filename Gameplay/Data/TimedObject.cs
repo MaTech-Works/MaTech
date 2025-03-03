@@ -28,8 +28,16 @@ namespace MaTech.Gameplay.Data {
         public bool HasStart => Start != null;
         public bool HasEnd => End != null;
         
-        public ITimePoint StartOrMin => Start ?? TimePoint.MinValue;
-        public ITimePoint EndOrMax => End ?? TimePoint.MaxValue;
+        public ITimePoint SafeStart => Start ?? TimePoint.MinValue;
+        public ITimePoint SafeEnd => End ?? TimePoint.MaxValue;
+        
+        public Range<TimeUnit> TimeRange => new(TimeStart, TimeEnd);
+        public TimeUnit TimeStart => SafeStart.Time;
+        public TimeUnit TimeEnd => SafeEnd.Time;
+        
+        public Range<BeatUnit> BeatRange => new(BeatStart, BeatEnd);
+        public BeatUnit BeatStart => SafeStart.Beat;
+        public BeatUnit BeatEnd => SafeEnd.Beat;
         
         public static IComparer<TimedObject> ComparerAnchorBeat => comparers[0];
         public static IComparer<TimedObject> ComparerAnchorTime => comparers[1];
@@ -53,10 +61,10 @@ namespace MaTech.Gameplay.Data {
         private static readonly IComparer<TimedObject>[] comparers = {
             CreateComparer(true, o => o.Anchor),
             CreateComparer(false, o => o.Anchor),
-            CreateComparer(true, o => o.StartOrMin),
-            CreateComparer(false, o => o.StartOrMin),
-            CreateComparer(true, o => o.EndOrMax),
-            CreateComparer(false, o => o.EndOrMax),
+            CreateComparer(true, o => o.SafeStart),
+            CreateComparer(false, o => o.SafeStart),
+            CreateComparer(true, o => o.SafeEnd),
+            CreateComparer(false, o => o.SafeEnd),
         };
 
         private static IComparer<TimedObject> CreateComparer(bool isBeatInsteadOfTime, Func<TimedObject, ITimePoint> whichTimePoint) {

@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
@@ -89,9 +91,8 @@ namespace MaTech.Gameplay.Processor {
                 return;
             }
 
-            // Finally sort the objects
-            SortCarriers<NoteCarrier, NoteLayer>(noteList, 0);
-            SortCarriers<BarCarrier, BarLayer>(barList, 0);
+            SortCarriers<NoteCarrier, NoteLayer>(noteList, true);
+            SortCarriers<BarCarrier, BarLayer>(barList, true);
         
             ResultTimeList = timeList;
             ResultNoteList = noteList;
@@ -107,36 +108,45 @@ namespace MaTech.Gameplay.Processor {
             var temposSorted = new QueueList<TempoChange>(Tempos.OrderBy(tp => tp, TimedObject.ComparerStartBeat));
 
             if (Effects is { Count: > 0 }) {
-                // 将开头和结尾分别列出并排序，先是无头的开始，然后是剩下的，同beat先开始后结束
-                var starts = Effects.Where(effect => effect.Start != null).Select(effect => (effect, beat: effect.Start.Beat, isStart: true));
-                var ends = Effects.Where(effect => effect.End != null).Select(effect => (effect, beat: effect.End.Beat, isStart: false));
-                var effectsSorted = starts.Concat(ends).OrderBy(tuple => tuple.beat).ThenBy(tuple => tuple.isStart ? 0 : 1).ToQueueList();
-
-                timeList.Capacity = temposSorted.Count + effectsSorted.Count;
+                timeList.Capacity = Tempos.Count + Effects.Count;
                 
-                // 为第一个tp前的effect提供参考
-                var startingReferenceTimeCarrier = CreateTimeWithInitEffects(Tempos[0], Effects.Where(e => e.Start == null));
+                var effectIndices = Effects.Select((effect, index) => (effect, index)).ToDictionary(t => t.effect, t => t.index);
+                var effectIndexComparer = Comparer<Effect>.Create((a, b) => effectIndices[a].CompareTo(effectIndices[b]));
+                
+                var effectEdges = Effects.Where(effect => effect is not null)
+                    .SelectMany((effect, index) => Enumerable.Repeat((index, effect), 2).Select((t, index) => (t.index, effect, isStart: index == 0)))
+                    .Select(t => (t.index, t.effect, timePoint: t.isStart ? t.effect.Start : t.effect.End, t.isStart))
+                    .Where(t => t.timePoint is not null)
+                    .OrderBy(t => t.timePoint.Beat)
+                    .ThenBy(t => t.index)
+                    .ToQueueList();
 
-                var lastTimeCarrier = startingReferenceTimeCarrier;
-                var nextTimeBeat = startingReferenceTimeCarrier.StartBeat;
-                while (true) {
-                    while (effectsSorted.HasNext && effectsSorted.Peek().beat < nextTimeBeat) {
-                        var next = effectsSorted.Next();
-                        timeList.Add(lastTimeCarrier = CreateTimeFromEffect(next.effect, lastTimeCarrier, next.isStart));
+                // todo: use effectEdges.GroupBy(beat) to avoid the while(effectEdges.GetNextOrDefault()) below
+                
+                var activeEffects = new List<Effect>(Effects.Where(e => e.Start == null));
+
+                var initTimeCarrier = CreateTimeCarrierForTempo(Tempos[0], effects: activeEffects);
+                var lastTimeCarrier = initTimeCarrier;
+                
+                while (temposSorted.NextOrDefault() is var tempo) {
+                    var nextTempoTimePoint = tempo?.Start ?? TimePoint.MaxValue;
+                    while (effectEdges.NextIf(t => t.timePoint.Beat.CompareTo(nextTempoTimePoint.Beat) <= 0) is { effect: not null, timePoint: var effectTimePoint } t) {
+                        if (t.isStart) activeEffects.OrderedInsert(t.effect, effectIndexComparer);
+                        else activeEffects.Remove(t.effect);
+                        if (t.timePoint.Beat >= nextTempoTimePoint.Beat) break;
+                        if (effectEdges.PeekIf(t => t.timePoint.Beat.CompareTo(effectTimePoint.Beat) <= 0) is { effect: not null }) continue;
+                        timeList.Add(lastTimeCarrier = CreateTimeCarrier(t.timePoint, lastTimeCarrier, activeEffects));
                     }
-
-                    if (!temposSorted.HasNext) break;
-
-                    timeList.Add(lastTimeCarrier = CreateTimeFromTempo(temposSorted.Next(), lastTimeCarrier));
-                    nextTimeBeat = temposSorted.PeekOrDefault()?.Start.Beat ?? Fraction.maxValue;
+                    if (tempo is null) break;
+                    timeList.Add(lastTimeCarrier = CreateTimeCarrierForTempo(tempo, lastTimeCarrier, activeEffects));
                 }
             } else {
                 // 只有tp容器的话，直接简化处理
-                timeList.Capacity = temposSorted.Count;
+                timeList.Capacity = Tempos.Count;
 
                 TimeCarrier lastTimeCarrier = null;
                 foreach (var tempo in temposSorted) {
-                    lastTimeCarrier = CreateTimeFromTempo(tempo, lastTimeCarrier);
+                    lastTimeCarrier = CreateTimeCarrierForTempo(tempo, lastTimeCarrier);
                     timeList.Add(lastTimeCarrier);
                 }
             }
@@ -151,7 +161,7 @@ namespace MaTech.Gameplay.Processor {
                 double nextTime = indexTime == countTime ? double.PositiveInfinity : timeList[indexTime].StartTime;
                 // todo: 记录indexTime来优化FindTimeCarrier的二分查找，将时间复杂度系数从O(logN)降低到最差情况O(loglogN)
                 
-                while (indexNote < countNote && Objects[indexNote].StartOrMin.Time.OffsetBy(toleranceTimeOffset).Seconds < nextTime) {
+                while (indexNote < countNote && Objects[indexNote].SafeStart.Time.OffsetBy(toleranceTimeOffset).Seconds < nextTime) {
                     OnProcessNote(Objects[indexNote]);
                     ++indexNote;
                 }
@@ -172,18 +182,18 @@ namespace MaTech.Gameplay.Processor {
                 return;
             }
 
-            var endBeat = Objects.Select(o => (o.End ?? o.StartOrMin).Beat).Max();
+            var endBeat = Objects.Select(o => (o.End ?? o.SafeStart).Beat).Max();
             var bars = BarUtil.GenerateBars(Tempos, Effects, endBeat);
             
             barList = new QueueList<BarCarrier>(bars.Count);
             foreach (var bar in bars) {
                 if (bar.hidden) continue;
-                var timing = CreateTiming(bar.timePoint);
                 var timeCarrier = FindTimeCarrier(bar.timePoint);
+                var timing = CreateTiming(bar.timePoint, timeCarrier);
                 barList.Add(new BarCarrier() {
                     start = timing,
                     end = timing,
-                    scaleY = timeCarrier.noteScaleY,
+                    scale = timeCarrier.scale.note,
                 });
             }
         }
@@ -195,7 +205,7 @@ namespace MaTech.Gameplay.Processor {
         protected abstract void OnProcessNote(TimedObject note);
 
         /// <summary>
-        /// 实现这个函数以便进行初始化，此时timeList仍然还没有内容，不能对三条时间轴进行采样。
+        /// 实现这个函数以便进行初始化，此时timeList仍然还没有内容，不能采样effect。
         /// </summary>
         protected virtual void OnPreProcess() { }
 

@@ -9,61 +9,65 @@
 using System.Collections.Generic;
 using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
+using UnityEngine.UIElements;
+using TimeUnit = MaTech.Gameplay.Data.TimeUnit;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
         /// <summary> 图形或判定逻辑元素的三维时间轴位置 </summary>
         public struct CarrierTiming {
             /// <summary> 位于时间轴上的时间，以秒计 </summary>
-            public double time;
-            /// <summary> 位于图形卷轴上的位置，由Processor计算而来，由各模式自行定义 </summary>
-            public double displayY;
+            public TimeUnit time;
             /// <summary> 位于节拍轴上的拍号，不一定严格对应时间，部分模式可能没有这个数值 </summary>
-            public Fraction beat;
+            public BeatUnit beat;
+            /// <summary> 位于图形卷轴上的位置，由Processor计算而来，由各模式自行定义 </summary>
+            public double roll;
 
-            public static CarrierTiming FromTimePoint(ITimePoint timePoint, double displayY = 0) {
-                return new CarrierTiming() { time = timePoint.Time.Seconds, beat = timePoint.Beat.fraction, displayY = displayY };
+            public static CarrierTiming FromTimePoint(ITimePoint timePoint, double roll = 0) {
+                return new CarrierTiming() { time = timePoint.Time, beat = timePoint.Beat, roll = roll };
             }
 
-            public bool IsPositiveInfinity => beat == Fraction.maxValue || double.IsPositiveInfinity(time) || double.IsPositiveInfinity(time);
-            public bool IsNegativeInfinity => beat == Fraction.minValue || double.IsNegativeInfinity(time) || double.IsNegativeInfinity(time);
+            public bool IsMax => beat.IsMax || time.IsMax || double.IsPositiveInfinity(roll);
+            public bool IsMin => beat.IsMin || time.IsMin || double.IsNegativeInfinity(roll);
 
-            public static CarrierTiming PositiveInfinity => new CarrierTiming() { time = double.PositiveInfinity, beat = Fraction.maxValue, displayY = double.PositiveInfinity };
-            public static CarrierTiming NegativeInfinity => new CarrierTiming() { time = double.NegativeInfinity, beat = Fraction.minValue, displayY = double.NegativeInfinity };
+            public static CarrierTiming MaxValue => new() { time = TimeUnit.MaxValue, beat = BeatUnit.MaxValue, roll = double.PositiveInfinity };
+            public static CarrierTiming MinValue => new() { time = TimeUnit.MinValue, beat = BeatUnit.MinValue, roll = double.NegativeInfinity };
+            
+            public override string ToString() => $"Beat {beat}, Time {time}, Roll {roll}";
         }
 
         public abstract class Carrier {
-            // TODO: 增加不受speed scale影响的边缘时间margin
-
             public CarrierTiming start;
             public CarrierTiming end;
             
-            public double StartTime => start.time;
-            public double StartY => start.displayY;
-            public Fraction StartBeat => start.beat;
+            public double StartTime => start.time.Seconds;
+            public double StartRoll => start.roll;
+            public Fraction StartBeat => start.beat.Fraction;
             
-            public double EndTime => end.time;
-            public double EndY => end.displayY;
-            public Fraction EndBeat => end.beat;
+            public double EndTime => end.time.Seconds;
+            public double EndRoll => end.roll;
+            public Fraction EndBeat => end.beat.Fraction;
 
-            public double LengthTime => end.time - start.time;
-            public double LengthY => end.displayY - start.displayY;
-            public Fraction LengthBeat => end.beat - start.beat;
+            public double LengthTime => end.time.Seconds - start.time.Seconds;
+            public double LengthRoll => end.roll - start.roll;
+            public Fraction LengthBeat => end.beat.Fraction - start.beat.Fraction;
+            
+            public override string ToString() => $"{start} == {end}";
                 
-            public static Comparer<Carrier> ComparerStartOffset => comparers[0];
-            public static Comparer<Carrier> ComparerStartY => comparers[1];
+            public static Comparer<Carrier> ComparerStartTime => comparers[0];
+            public static Comparer<Carrier> ComparerStartRoll => comparers[1];
             public static Comparer<Carrier> ComparerStartBeat => comparers[2];
 
-            public static Comparer<Carrier> ComparerEndOffset => comparers[3];
-            public static Comparer<Carrier> ComparerEndY => comparers[4];
+            public static Comparer<Carrier> ComparerEndTime => comparers[3];
+            public static Comparer<Carrier> ComparerEndRoll => comparers[4];
             public static Comparer<Carrier> ComparerEndBeat => comparers[5];
 
             private static readonly Comparer<Carrier>[] comparers = {
                 Comparer<Carrier>.Create((x, y) => x.start.time.CompareTo(y.start.time)),
-                Comparer<Carrier>.Create((x, y) => x.start.displayY.CompareTo(y.start.displayY)),
+                Comparer<Carrier>.Create((x, y) => x.start.roll.CompareTo(y.start.roll)),
                 Comparer<Carrier>.Create((x, y) => x.start.beat.CompareTo(y.start.beat)),
                 Comparer<Carrier>.Create((x, y) => x.end.time.CompareTo(y.end.time)),
-                Comparer<Carrier>.Create((x, y) => x.end.displayY.CompareTo(y.end.displayY)),
+                Comparer<Carrier>.Create((x, y) => x.end.roll.CompareTo(y.end.roll)),
                 Comparer<Carrier>.Create((x, y) => x.end.beat.CompareTo(y.end.beat)),
             };
         }
