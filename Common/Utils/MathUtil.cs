@@ -73,10 +73,34 @@ namespace MaTech.Common.Utils {
         public static double LerpUnclamped(double a, double b, double k) => (1 - k) * a + k * b;
         /// <summary> 用法同UnityEngine.Mathf.InverseLerp </summary>
         public static double InverseLerp(double a, double b, double value) => Saturate(InverseLerpUnclamped(a, b, value));
-
-        public static float InverseLerpUnclamped(float a, float b, float value) => (value - a) / (b - a);
-        public static double InverseLerpUnclamped(double a, double b, double value) => (value - a) / (b - a);
-
+        
+        public static float InverseLerpUnclamped(float a, float b, float value) {
+            return (float.IsInfinity(a), float.IsInfinity(b)) switch {
+                (true, true) => (a > 0, b > 0) switch {
+                    (false, false) => float.PositiveInfinity,
+                    (true, true) => float.NegativeInfinity,
+                    _ => 0.5f
+                },
+                (false, true) => 0.0f,
+                (true, false) => 1.0f,
+                _ when a.Exactly(b) => value.Exactly(b) ? 0.5f : float.NaN,
+                _ => (value - a) / (b - a)
+            };
+        }
+        public static double InverseLerpUnclamped(double a, double b, double value) {
+            return (double.IsInfinity(a), double.IsInfinity(b)) switch {
+                (true, true) => (a > 0, b > 0) switch {
+                    (false, false) => double.PositiveInfinity,
+                    (true, true) => double.NegativeInfinity,
+                    _ => 0.5
+                },
+                (false, true) => 0.0,
+                (true, false) => 1.0,
+                _ when a.Exactly(b) => value.Exactly(b) ? 0.5 : double.NaN,
+                _ => (value - a) / (b - a)
+            };
+        }
+        
         public static float LinearMap(float sourceA, float sourceB, float destA, float destB, float value) {
             return Mathf.Lerp(destA, destB, InverseLerpUnclamped(sourceA, sourceB, value));
         }
