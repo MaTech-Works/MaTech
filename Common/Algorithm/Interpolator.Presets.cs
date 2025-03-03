@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using MaTech.Common.Utils;
 
 namespace MaTech.Common.Algorithm {
     public static partial class Interpolators {
@@ -14,66 +15,66 @@ namespace MaTech.Common.Algorithm {
 
         private static class Presets {
             public class Linear : IInterpolator {
-                public double Map(double k) => k;
-                public double Derivative(double k) => 1;
-                public double Integral(double k) => k * k / 2;
+                public double Map(double t) => t;
+                public double Derivative(double t) => 1;
+                public double Integral(double t) => t * t / 2;
             }
 
-            public class HoldAndChange : IInterpolator {
-                public double Map(double k) => k >= 1 ? 1 : 0;
-                public double Derivative(double k) => 0; // TODO: 思考一下是否要针对1处的跳变进行额外处理
-                public double Integral(double k) => Math.Max(k, 1);
+            public class ChangeAtStart : IInterpolator {
+                public double Map(double t) => t > 0 ? 1 : 0;
+                public double Derivative(double t) => t.Exactly(0) ? double.PositiveInfinity : 0;
+                public double Integral(double t) => Math.Max(t, 0);
             }
 
-            public class ChangeAndHold : IInterpolator {
-                public double Map(double k) => k > 0 ? 1 : 0;
-                public double Derivative(double k) => 0; // TODO: 思考一下是否要针对0处的跳变进行额外处理
-                public double Integral(double k) => Math.Max(k, 0);
+            public class ChangeAtEnd : IInterpolator {
+                public double Map(double t) => t >= 1 ? 1 : 0;
+                public double Derivative(double t) => t.Exactly(1) ? double.PositiveInfinity : 0;
+                public double Integral(double t) => Math.Max(t, 1);
             }
 
             public class EaseInQuad : IInterpolator {
-                public double Map(double k) => k * k;
-                public double Derivative(double k) => 2 * k;
-                public double Integral(double k) => k * k * k / 3;
+                public double Map(double t) => t * t;
+                public double Derivative(double t) => 2 * t;
+                public double Integral(double t) => t * t * t / 3;
             }
 
             public class EaseOutQuad : IInterpolator {
-                public double Map(double k) => (2 - k) * k; // 1-(1-k)^2
-                public double Derivative(double k) => 2 - 2 * k;
-                public double Integral(double k) => k * k * (1 - k / 3); // k^2-k^3/3
+                public double Map(double t) => (2 - t) * t; // 1-(1-k)^2
+                public double Derivative(double t) => 2 - 2 * t;
+                public double Integral(double t) => t * t * (1 - t / 3); // k^2-k^3/3
             }
 
             public class EaseInOutQuad : IInterpolator {
-                public double Map(double k) {
-                    double t = k * 2 - 1;
-                    return ((2 - Math.Abs(t)) * t + 1) / 2;
+                public double Map(double t) {
+                    double x = t * 2 - 1;
+                    return ((2 - Math.Abs(x)) * x + 1) / 2;
                 }
-                public double Derivative(double k) {
-                    double t = k * 2 - 1;
-                    return 2 - 2 * Math.Abs(t);
+                public double Derivative(double t) {
+                    double x = t * 2 - 1;
+                    return 2 - 2 * Math.Abs(x);
                 }
-                public double Integral(double k) {
-                    double t = k * 2 - 1;
-                    return (t * t * (1 - Math.Abs(t) / 3) + t) / 2;
+                public double Integral(double t) {
+                    double x = t * 2 - 1;
+                    return (x * x * (1 - Math.Abs(x) / 3) + x) / 2;
                 }
             }
 
             public class EaseInSine : IInterpolator {
-                public double Map(double k) => 1 - Math.Cos(k * PiOverTwo);
-                public double Derivative(double k) => (PiOverTwo * Math.Sin(k * PiOverTwo));
-                public double Integral(double k) => k - (TwoOverPi * Math.Sin(k * PiOverTwo));
+                public double Map(double t) => 1 - Math.Cos(t * PiOverTwo);
+                public double Derivative(double t) => (PiOverTwo * Math.Sin(t * PiOverTwo));
+                public double Integral(double t) => t - (TwoOverPi * Math.Sin(t * PiOverTwo));
             }
 
             public class EaseOutSine : IInterpolator {
-                public double Map(double k) => Math.Sin(k * PiOverTwo);
-                public double Derivative(double k) => (PiOverTwo * Math.Cos(k * PiOverTwo));
-                public double Integral(double k) => (-TwoOverPi * Math.Sin(k * PiOverTwo));
+                public double Map(double t) => Math.Sin(t * PiOverTwo);
+                public double Derivative(double t) => (PiOverTwo * Math.Cos(t * PiOverTwo));
+                public double Integral(double t) => (-TwoOverPi * Math.Sin(t * PiOverTwo));
             }
 
             public class EaseInOutSine : IInterpolator {
-                public double Map(double k) => (1 - Math.Cos(k * Math.PI)) / 2;
-                public double Derivative(double k) => (PiOverTwo * Math.Sin(k * Math.PI));
-                public double Integral(double k) => k / 2 - (Math.Sin(k * Math.PI) * InverseTwoPi);
+                public double Map(double t) => (1 - Math.Cos(t * Math.PI)) / 2;
+                public double Derivative(double t) => (PiOverTwo * Math.Sin(t * Math.PI));
+                public double Integral(double t) => t / 2 - (Math.Sin(t * Math.PI) * InverseTwoPi);
             }
         }
     }
