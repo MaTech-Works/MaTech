@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Optional;
 
 namespace MaTech.Common.Algorithm {
     public static class CollectionsExtension {
@@ -199,7 +200,7 @@ namespace MaTech.Common.Algorithm {
             return value;
         }
 
-        public static TValue GetOrNewDerived<TKey, TValue, TDerived>(this Dictionary<TKey, TValue> dict, TKey key) where TDerived : TValue, new() {
+        public static TValue GetOrNew<TKey, TValue, TDerived>(this Dictionary<TKey, TValue> dict, TKey key) where TDerived : TValue, new() {
             if (!dict.TryGetValue(key, out var value))
                 dict.Add(key, value = new TDerived());
             return value;
@@ -215,6 +216,10 @@ namespace MaTech.Common.Algorithm {
         
         public static TValue? GetNullable<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : struct {
             return dict.TryGetValue(key, out var value) ? value : default;
+        }
+        
+        public static Option<TValue> Get<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : class {
+            return dict.TryGetValue(key, out var value) ? Option.Some(value) : Option.None<TValue>();
         }
     }
 }
