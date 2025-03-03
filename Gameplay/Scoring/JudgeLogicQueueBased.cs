@@ -72,7 +72,7 @@ namespace MaTech.Gameplay.Scoring {
             Score.Init(playInfo);
             Timing.Init(playInfo);
             
-            pendingCarriers.ClearAndRestart();
+            pendingCarriers.Clear();
             activeCarriers.Clear();
             
             pendingCarriers.AddRange(processor.ResultNoteList.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null));

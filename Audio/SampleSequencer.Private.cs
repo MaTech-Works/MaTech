@@ -45,7 +45,7 @@ namespace MaTech.Audio {
             StopAllSamples();
 
             if (!trackSamplesQueued) {
-                queueSample.ClearAndRestart();
+                queueSample.Clear();
                 queueSample.AddRange(track.Samples);
                 ShellSort.Hibbard(queueSample);
 
