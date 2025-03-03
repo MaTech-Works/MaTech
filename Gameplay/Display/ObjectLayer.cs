@@ -25,7 +25,8 @@ namespace MaTech.Gameplay.Display {
         where TCarrier : ObjectCarrier<TCarrier, TLayer>
         where TLayer : ObjectLayer<TCarrier, TLayer> {
         
-        // TODO: 支持为每个VisualUnit实例化图形，而非为每个NoteCarrier实例化图形
+        // todo: rename every "Y" to "roll"
+        // todo: 支持为每个VisualUnit实例化图形，而非为每个NoteCarrier实例化图形
         
         #region Private Fields - Runtime Containers
         
