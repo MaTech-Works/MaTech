@@ -90,9 +90,6 @@ namespace MaTech.Gameplay.Processor {
                 Debug.LogException(ex);
                 return;
             }
-
-            SortCarriers<NoteCarrier, NoteLayer>(noteList, true);
-            SortCarriers<BarCarrier, BarLayer>(barList, true);
         
             ResultTimeList = timeList;
             ResultNoteList = noteList;

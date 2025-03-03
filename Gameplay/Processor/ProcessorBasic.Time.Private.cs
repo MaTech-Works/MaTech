@@ -78,7 +78,7 @@ namespace MaTech.Gameplay.Processor {
         /// <param name="list"> 被排序的列表 </param>
         /// <param name="byStart"> 按照开始还是结束边界排序 </param>
         /// <param name="windowDeltaRoll"> 为每个Carrier计入的排序提前量，排序的结果会在计入hs超车影响的情况下，在相对判定点的这个位置是有序的 </param>
-        public static void SortCarriers<TCarrier, TLayer>(IList<TCarrier> list, bool byStart, double? windowDeltaRoll = null)
+        public static void SortCarriersByRoll<TCarrier, TLayer>(IList<TCarrier> list, bool byStart, double? windowDeltaRoll = null)
             where TCarrier : ObjectCarrier<TCarrier, TLayer>
             where TLayer : ObjectLayer<TCarrier, TLayer> {
             if (list == null) return;

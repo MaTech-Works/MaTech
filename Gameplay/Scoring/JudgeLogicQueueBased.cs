@@ -18,7 +18,7 @@ namespace MaTech.Gameplay.Scoring {
         /// 还未进入判定范围的carrier队列，按顺序检查进入ActiveNoteEarlyWindow范围并踢到activeNotes中。
         private readonly QueueList<NoteCarrier> pendingCarriers = new();
         /// 进入判定范围的所有carrier，会被检查是否退出了judgeWindowLate指定的判定范围
-        private readonly Queue<NoteCarrier> activeCarriers = new(1000);
+        private readonly QueueList<NoteCarrier> activeCarriers = new(1000);
         
         /// 进入判定范围的所有carrier携带的unit，在carrier进入或退出activeCarriers容器时更新
         private readonly Dictionary<IJudgeUnit, HashSet<NoteCarrier>> activeUnitsWithCarriers = new(1000);
@@ -75,7 +75,7 @@ namespace MaTech.Gameplay.Scoring {
             pendingCarriers.Clear();
             activeCarriers.Clear();
             
-            pendingCarriers.AddRange(processor.ResultNoteList.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null));
+            pendingCarriers.AddRange(processor.ResultNoteList.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null).OrderBy(carrier => carrier, Carrier.ComparerStartTime));
 
             ResetJudge(playInfo);
         }
@@ -88,13 +88,11 @@ namespace MaTech.Gameplay.Scoring {
             DepopulateActiveListUntil(judgeTimeBeforeInput);
         }
         
+        // todo: 提供一种队列进入退出标准的override方法
         // todo: 能不能把区间查找做进一种队列性质的helper容器，而非中间类？
         protected void DepopulateActiveListUntil(TimeUnit judgeTime) {
-            // todo: 这里应当以某个“最后一次处理输入消息的时间”值为标准弹出note
-            while (activeCarriers.Count > 0) {
-                var carrier = activeCarriers.Peek();
-                if (carrier.EndTime > judgeTime.Seconds - ActiveNoteLateWindow.Seconds) break;
-                activeCarriers.Dequeue();
+            TimeUnit window = judgeTime.OffsetBy(ActiveNoteLateWindow.Negate());
+            while (activeCarriers.NextIf(window, (carrier, window) => carrier.end.time.CompareTo(window) <= 0) is { } carrier) {
                 foreach (var unit in carrier.UnitsOf<IJudgeUnit>()) {
                     if (!activeUnitsWithCarriers.TryGetValue(unit, out var set)) continue;
                     set.Remove(carrier);
@@ -104,14 +102,13 @@ namespace MaTech.Gameplay.Scoring {
                     }
                 }
             }
+            activeCarriers.RemovePassed();
         }
 
         protected void PopulateActiveListUntil(TimeUnit judgeTime) {
-            while(pendingCarriers.HasNext) {
-                var carrier = pendingCarriers.Peek();
-                if (carrier.StartTime > judgeTime.Seconds + ActiveNoteEarlyWindow.Seconds) break;
-                pendingCarriers.Skip();
-                activeCarriers.Enqueue(carrier);
+            TimeUnit window = judgeTime.OffsetBy(ActiveNoteEarlyWindow);
+            while (pendingCarriers.NextIf(window, (carrier, window) => carrier.start.time.CompareTo(window) < 0) is { } carrier) {
+                activeCarriers.OrderedInsert(carrier, Carrier.ComparerEndTime);
                 foreach (var unit in carrier.UnitsOf<IJudgeUnit>()) {
                     if (!activeUnitsWithCarriers.TryGetValue(unit, out var set)) {
                         set = carrierHashSetPool.Get();

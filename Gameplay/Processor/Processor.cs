@@ -15,8 +15,8 @@ namespace MaTech.Gameplay.Processor {
     /// Processor类
     /// 将Chart Data的Timing，Note和Effect数据处理成可以显示的Carrier图形数据。
     /// 接收Chart的Time，Note和Effect容器作为参数，生成联系时间-图形相关量TimeCarrier和音符逻辑-图形相关量NoteCarrier的列表，以及作为可选结果的承载小节线信息的BarCarrier。
-    /// TODO: 与MonoBehaviour解耦，不依赖场景来查找此组件
-    /// TODO: 把processor细分成不同的用途，如TimeProcessor、NoteProcessor等，并且允许每个ObjectLayer使用不同的processor
+    /// todo: 与MonoBehaviour解耦，不依赖场景来查找此组件
+    /// todo: 把processor细分成不同的用途，如TimeProcessor、NoteProcessor等，并且允许每个ObjectLayer使用不同的processor
     /// </summary>
     public abstract class Processor : MonoBehaviour {
         public IPlayInfo PlayInfo { get; set; }
@@ -28,6 +28,7 @@ namespace MaTech.Gameplay.Processor {
 
         public int RandomSeed => PlayInfo.RandomSeed ?? 0;
         
+        // todo: 输出的list无法确定排序规则；重构时增加输出排序后版本的方法，参数可以使用Carrier上的若干Comparer
         public QueueList<TimeCarrier> ResultTimeList { get; protected set; }
         public QueueList<NoteCarrier> ResultNoteList { get; protected set; }
         public QueueList<BarCarrier> ResultBarList { get; protected set; }
