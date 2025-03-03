@@ -88,14 +88,15 @@ namespace MaTech.Gameplay.Scoring {
         public static bool HasAnyFlagExcept(this HitResult self, HitResult any, HitResult except) => (self & any) != 0 && (self & except) == 0;
         public static bool HasAllFlagExcept(this HitResult self, HitResult all, HitResult except) => (self & all) == all && (self & except) == 0;
         
-        public static HitResult MaskWith(this HitResult result, HitResult mask) => result & mask;
-        public static HitResult Remove(this HitResult result, HitResult mask) => result & ~mask;
+        public static HitResult MaskWith(this HitResult self, HitResult flags) => self & flags;
+        public static HitResult Remove(this HitResult self, HitResult flags) => self & ~flags;
+        public static HitResult Add(this HitResult self, HitResult flags) => self | flags;
         
-        public static int CountEach(this HitResult result, Func<HitResult, bool> predicate = null) {
+        public static int CountEach(this HitResult self, Func<HitResult, bool> predicate = null) {
             int count = 0;
             for (int i = 0; i < HitResultInfo.MaxCount; ++i) {
                 var flag = (HitResult)(1 << i);
-                if (result.HasAnyFlag(flag))
+                if (self.HasAnyFlag(flag))
                     count += predicate?.Invoke(flag) ?? true ? 1 : 0;
             }
             return count;
