@@ -18,7 +18,7 @@ namespace MaTech.Gameplay.Scoring {
         private void LogNoteHit(ChartPlayer.IJudgeUnit unit, NoteHitAction action, TimeUnit judgeTime, HitResult result) {
             if (DebugLogHistory.HasInstances && logFilterOnNoteHit is not null) {
                 if (logFilterOnNoteHit(unit, action, judgeTime, result))
-                    DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit {action} [{unit}] --> [{result.ToEditorName()}]");
+                    DebugLogHistory.PushHistory("play", $"{judgeTime}: note hit {action} [{unit}] -- [{result.ToEditorName()}]");
             }
         }
 

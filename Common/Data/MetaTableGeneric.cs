@@ -4,7 +4,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-// note: 这里没有用#nullable enable，避免难以区分defaultable和Nullable<T>
 #nullable enable
 
 using System;
@@ -28,15 +27,12 @@ namespace MaTech.Common.Data {
             public bool IsValid() => context.GetTable<TEnum0>() != null;
             
             public MetaTableGeneric<TEnum0>? GetContextTable() => context.GetTable<TEnum0>();
-            
-            #nullable enable
             public MetaTableGeneric<TEnum0> EnsureContextTable() => context.EnsureTable<TEnum0>();
-            #nullable restore
             
             public bool Has<T>() => GetContextTable()?.Has<T>(key) ?? false;
             public bool Remove<T>() => GetContextTable()?.Remove<T>(key) ?? false;
             
-            public T Get<T>() => GetContextTable() is { } table ? table.Get<T>(key) : default; // cannot do GetContextTable()?.Get<T>() without C# 9.0
+            public T? Get<T>() => GetContextTable() is { } table ? table.Get<T>(key) : default; // cannot do GetContextTable()?.Get<T>() without C# 9.0
             public T? GetNullable<T>() where T : struct => GetContextTable()?.GetNullable<T>(key);
             public T GetOrSet<T>(in T value) => EnsureContextTable().GetOrSet<T>(key, value);
             public T Set<T>(in T value) => EnsureContextTable().Set<T>(key, value);
