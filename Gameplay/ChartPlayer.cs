@@ -89,11 +89,6 @@ namespace MaTech.Gameplay {
         
         private int playCount;
 
-        private QueueList<TimeCarrier> timeList;
-
-        private TimeCarrier nextTime;
-        private TimeCarrier currTime;
-
         private PlayTime.Setter timeSetter;
 
         private IReplayFileSource replayFileSource;
@@ -169,22 +164,17 @@ namespace MaTech.Gameplay {
 
             /////////////////////////////////
 
-            #region Game Data: Parse and process the chart
+            #region Process the chart
 
             await UniTask.SwitchToThreadPool();
 
             processor.PlayInfo = playInfo;
-            processor.Process();
-
-            timeList = processor.ResultTimeList;
-            if (timeList == null) {
+            
+            if (!processor.Process()) {
                 Debug.LogError("<b>[ChartPlayer]</b> Failed to process the chart");
                 await UniTask.SwitchToMainThread();
                 return false;
             }
-
-            timeTrackStart = (playInfo.TrackStartTime?.Seconds ?? 0) + offsetTrackStart;
-            timeFinishCheck = (playInfo.FinishCheckTime?.Seconds ?? 0) + offsetFinishCheck;
 
             LoadedChart = chart;
 
@@ -194,7 +184,7 @@ namespace MaTech.Gameplay {
 
             #region Game Rules: Judge logic, input, and replay recorder
 
-            // todo: 将以下的一切数据的来源打包成一个ModeRule类，来规定模式相关的所有数据，递交模式特定的派生类组件
+            // todo: 将数据与组件来源打包成GameRule类
             if (judgeLogic != null) {
                 judgeLogic.OnLoadChart(playInfo, processor);
 
@@ -204,7 +194,6 @@ namespace MaTech.Gameplay {
                     }
                 };
 
-                // todo: 需要禁用成绩上传时，增加一步操作：“将加密成绩计算替换为明文成绩计算，使得最终成绩无法被上传并接受”
                 /* if (playInfo.playBy == PlayByType.ReplayPlayer) {
                     if (playInfo.Replay != null) {
                         Controller = new ReplayPlayback(playInfo.Replay);
@@ -284,6 +273,9 @@ namespace MaTech.Gameplay {
 
             await UniTask.SwitchToMainThread();
 
+            timeTrackStart = (playInfo.TrackStartTime?.Seconds ?? 0) + offsetTrackStart;
+            timeFinishCheck = (playInfo.FinishCheckTime?.Seconds ?? 0) + offsetFinishCheck;
+
             // TODO: 对外暴露Offset设置接口
             // TODO: 将PlayTime的类型定义封装成ChartPlayer的nested类
             timeSetter = new PlayTime.Setter {
@@ -328,10 +320,6 @@ namespace MaTech.Gameplay {
             PlayBehavior.ListAll.ForEach(isRetry ? behavior => behavior.OnStart(true) : behavior => behavior.OnStart(false));
 
             UpdateSettings();
-
-            timeList.Restart();
-            currTime = timeList.Next();
-            nextTime = timeList.PeekOrDefault();
 
             timeSetter.UpdateTime(timeTrackStart, true);
             timeSetter.SetPlaying(true);

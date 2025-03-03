@@ -64,13 +64,13 @@ namespace MaTech.Gameplay.Processor {
         protected QueueList<NoteCarrier> noteList;
         protected QueueList<BarCarrier> barList;
         
-        public sealed override void Process() {
+        public sealed override bool Process() {
             ResultTimeList = null;
             ResultNoteList = null;
             ResultBarList = null;
 
             if (Tempos == null || Tempos.Count == 0)
-                return;
+                return false;
 
             timeList = new QueueList<TimeCarrier>();
             noteList = new QueueList<NoteCarrier>();
@@ -88,12 +88,13 @@ namespace MaTech.Gameplay.Processor {
             } catch (Exception ex) {
                 Debug.LogError($"[Processor] Exception thrown when processing chart.");
                 Debug.LogException(ex);
-                return;
+                return false;
             }
         
             ResultTimeList = timeList;
             ResultNoteList = noteList;
             ResultBarList = barList;
+            return true;
         }
 
         private void ProcessTime() {

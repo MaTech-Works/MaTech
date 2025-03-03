@@ -37,7 +37,7 @@ namespace MaTech.Gameplay.Processor {
         /// <summary>
         /// Generate <see cref="ResultTimeList" /> and <see cref="ResultNoteList" />, possibly <see cref="ResultBarList" />.
         /// </summary>
-        public abstract void Process();
+        public abstract bool Process();
 
         public virtual double CurrentRoll => PlayTime.DisplayTime;
     }
