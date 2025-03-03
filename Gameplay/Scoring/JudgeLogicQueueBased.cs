@@ -25,7 +25,8 @@ namespace MaTech.Gameplay.Scoring {
         private readonly HashSetPool<NoteCarrier> carrierHashSetPool = new HashSetPool<NoteCarrier>(1000, 100);
 
         // 让activeList里的音符离miss边界远一些。100ms的额外边界暂时足够了。
-        // todo: 为IJudgeUnit增加接口来表示判定是否处理完成，而非用固定的WindowOffset来保证完成判定处理
+        // todo: 增加接口处理退出判定范围的IJudgeUnit
+        // todo: 检查PlayControl与JudgeInput的操作顺序
         private readonly TimeUnit activeNoteWindowOffset = TimeUnit.FromMilliseconds(100);
         
         protected readonly struct ReadOnlyUnits : IReadOnlyCollection<IJudgeUnit> {
