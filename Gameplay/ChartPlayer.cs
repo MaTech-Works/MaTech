@@ -173,17 +173,6 @@ namespace MaTech.Gameplay {
 
             await UniTask.SwitchToThreadPool();
 
-            if (fullReload || !chart.FullLoaded) {
-                var parser = chart.CreateParser();
-                parser.Parse(false);
-            }
-
-            if (!chart.FullLoaded) {
-                Debug.LogError("<b>[ChartPlayer]</b> Failed to full load the chart");
-                await UniTask.SwitchToMainThread();
-                return false;
-            }
-
             processor.PlayInfo = playInfo;
             processor.Process();
 

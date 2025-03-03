@@ -11,8 +11,9 @@ using MaTech.Common.Algorithm;
 
 namespace MaTech.Gameplay.Data {
     public class Chart {
-        // TODO: 将tempos封装至TempoTimeline类并始终维护内部列表有序
-        // TODO: 将effects封装至EffectTimeline类并始终维护内部列表有序，并且提供插值采样的方法
+        // todo: 将tempo封装至Timeline类，不在这里计算time
+        // todo: 将effects封装至Timeline类，从Processor提取功能
+        // todo: 思考Timeline如何组成成Chart类，也许可以不再使用此类，或者提供一种默认或可组合的结构与序列化支持
         
         public readonly List<TempoChange> tempos = new List<TempoChange>();
         public readonly List<Effect> effects = new List<Effect>();
@@ -25,14 +26,6 @@ namespace MaTech.Gameplay.Data {
             if (tempos.Count == 0) return TimeUnit.MinValue;
             int index = tempos.IndexOfLastMatchedValue(beat, funcMatchTempo);
             return tempos[index == -1 ? 0 : index].CalculateTimeFromBeat(beat);
-        }
-
-        // TODO: 重构chart框架并重新设计此接口
-        public DummyChartParser CreateParser() => new DummyChartParser();
-        public bool FullLoaded => true;
-
-        public class DummyChartParser {
-            public void Parse(bool fullReload) { }
         }
     }
 }
