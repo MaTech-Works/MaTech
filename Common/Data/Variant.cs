@@ -82,6 +82,7 @@ namespace MaTech.Common.Data {
         public readonly Option<object> TryObject => Type == VariantType.Object ? Option.Some(o) : Option.None<object>();
 
         public readonly bool IsNone => Type is VariantType.None;
+        public readonly bool IsSome => Type is not VariantType.None;
         public readonly bool IsBoolean => Type is VariantType.Bool;
         public readonly bool IsInteger => Type is VariantType.Int;
         public readonly bool IsFloat => Type is VariantType.Float;
@@ -108,6 +109,7 @@ namespace MaTech.Common.Data {
         public readonly T As<T>() where T : class => o as T;
         
         // todo: in theory we can cache boxer func for each type and hide boxing process, in the end not having separate method for generic struct and class
+        // todo: do we immediately recycle the box upon Unbox<T>? provide Ref<T> and To<T> in this case
         public static Variant Box<T>(T value) where T : struct => new(value);
         public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
         
