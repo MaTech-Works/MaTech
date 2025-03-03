@@ -8,22 +8,19 @@
 
 using System;
 using MaTech.Common.Algorithm;
+using MaTech.Common.Data;
 using UnityEngine;
 
 namespace MaTech.Common.Utils {
     public static class MathUtil {
         /// <summary> 辗转相除法算最大公约数 </summary>
-        public static int GCD(int x, int y) {
-            x = Math.Abs(x);
-            y = Math.Abs(y);
-            int t = y;
-            while (t != 0) {
-                t = x % y;
-                x = y;
-                y = t;
-            }
-            return x;
-        }
+        public static int GCD(int x, int y) => (int)GCD((uint)Math.Abs(x), (uint)Math.Abs(y));
+        /// <summary> 辗转相除法算最大公约数 </summary>
+        public static uint GCD(uint x, uint y) { while (y != 0) (x, y) = (y, x % y); return x; }
+        /// <summary> 辗转相除法算最大公约数 </summary>
+        public static long GCD(long x, long y) => (long)GCD((ulong)Math.Abs(x), (ulong)Math.Abs(y));
+        /// <summary> 辗转相除法算最大公约数 </summary>
+        public static ulong GCD(ulong x, ulong y) { while (y != 0) (x, y) = (y, x % y); return x; }
 
         public enum RoundingMode { Round, Floor, Ceiling }
 
