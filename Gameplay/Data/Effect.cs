@@ -47,13 +47,7 @@ namespace MaTech.Gameplay.Data {
         /// </summary>
         ShowBar,
         
-        /// <summary>
-        /// 是否为副歌（高潮段）：bool（兼容int，float，Fraction；非零值为 true）
-        /// 在值为 true 的期间开启一些画面特效，表示进入了歌曲或谱面的引人注意的段落。与 osu 谱面的 kiai time 同理。
-        /// </summary>
-        Chorus,
-        
-        // Tips: 可以使用 DataEnum 来扩展额外的 EffectType
+        // Tips: 可以使用 DataEnum 来扩展额外的 EffectType, Ordered和Unordered皆可
         ExtensionStart = 100
     }
     
