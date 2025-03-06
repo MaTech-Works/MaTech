@@ -17,27 +17,29 @@ using static MaTech.Gameplay.Scoring.JudgeLogicBase;
 
 namespace MaTech.Gameplay.Utils {
     [Serializable]
+    public enum FlagMatchMethod {
+        [Tooltip("要求判定结果和目标完全一样，没有缺少与多余，才会触发事件")] Exact,
+        [Tooltip("判定结果和目标有任意的重合（有交集），就会触发事件")] HasAny,
+        [Tooltip("判定结果完全包含目标时触发事件")] ContainsAll,
+        [Tooltip("目标完全包含判定结果时触发事件")] InsideAll,
+        [Tooltip("目标完全包含判定结果时触发事件")] HasNone,
+    }
+    
+    [Serializable]
     public struct HitEventCondition {
         public NoteHitAction[] allowedActions;
         public HitResult matchTarget;
-        public MatchMethod matchMethod;
-
-        [Serializable]
-        public enum MatchMethod {
-            [Tooltip("要求判定结果和目标完全一样，没有缺少与多余，才会触发事件")] Exact,
-            [Tooltip("判定结果和目标有任意的重合（有交集），就会触发事件")] HasAny,
-            [Tooltip("判定结果完全包含目标时触发事件")] ContainsAll,
-            [Tooltip("目标完全包含判定结果时触发事件")] InsideAll,
-        }
+        public FlagMatchMethod matchMethod;
         
         public bool Match(NoteHitAction action, HitResult result) {
             foreach (NoteHitAction allowedAction in allowedActions) {
                 if (allowedAction != action) continue;
                 switch (matchMethod) {
-                case MatchMethod.Exact when result == matchTarget: break;
-                case MatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
-                case MatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
-                case MatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
+                case FlagMatchMethod.Exact when result == matchTarget: break;
+                case FlagMatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
+                case FlagMatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
+                case FlagMatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
+                case FlagMatchMethod.HasNone when result.HasAnyFlagExcept(HitResult.None, matchTarget): break;
                 default: continue;
                 }
                 return true;
@@ -50,26 +52,20 @@ namespace MaTech.Gameplay.Utils {
     public class HitEvent {
         public NoteHitAction[] allowedActions;
         public HitResult matchTarget;
-        public MatchMethod matchMethod;
+        public FlagMatchMethod matchMethod;
 
         public UnityEvent onHit;
         
-        [Serializable]
-        public enum MatchMethod {
-            [Tooltip("要求判定结果和目标完全一样，没有缺少与多余，才会触发事件")] Exact,
-            [Tooltip("判定结果和目标有任意的重合（有交集），就会触发事件")] HasAny,
-            [Tooltip("判定结果完全包含目标时触发事件")] ContainsAll,
-            [Tooltip("目标完全包含判定结果时触发事件")] InsideAll,
-        }
-        
+        // todo: migrate to HitEventCondition[] and remove this method
         public bool Match(NoteHitAction action, HitResult result) {
             foreach (NoteHitAction allowedAction in allowedActions) {
                 if (allowedAction != action) continue;
                 switch (matchMethod) {
-                case MatchMethod.Exact when result == matchTarget: break;
-                case MatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
-                case MatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
-                case MatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
+                case FlagMatchMethod.Exact when result == matchTarget: break;
+                case FlagMatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
+                case FlagMatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
+                case FlagMatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
+                case FlagMatchMethod.HasNone when result.HasAnyFlagExcept(HitResult.None, matchTarget): break;
                 default: continue;
                 }
                 return true;
