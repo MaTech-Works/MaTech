@@ -186,7 +186,7 @@ namespace MaTech.Gameplay {
 
             // todo: 将数据与组件来源打包成GameRule类
             if (judgeLogic != null) {
-                judgeLogic.OnLoadChart(playInfo, processor);
+                judgeLogic.OnLoadChart(playInfo, processor.ResultNoteList);
 
                 judgeLogic.OnHitNote = (IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result) => {
                     foreach (var layer in noteLayers) {

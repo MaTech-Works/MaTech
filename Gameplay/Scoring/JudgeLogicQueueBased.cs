@@ -64,7 +64,7 @@ namespace MaTech.Gameplay.Scoring {
             }
         }
 
-        public sealed override void OnLoadChart(IPlayInfo playInfo, Processor.Processor processor) {
+        public sealed override void OnLoadChart(IPlayInfo playInfo, QueueList<NoteCarrier> notes) {
             // TODO: 从外部inject Score和Timing对象（如实现一个抽象工厂GameRule类），而不是令派生类自行构建
             
             Score = CreateScore(playInfo);
@@ -76,7 +76,10 @@ namespace MaTech.Gameplay.Scoring {
             pendingCarriers.Clear();
             activeCarriers.Clear();
             
-            pendingCarriers.AddRange(processor.ResultNoteList.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null).OrderBy(carrier => carrier, Carrier.ComparerStartTime));
+            activeUnitsWithCarriers.ForEach(value: hashset => carrierHashSetPool.Recycle(hashset));
+            activeUnitsWithCarriers.Clear();
+            
+            pendingCarriers.AddRange(notes.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null).OrderBy(carrier => carrier, Carrier.ComparerStartTime));
 
             ResetJudge(playInfo);
         }

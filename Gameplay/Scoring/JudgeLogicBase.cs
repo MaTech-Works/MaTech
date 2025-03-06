@@ -4,6 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
 using MaTech.Common.Tools;
 using MaTech.Gameplay.Data;
@@ -20,6 +21,7 @@ namespace MaTech.Gameplay.Scoring {
         
         #region Public Methods
     
+        // todo: think about how to adjust HitEvent inspector on extending actions
         public enum NoteHitAction {
             Unknown = -1, // 无法判别交互形式时使用
             Auto = 0, // 无对应输入操作（如超时自动判miss）或无法判别交互形式时使用
@@ -66,7 +68,7 @@ namespace MaTech.Gameplay.Scoring {
         /// </summary>
         /// <param name="playInfo">目前正在处理的游玩信息，包含已经加载完成的谱面</param>
         /// <param name="processor">已经完成处理的processor，可以取得处理结果</param>
-        public abstract void OnLoadChart(IPlayInfo playInfo, Processor.Processor processor);
+        public abstract void OnLoadChart(IPlayInfo playInfo, QueueList<NoteCarrier> notes);
 
         /// <summary>
         /// 每帧游戏逻辑更新时被调用，与帧率关联的回调。
