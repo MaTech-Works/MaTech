@@ -70,10 +70,12 @@ namespace MaTech.Common.Algorithm {
             }
             return index;
         }
+        
+        public delegate bool Match<in T, in TValue>(T item, TValue value);
 
         /// <summary> 使用非列表元素的值 <b>顺序搜索</b> 列表。 </summary>
         /// <returns> 第一个匹配元素的下标，若无则返回-1 </returns>
-        public static int IndexOfFirstMatchedValue<T, TValue>(this List<T> list, TValue value, Func<T, TValue, bool> match) {
+        public static int IndexOfFirstMatchedValue<T, TValue>(this List<T> list, in TValue value, Match<T, TValue> match) {
             for (int i = 0, n = list.Count; i < n; ++i) {
                 var item = list[i];
                 if (match(item, value))
@@ -84,7 +86,7 @@ namespace MaTech.Common.Algorithm {
         
         /// <summary> 使用非列表元素的值 <b>顺序搜索</b> 列表。 </summary>
         /// <returns> 最后一个匹配元素的下标，若无则返回-1 </returns>
-        public static int IndexOfLastMatchedValue<T, TValue>(this List<T> list, TValue value, Func<T, TValue, bool> match) {
+        public static int IndexOfLastMatchedValue<T, TValue>(this List<T> list, in TValue value, Match<T, TValue> match) {
             for (int i = list.Count - 1; i >= 0; --i) {
                 var item = list[i];
                 if (match(item, value))
@@ -98,7 +100,7 @@ namespace MaTech.Common.Algorithm {
         /// <param name="value"></param>
         /// <param name="matchOrAfterValue"> 对搜索目标以及所有排列在后面的元素返回true </param>
         /// <returns> 第一个匹配元素的下标，若无则返回-1 </returns>
-        public static int IndexOfFirstMatchedValueBinarySearch<T, TValue>(this List<T> list, TValue value, Func<T, TValue, bool> matchOrAfterValue) {
+        public static int IndexOfFirstMatchedValueBinarySearch<T, TValue>(this List<T> list, in TValue value, Match<T, TValue> matchOrAfterValue) {
             if (list.Count == 0 || !matchOrAfterValue(list.Last(), value))
                 return -1;
 
@@ -120,7 +122,7 @@ namespace MaTech.Common.Algorithm {
         /// <param name="value"></param>
         /// <param name="matchOrBeforeValue"> 对搜索目标以及所有排列在前面的元素返回true </param>
         /// <returns> 最后一个匹配元素的下标，若无则返回-1 </returns>
-        public static int IndexOfLastMatchedValueBinarySearch<T, TValue>(this List<T> list, TValue value, Func<T, TValue, bool> matchOrBeforeValue) {
+        public static int IndexOfLastMatchedValueBinarySearch<T, TValue>(this List<T> list, in TValue value, Match<T, TValue> matchOrBeforeValue) {
             if (list.Count == 0 || !matchOrBeforeValue(list.First(), value))
                 return -1;
 
