@@ -19,22 +19,23 @@ namespace MaTech.Gameplay.Display {
         [field: SerializeField, ReadOnlyInInspector] public bool IsVisualFinished { get; set; } = false;
         [field: SerializeField, ReadOnlyInInspector] public bool IgnoreDisplayWindow { get; set; } = false;
 
-        protected virtual void ActivateObject() => gameObject.SetActive(true);
-        protected virtual void DeactivateObject() => gameObject.SetActive(false);
+        protected virtual void EnableObject() => gameObject.SetActive(true);
+        protected virtual void DisableObject() => gameObject.SetActive(false);
+        
         protected abstract void UpdateObject();
 
         protected virtual void HitObject(JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result) {}
 
-        void Awake() => DeactivateObject();
+        void Awake() => DisableObject();
 
         void IObjectVisual<NoteCarrier, NoteLayer>.InitVisual(NoteCarrier initCarrier, NoteLayer initLayer) {
             carrier = initCarrier;
             layer = initLayer;
-            ActivateObject();
+            EnableObject();
         }
 
         void IObjectVisual<NoteCarrier, NoteLayer>.FinishVisual() {
-            DeactivateObject();
+            DisableObject();
             carrier = null;
         }
 
