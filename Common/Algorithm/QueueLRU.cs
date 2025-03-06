@@ -15,14 +15,14 @@ namespace MaTech.Common.Algorithm {
             public Node prev;
         }
 
-        private readonly ObjectPool<Node> pool;
+        private readonly Pool<Node> pool;
         private readonly Dictionary<T, Node> nodes;
 
         private readonly Node headNode = new Node(); // Least recently used
         private readonly Node tailNode = new Node(); // Most recently used
 
         public QueueLRU(int initCapacity = 0) {
-            pool = new ObjectPool<Node>(() => new Node(), initCapacity);
+            pool = new Pool<Node>(() => new Node(), initCapacity);
             nodes = new Dictionary<T, Node>(initCapacity);
             headNode.next = tailNode;
             tailNode.prev = headNode;
