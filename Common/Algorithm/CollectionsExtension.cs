@@ -221,5 +221,18 @@ namespace MaTech.Common.Algorithm {
         public static Option<TValue> Get<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key) where TValue : class {
             return dict.TryGetValue(key, out var value) ? Option.Some(value) : Option.None<TValue>();
         }
+
+        public static void ForEach<TKey, TValue>(this Dictionary<TKey, TValue> dict, Action<TKey, TValue> action) {
+            foreach (var pair in dict) {
+                action(pair.Key, pair.Value);
+            }
+        }
+        public static void ForEach<TKey, TValue>(this Dictionary<TKey, TValue> dict, Action<TKey>? key = null, Action<TValue>? value = null) {
+            if (key is null && value is null) return;
+            foreach (var pair in dict) {
+                key?.Invoke(pair.Key);
+                value?.Invoke(pair.Value);
+            }
+        }
     }
 }
