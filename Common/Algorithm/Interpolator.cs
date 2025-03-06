@@ -22,6 +22,9 @@ namespace MaTech.Common.Algorithm {
     public static partial class Interpolators {
         public static readonly IInterpolator linear = new Presets.Linear();
         
+        public static readonly IInterpolator holdStart = new Presets.HoldStart();
+        public static readonly IInterpolator holdEnd = new Presets.HoldEnd();
+        
         public static readonly IInterpolator changeAtStart = new Presets.ChangeAtStart();
         public static readonly IInterpolator changeAtEnd = new Presets.ChangeAtEnd();
         

@@ -20,6 +20,18 @@ namespace MaTech.Common.Algorithm {
                 public double Integral(double t) => t * t / 2;
             }
 
+            public class HoldStart : IInterpolator {
+                public double Map(double t) => 0;
+                public double Derivative(double t) => 0;
+                public double Integral(double t) => 0;
+            }
+
+            public class HoldEnd : IInterpolator {
+                public double Map(double t) => 1;
+                public double Derivative(double t) => 0;
+                public double Integral(double t) => t;
+            }
+
             public class ChangeAtStart : IInterpolator {
                 public double Map(double t) => t > 0 ? 1 : 0;
                 public double Derivative(double t) => t.Exactly(0) ? double.PositiveInfinity : 0;
@@ -29,7 +41,7 @@ namespace MaTech.Common.Algorithm {
             public class ChangeAtEnd : IInterpolator {
                 public double Map(double t) => t >= 1 ? 1 : 0;
                 public double Derivative(double t) => t.Exactly(1) ? double.PositiveInfinity : 0;
-                public double Integral(double t) => Math.Max(t, 1);
+                public double Integral(double t) => Math.Max(t - 1, 1);
             }
 
             public class EaseInQuad : IInterpolator {
