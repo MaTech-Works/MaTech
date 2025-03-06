@@ -203,10 +203,10 @@ namespace MaTech.Gameplay.Display {
         
         public double SpeedScale => speedScale;
 
-        public void SetSpeedScale(double value) {
+        public void UpdateSpeedScale(double value, bool updateGraphics = true) {
             speedScale = value;
             invSpeedScale = 1.0 / value;
-            if (isLoaded) {
+            if (isLoaded && updateGraphics) {
                 SortCarriers();
                 UpdateGraphics();
             }
@@ -259,16 +259,12 @@ namespace MaTech.Gameplay.Display {
         
         #region Public Methods - Load and Update
         
+        // TODO: 改为继承自PlayBehavior，并且将ChartPlayer中的Processor依赖移至这里
         public async UniTask Load(IList<TCarrier> carriers) {
-            // TODO: 改为继承自PlayBehavior，并且将ChartPlayer中的Processor依赖移至这里
-            
             Assert.IsNotNull(carriers);
-            
-            await UniTask.SwitchToMainThread();
-            foreach (var tuple in listObjectRealized) {
-                VirtualizeObject(tuple);
-            }
 
+            await UniTask.SwitchToMainThread();
+            if (isLoaded) await Unload();
             await UniTask.SwitchToThreadPool();
             
             // 以下各种函数中用到的回调依赖this捕获，而C#尚未引入静态lambda对象优化，所以在这里一次性创建好
@@ -342,6 +338,14 @@ namespace MaTech.Gameplay.Display {
 
             lastDisplayY = double.MinValue;
             isLoaded = true;
+        }
+
+        public async UniTask Unload() {
+            await UniTask.SwitchToMainThread();
+            foreach (var tuple in listObjectRealized) {
+                VirtualizeObject(tuple);
+            }
+            isLoaded = false;
         }
 
         public void UpdateGraphics() {

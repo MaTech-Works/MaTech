@@ -133,12 +133,8 @@ namespace MaTech.Gameplay {
                 timeSetter.UpdateDisplayY(processor.CurrentRoll);
             }
         }
-        
-        private void UpdateSettings() {
-            UpdateObjectLayerSettings();
-        }
 
-        private void UpdateObjectLayerSettings() {
+        private void UpdateObjectLayerWindows() {
             double judgeWindowUp = 0;
             double judgeWindowDown = 0;
 
@@ -174,19 +170,17 @@ namespace MaTech.Gameplay {
                     layer.displayWindowDownY = effectiveDisplayWindowDown;
                 }
             }
-            
-            UpdateObjectLayerSpeedScale(speedScale);
         }
 
-        private void UpdateObjectLayerSpeedScale(double value) {
+        private void UpdateObjectLayerSpeedScale() {
             foreach (var layer in noteLayers) {
                 if (UnityUtil.IsAssigned(layer)) {
-                    layer.SetSpeedScale(value);
+                    layer.UpdateSpeedScale(speedScale, loaded);
                 }
             }
             foreach (var layer in barLayers) {
                 if (UnityUtil.IsAssigned(layer)) {
-                    layer.SetSpeedScale(value);
+                    layer.UpdateSpeedScale(speedScale, loaded);
                 }
             }
         }

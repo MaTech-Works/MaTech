@@ -107,7 +107,7 @@ namespace MaTech.Gameplay {
             get => speedScale;
             set {
                 speedScale = value;
-                UpdateObjectLayerSpeedScale(speedScale);
+                UpdateObjectLayerSpeedScale();
             }
         }
 
@@ -133,9 +133,8 @@ namespace MaTech.Gameplay {
                 sequencer.Pause();
             }
 
-            if (loaded && fullReload) {
-                await Unload();
-            }
+            if (!loaded) fullReload = true;
+            if (fullReload) await Unload();
 
             using var busy = SetBusy(BusyReason.Loading);
 
@@ -246,20 +245,17 @@ namespace MaTech.Gameplay {
             /////////////////////////////////
 
             #region Graphics: The object layers
-
-            if (collectLayersOnLoad) {
-                await UniTask.SwitchToMainThread();
-                CollectLayersFromScene();
-                await UniTask.SwitchToThreadPool();
-            }
-
+            
+            await noteLayers.Select(layer => layer.Unload());
+            await barLayers.Select(layer => layer.Unload());
+            
             if (fullReload) {
-                // Notice that on non-full-reloading, objects originally on the layer are still loaded here,
-                // which means updating settings will trigger graphic updates and thus required to be on the main thread.
-                // Here we avoided switching threads because settings don't need to be updated.
-                // However, there should be a better way to universally setup display windows instead of relying on operation orders,
-                // which is another story.
-                UpdateObjectLayerSettings();
+                await UniTask.SwitchToMainThread();
+                if (collectLayersOnLoad) {
+                    CollectLayersFromScene();
+                }
+                UpdateObjectLayerWindows();
+                UpdateObjectLayerSpeedScale();
             }
             
             await noteLayers.Select(layer => layer.Load(processor.ResultNoteList));
@@ -304,6 +300,7 @@ namespace MaTech.Gameplay {
             timeSetter.SetPlaying(false);
             playing = false;
             
+            await UniTask.SwitchToMainThread();
             await PlayBehavior.ListAll.WhenAll(behavior => behavior.OnUnload(SourcePlayInfo));
             await sequencer.Track.Unload();
             await UniTask.SwitchToMainThread();
@@ -318,8 +315,6 @@ namespace MaTech.Gameplay {
 
             bool isRetry = playCount > 0;
             PlayBehavior.ListAll.ForEach(isRetry ? behavior => behavior.OnStart(true) : behavior => behavior.OnStart(false));
-
-            UpdateSettings();
 
             timeSetter.UpdateTime(timeTrackStart, true);
             timeSetter.SetPlaying(true);
@@ -365,8 +360,6 @@ namespace MaTech.Gameplay {
             if (!loaded || playing || rewinding) return;
 
             PlayBehavior.ListAll.ForEach(behavior => behavior.OnResume());
-            
-            UpdateSettings();
 
             // TODO 移除rewind，并允许外部代码任意控制回放时间
             if (skipRewinding) {
