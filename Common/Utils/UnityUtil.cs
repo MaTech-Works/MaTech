@@ -172,13 +172,15 @@ namespace MaTech.Common.Utils {
             return (mask & (1 << layer)) != 0;
         }
 
-        /// <summary> Checks if the object is literally null. Missing references are treated as assigned. </summary>
-        public static bool IsUnassigned([NotNullWhen(false)] Object obj) => ReferenceEquals(obj, null) || obj.GetHashCode() == 0;
-        /// <summary> Checks if the object is literally not null. Missing references are treated as assigned. </summary>
-        public static bool IsAssigned([NotNullWhen(true)] Object obj) => !ReferenceEquals(obj, null) && obj.GetHashCode() != 0;
+        // ReSharper disable Unity.PerformanceCriticalCodeInvocation
+        /// <summary> Checks if the object is literally null or a "null reference". Missing references and dead objects are treated as assigned. </summary>
+        public static bool IsUnassigned([NotNullWhen(false)] Object obj) => obj is null || obj.GetHashCode() == 0;
+        /// <summary> Checks if the object is literally not null and also not a "null reference". Missing references and dead objects are treated as assigned. </summary>
+        public static bool IsAssigned([NotNullWhen(true)] Object obj) => obj is not null && obj.GetHashCode() != 0;
+        // ReSharper restore Unity.PerformanceCriticalCodeInvocation
 
         public static T NullifyInvalid<T>(T obj) where T : Object => obj == null ? null : obj;
-        public static T NullifyUnassigned<T>(T obj) where T : Object => obj == null ? null : obj; 
+        public static T NullifyUnassigned<T>(T obj) where T : Object => IsUnassigned(obj) ? null : obj; 
 
         private static readonly List<GameObject> reusedGameObjectList = new List<GameObject>(); // 仅在主线程使用
         private static readonly List<Component> reusedComponentList = new List<Component>(); // 仅在主线程使用
