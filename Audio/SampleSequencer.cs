@@ -36,8 +36,8 @@ namespace MaTech.Audio {
                 trackSamplesQueued = false;
                 
                 int sampleCount = queueSample.Count;
-                listAudioPlaying.Capacity = sampleCount;
-                listAudioPool.Capacity = sampleCount;
+                listAudioPlaying.Capacity = Math.Max(listAudioPlaying.Capacity, sampleCount);
+                listAudioPool.Capacity = Math.Max(listAudioPool.Capacity, sampleCount);
                 
                 Reload();
             }
