@@ -93,7 +93,7 @@ namespace MaTech.Gameplay.Data {
         public Variant SpeedAt(double t, double? w = null) {
             if (!value.start.IsNumeral || !value.end.IsNumeral) return Variant.None;
             double k = interpolator?.Derivative(t) ?? 0.0f;
-            double v0 = value.start.Double, v1 = value.end.Double;
+            double v0 = value.start.Double, v1 = value.end.Double; // todo: generic vector scaling math support
             return k * (v1 - v0) / (w ?? 1);
         }
 
@@ -101,7 +101,7 @@ namespace MaTech.Gameplay.Data {
         public Variant ValueAt(double t) {
             double k = interpolator?.Map(t) ?? 0.0f;
             if (value.start.IsNumeral && value.end.IsNumeral) {
-                return MathUtil.Lerp(value.start.Double, value.end.Double, k);
+                return MathUtil.Lerp(value.start.Double, value.end.Double, k); // todo: generic vector scaling math support
             }
             return k >= 0.5 ? value.end : value.start;
         }
@@ -114,7 +114,7 @@ namespace MaTech.Gameplay.Data {
         public Variant Integrate<T>(in T start, in T end) where T : struct, ITimeUnit<T> => Integrate(ClampedRatioOf(start), ClampedRatioOf(end), ClampedLength<T>((start, end)));
         public Variant Integrate(double t0, double t1, double? tw = null) {
             if (!value.start.IsNumeral || !value.end.IsNumeral) return Variant.None;
-            double v0 = value.start.Double, v1 = value.end.Double;
+            double v0 = value.start.Double, v1 = value.end.Double; // todo: generic vector scaling math support
             return (v0 + (v1 - v0) * (interpolator?.Average(t0, t1) ?? 0.0)) * (tw ?? t1 - t0); // use Average since it handles divide by 0
         }
         
