@@ -9,8 +9,6 @@
 using System.Collections.Generic;
 using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
-using UnityEngine.UIElements;
-using TimeUnit = MaTech.Gameplay.Data.TimeUnit;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
@@ -23,8 +21,8 @@ namespace MaTech.Gameplay {
             /// <summary> 位于图形卷轴上的位置，由Processor计算而来，由各模式自行定义 </summary>
             public double roll;
 
-            public static CarrierTiming FromTimePoint(ITimePoint timePoint, double roll = 0) {
-                return new CarrierTiming() { time = timePoint.Time, beat = timePoint.Beat, roll = roll };
+            public static CarrierTiming FromTimePoint(ITimePoint timePoint, double? roll = null) {
+                return new CarrierTiming() { time = timePoint.Time, beat = timePoint.Beat, roll = roll ?? 0.0 };
             }
 
             public bool IsMax => beat.IsMax || time.IsMax || double.IsPositiveInfinity(roll);
@@ -52,23 +50,33 @@ namespace MaTech.Gameplay {
             public double LengthRoll => end.roll - start.roll;
             public Fraction LengthBeat => end.beat.Fraction - start.beat.Fraction;
             
+            // todo: Range<U> and RollUnit (notice that multi-dimension roll can be supported as multiple tracks)
+            // todo: reverse word order for naming, such as StartTime
+            
             public override string ToString() => $"{start} == {end}";
+
+            public static IComparer<Carrier> ComparerStartTime(bool aligned = true) => aligned ? Comparers.alignedStartTime : Comparers.preciseStartTime;
+            public static IComparer<Carrier> ComparerStartBeat(bool aligned = true) => aligned ? Comparers.alignedStartBeat : Comparers.preciseStartBeat;
+            public static IComparer<Carrier> ComparerStartRoll() => Comparers.preciseStartRoll;
+
+            public static IComparer<Carrier> ComparerEndTime(bool aligned = true) => aligned ? Comparers.alignedEndTime : Comparers.preciseEndTime;
+            public static IComparer<Carrier> ComparerEndBeat(bool aligned = true) => aligned ? Comparers.alignedEndBeat : Comparers.preciseEndBeat;
+            public static IComparer<Carrier> ComparerEndRoll() => Comparers.preciseEndRoll;
+
+            private static class Comparers {
+                public static readonly IComparer<Carrier> alignedStartTime = Comparer<Carrier>.Create((x, y) => x.start.time.CompareTo(y.start.time, true));
+                public static readonly IComparer<Carrier> alignedStartBeat = Comparer<Carrier>.Create((x, y) => x.start.beat.CompareTo(y.start.beat, true));
                 
-            public static Comparer<Carrier> ComparerStartTime => comparers[0];
-            public static Comparer<Carrier> ComparerStartRoll => comparers[1];
-            public static Comparer<Carrier> ComparerStartBeat => comparers[2];
-
-            public static Comparer<Carrier> ComparerEndTime => comparers[3];
-            public static Comparer<Carrier> ComparerEndRoll => comparers[4];
-            public static Comparer<Carrier> ComparerEndBeat => comparers[5];
-
-            private static readonly Comparer<Carrier>[] comparers = {
-                Comparer<Carrier>.Create((x, y) => x.start.time.CompareTo(y.start.time)),
-                Comparer<Carrier>.Create((x, y) => x.start.roll.CompareTo(y.start.roll)),
-                Comparer<Carrier>.Create((x, y) => x.start.beat.CompareTo(y.start.beat)),
-                Comparer<Carrier>.Create((x, y) => x.end.time.CompareTo(y.end.time)),
-                Comparer<Carrier>.Create((x, y) => x.end.roll.CompareTo(y.end.roll)),
-                Comparer<Carrier>.Create((x, y) => x.end.beat.CompareTo(y.end.beat)),
+                public static readonly IComparer<Carrier> alignedEndTime = Comparer<Carrier>.Create((x, y) => x.end.time.CompareTo(y.end.time, true));
+                public static readonly IComparer<Carrier> alignedEndBeat = Comparer<Carrier>.Create((x, y) => x.end.beat.CompareTo(y.end.beat, true));
+                
+                public static readonly IComparer<Carrier> preciseStartTime = Comparer<Carrier>.Create((x, y) => x.start.time.CompareTo(y.start.time, false));
+                public static readonly IComparer<Carrier> preciseStartBeat = Comparer<Carrier>.Create((x, y) => x.start.beat.CompareTo(y.start.beat, false));
+                public static readonly IComparer<Carrier> preciseStartRoll = Comparer<Carrier>.Create((x, y) => x.start.roll.CompareTo(y.start.roll));
+                
+                public static readonly IComparer<Carrier> preciseEndTime = Comparer<Carrier>.Create((x, y) => x.end.time.CompareTo(y.end.time, false));
+                public static readonly IComparer<Carrier> preciseEndBeat = Comparer<Carrier>.Create((x, y) => x.end.beat.CompareTo(y.end.beat, false));
+                public static readonly IComparer<Carrier> preciseEndRoll = Comparer<Carrier>.Create((x, y) => x.end.roll.CompareTo(y.end.roll));
             };
         }
     }

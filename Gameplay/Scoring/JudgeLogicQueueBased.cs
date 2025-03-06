@@ -79,7 +79,7 @@ namespace MaTech.Gameplay.Scoring {
             activeUnitsWithCarriers.ForEach(value: hashset => carrierHashSetPool.Recycle(hashset));
             activeUnitsWithCarriers.Clear();
             
-            pendingCarriers.AddRange(notes.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null).OrderBy(carrier => carrier, Carrier.ComparerStartTime));
+            pendingCarriers.AddRange(notes.Where(carrier => carrier.UnitOf<IJudgeUnit>() != null).OrderBy(carrier => carrier, Carrier.ComparerStartTime()));
 
             ResetJudge(playInfo);
         }
@@ -112,7 +112,7 @@ namespace MaTech.Gameplay.Scoring {
         protected void PopulateActiveListUntil(TimeUnit judgeTime) {
             TimeUnit window = judgeTime.OffsetBy(ActiveNoteEarlyWindow);
             while (pendingCarriers.NextIf(window, (carrier, window) => carrier.start.time.CompareTo(window) < 0) is { } carrier) {
-                activeCarriers.OrderedInsert(carrier, Carrier.ComparerEndTime);
+                activeCarriers.OrderedInsert(carrier, Carrier.ComparerEndTime());
                 foreach (var unit in carrier.UnitsOf<IJudgeUnit>()) {
                     if (!activeUnitsWithCarriers.TryGetValue(unit, out var set)) {
                         set = carrierHashSetPool.Get();

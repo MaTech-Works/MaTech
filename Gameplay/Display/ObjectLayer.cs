@@ -393,7 +393,7 @@ namespace MaTech.Gameplay.Display {
             // 排序后carrier会按顺序经过这些边界位置；经过这些边界位置的carrier均需测试是否需要实例化音符。
             ProcessorBasic.SortCarriersByRoll<TCarrier, TLayer>(listCarrierUpY, true, DisplayWindowUpScaled);
             ProcessorBasic.SortCarriersByRoll<TCarrier, TLayer>(listCarrierDownY, false, DisplayWindowDownScaled);
-            ShellSort.Hibbard(listCarrierUpTime, Carrier.ComparerStartTime);
+            ShellSort.Hibbard(listCarrierUpTime, Carrier.ComparerStartTime());
         }
         
         private void IterateForward(PointerList<TCarrier> list, Func<TCarrier, bool> stopCondition, Action<TCarrier> actionOnForward) {

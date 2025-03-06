@@ -7,6 +7,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using MaTech.Common.Data;
@@ -15,7 +16,7 @@ using MaTech.Common.Utils;
 namespace MaTech.Gameplay.Data {
     public interface ITimeUnit<T> where T : struct, ITimeUnit<T> {
         public double Value { get; }
-        public int CompareTo(in T other, bool precise = true);
+        public int CompareTo(in T other, bool aligned = false);
 
         public T Negate();
         public T ScaleBy(double scale);
@@ -89,9 +90,9 @@ namespace MaTech.Gameplay.Data {
         public static bool operator!=(in BeatUnit a, in BeatUnit b) => a.fraction != b.fraction;
 
         public readonly int CompareTo(BeatUnit other) => CompareTo(other, false);
-        public readonly int CompareTo(in BeatUnit other, bool compareWithDecimals) {
+        public readonly int CompareTo(in BeatUnit other, bool alignToFraction) {
             if (CompareUtil.TryCompareTo(fraction, other.fraction, out var result)) return result;
-            return compareWithDecimals ? decimals.CompareTo(other.decimals) : 0;
+            return alignToFraction ? 0 : decimals.CompareTo(other.decimals);
         }
         
         public bool Equals(BeatUnit other) => CompareTo(other, true) == 0;
@@ -171,10 +172,10 @@ namespace MaTech.Gameplay.Data {
         public static bool operator==(in TimeUnit a, in TimeUnit b) => a.integer == b.integer;
         public static bool operator!=(in TimeUnit a, in TimeUnit b) => a.integer != b.integer;
 
-        public readonly int CompareTo(TimeUnit other) => CompareTo(other, true);
-        public readonly int CompareTo(in TimeUnit other, bool roundToMS) {
+        public readonly int CompareTo(TimeUnit other) => CompareTo(other, false);
+        public readonly int CompareTo(in TimeUnit other, bool alignToMilliseconds) {
             if (CompareUtil.TryCompareTo(integer, other.integer, out var result)) return result;
-            return roundToMS ? 0 : decimals.CompareTo(other.decimals);
+            return alignToMilliseconds ? 0 : decimals.CompareTo(other.decimals);
         }
         
         public bool Equals(TimeUnit other) => CompareTo(other, true) == 0;
@@ -206,6 +207,12 @@ namespace MaTech.Gameplay.Data {
         public static implicit operator (T start, T end)(in Range<T> range) => (range.start, range.end);
         public static implicit operator Range<T>(in (T start, T end) tuple) => new(tuple.start, tuple.end);
     }
+
+    public static class TimeUnitComparers<T> where T : struct, ITimeUnit<T> {
+        private class Comparer : IComparer<T> { public bool aligned; public int Compare(T x, T y) => x.CompareTo(y, aligned); }
+        public static readonly IComparer<T> precise = new Comparer() { aligned = true };
+        public static readonly IComparer<T> aligned = new Comparer() { aligned = false };
+    }
     
     public static class TimeUnitExtensions {
         // todo: Min and Max
@@ -215,12 +222,11 @@ namespace MaTech.Gameplay.Data {
         private static T Clamp<T>(in T a, in T b, T value) where T : struct, ITimeUnit<T> => (value.CompareTo(a), value.CompareTo(b)) switch { (<0, <0) => a, (>0, >0) => b, _ => value };
         private static T Lerp<T>(in T a, in T b, double k) where T : struct, ITimeUnit<T> => a.ScaleBy(1 - k).OffsetBy(b.ScaleBy(k));
         private static double Ratio<T>(in T a, in T b, in T value) where T : struct, ITimeUnit<T> => value.DeltaSince(a).RatioTo(b.DeltaSince(a));
-        //private static double Ratio<T>(in T a, in T b, in T value) where T : struct, ITimeUnit<T> => MathUtil.InverseLerpUnclamped(a.Value, b.Value, value.Value); // used when infinity breaks
         // ReSharper restore PossiblyImpureMethodCallOnReadonlyVariable
         
-        private static bool InRange<T>(this T value, in T start, in T end, bool excludeStart = false, bool excludeEnd = false, bool precise = false) where T : struct, ITimeUnit<T> {
-            int compareToStart = value.CompareTo(start, precise);
-            int compareToEnd = value.CompareTo(end, precise);
+        private static bool InRange<T>(this T value, in T start, in T end, bool excludeStart = false, bool excludeEnd = false, bool aligned = true) where T : struct, ITimeUnit<T> {
+            int compareToStart = value.CompareTo(start, aligned);
+            int compareToEnd = value.CompareTo(end, aligned);
             bool afterStart = excludeStart ? compareToStart > 0 : compareToStart >= 0;
             bool beforeEnd = excludeEnd ? compareToEnd < 0 : compareToEnd <= 0;
             return afterStart && beforeEnd;
@@ -229,6 +235,8 @@ namespace MaTech.Gameplay.Data {
         public static T ClampBetween<T>(this T self, in T a, in T b) where T : struct, ITimeUnit<T> => Clamp(a, b, self);
         public static double RatioBetween<T>(this T self, in T a, in T b) where T : struct, ITimeUnit<T> => Ratio(a, b, Clamp(a, b, self));
         public static double RatioAcross<T>(this T self, in T a, in T b) where T : struct, ITimeUnit<T> => Ratio(a, b, self);
+        public static bool InRange<T>(this T self, in Range<T> range, bool excludeStart = false, bool excludeEnd = false, bool aligned = true) where T : struct, ITimeUnit<T>
+            => self.InRange(range.start, range.end, excludeStart, excludeEnd, aligned);
 
         public static T Length<T>(in this Range<T> range) where T : struct, ITimeUnit<T> => Delta(range.start, range.end);
         public static T Lerp<T>(in this Range<T> range, double k) where T : struct, ITimeUnit<T> => Lerp(range.start, range.end, k);
@@ -237,8 +245,8 @@ namespace MaTech.Gameplay.Data {
             => new(Clamp(range.start, range.end, value.start), Clamp(range.start, range.end, value.end));
         public static double RatioOf<T>(in this Range<T> range, T value, bool clamped = true) where T : struct, ITimeUnit<T>
             => SaturateOrPassthrough(Ratio(range.start, range.end, value), clamped);
-        public static bool Contains<T>(in this Range<T> range, T value, bool excludeStart = false, bool excludeEnd = false, bool compareWithDecimals = false) where T : struct, ITimeUnit<T>
-            => value.InRange(range.start, range.end, excludeStart, excludeEnd, compareWithDecimals);
+        public static bool Contains<T>(in this Range<T> range, T value, bool excludeStart = false, bool excludeEnd = false, bool aligned = true) where T : struct, ITimeUnit<T>
+            => value.InRange(range.start, range.end, excludeStart, excludeEnd, aligned);
         
         public static T Length<T>(in this (T start, T end) range) where T : struct, ITimeUnit<T> => Delta(range.start, range.end);
         public static T Lerp<T>(in this (T start, T end) range, double k) where T : struct, ITimeUnit<T> => Lerp(range.start, range.end, k);
@@ -247,8 +255,8 @@ namespace MaTech.Gameplay.Data {
             => new(Clamp(range.start, range.end, value.start), Clamp(range.start, range.end, value.end));
         public static double RatioOf<T>(in this (T start, T end) range, T value, bool clamped = true) where T : struct, ITimeUnit<T>
             => SaturateOrPassthrough(Ratio(range.start, range.end, value), clamped);
-        public static bool Contains<T>(in this (T start, T end) range, T value, bool excludeStart = false, bool excludeEnd = false, bool compareWithDecimals = false) where T : struct, ITimeUnit<T>
-            => value.InRange(range.start, range.end, excludeStart, excludeEnd, compareWithDecimals);
+        public static bool Contains<T>(in this (T start, T end) range, T value, bool excludeStart = false, bool excludeEnd = false, bool aligned = true) where T : struct, ITimeUnit<T>
+            => value.InRange(range.start, range.end, excludeStart, excludeEnd, aligned);
         
         private static double SaturateOrPassthrough(double value, bool saturate) => saturate ? MathUtil.Saturate(value) : value;
     }

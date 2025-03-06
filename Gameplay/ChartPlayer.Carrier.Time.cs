@@ -21,7 +21,9 @@ namespace MaTech.Gameplay {
             public TempoChange? tempo = null!;
             /// <summary> 当前生效的Effect </summary>
             public EffectLookup? effects = null;
+            
             /// <summary> 根据ReferenceBeatLength调整后的速度缩放 </summary>
+            /// todo: 考虑使用accumulator进行乘积分，并且生成对应的积分系数至effect，最终改为可选的effect生成方法
             public (double roll, double note) scale = (1.0, 1.0);
             
             public Variant SampleEffect<T>(in T t, DataEnum<EffectType> type, in Variant keyword = default) where T : struct, ITimeUnit<T>
@@ -48,7 +50,12 @@ namespace MaTech.Gameplay {
                 return distance * scale.roll + offset;
             }
             
-            public CarrierTiming SampleTiming(ITimePoint timePoint, in Variant keyword = default) => CarrierTiming.FromTimePoint(timePoint, SampleRoll(timePoint.Time));
+            public double SampleNoteSpeed(ITimePoint timePoint, bool sampleByBeat = true, in Variant keyword = default)
+                => sampleByBeat ? SampleNoteSpeed(timePoint.Beat, keyword) : SampleNoteSpeed(timePoint.Time, keyword);
+            public double SampleNoteSpeed<T>(in T t, in Variant keyword = default) where T : struct, ITimeUnit<T> {
+                var speed = SampleEffect(t, EffectType.NoteSpeed, Effect.ValueSampler<T>(), keyword).Double;
+                return speed * scale.note;
+            }
         }
     }
 

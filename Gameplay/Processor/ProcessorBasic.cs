@@ -59,7 +59,7 @@ namespace MaTech.Gameplay.Processor {
         /// <summary> 是否按照默认逻辑生成小节线信息，为false时将不会为<see cref="barList" />准备内容，完全依靠派生类向<see cref="barList" />的输出 </summary>
         [SerializeField] protected bool barEnabled = true;
 
-        // 仅在Process时有效的临时变量
+        // Process结果，未排序
         protected QueueList<TimeCarrier> timeList;
         protected QueueList<NoteCarrier> noteList;
         protected QueueList<BarCarrier> barList;
@@ -148,6 +148,10 @@ namespace MaTech.Gameplay.Processor {
                     timeList.Add(lastTimeCarrier);
                 }
             }
+            
+            timeListByTime = timeList.OrderBy(carrier => carrier, Carrier.ComparerStartTime()).ToList();
+            timeListByBeat = timeList.OrderBy(carrier => carrier, Carrier.ComparerStartBeat()).ToList();
+            timeListByRoll = timeList.OrderBy(carrier => carrier, Carrier.ComparerStartRoll()).ToList();
         }
 
         private void ProcessObjects() {
@@ -186,12 +190,11 @@ namespace MaTech.Gameplay.Processor {
             barList = new QueueList<BarCarrier>(bars.Count);
             foreach (var bar in bars) {
                 if (bar.hidden) continue;
-                var timeCarrier = FindTimeCarrier(bar.timePoint);
-                var timing = CreateTiming(bar.timePoint, timeCarrier);
+                var timing = SampleTiming(bar.timePoint);
                 barList.Add(new BarCarrier() {
                     start = timing,
                     end = timing,
-                    scale = timeCarrier.scale.note,
+                    scale = SampleNoteSpeed(bar.timePoint),
                 });
             }
         }

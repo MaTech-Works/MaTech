@@ -17,7 +17,7 @@ using static MaTech.Gameplay.ChartPlayer;
 namespace MaTech.Gameplay.Processor {
     public partial class ProcessorBasic {
         private CarrierTiming CreateTiming(ITimePoint timePoint, TimeCarrier relative = null, in Variant keyword = default)
-            => relative?.SampleTiming(timePoint, keyword) ?? CarrierTiming.FromTimePoint(timePoint);
+            => CarrierTiming.FromTimePoint(timePoint, relative?.SampleRoll(timePoint.Time));
         
         private TimeCarrier CreateTimeCarrierForTempo(TempoChange tempo, TimeCarrier relative = null, IEnumerable<Effect> effects = null) {
             double scale = ReferenceBeatLength / tempo.timePerBeat;
