@@ -169,6 +169,8 @@ namespace Optional.Unsafe
         }
         
         // ============= MaTech additions =============
+        
+        public static T ValueOrNull<T>(in this Option<T> option) where T : class => option.HasValue ? option.Value : null;
 
         /// <summary> Just throw the exception E rather than a new OptionValueMissingException when none </summary>
         public static T ValueOrThrow<T, E>(in this Option<T, E> option) where E : Exception => option.HasValue ? option.Value : throw option.Exception;

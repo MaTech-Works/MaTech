@@ -217,9 +217,6 @@ namespace Optional
             option.FlatMap(innerOption => innerOption);
 
         // ============= MaTech additions =============
-        
-        public static T ValueOrNull<T>(in this Option<T> option) where T : class => option.HasValue ? option.Value : null;
-        public static T? ToNullable<T>(in this Option<T> option) where T : struct => option.HasValue ? option.Value : null;
 
         public static bool TryGet<T>(in this Option<T> option, out T result) {
             if (option.HasValue) {
