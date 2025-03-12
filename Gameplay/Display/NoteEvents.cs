@@ -11,6 +11,7 @@ using MaTech.Gameplay.Scoring;
 using MaTech.Gameplay.Utils;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using static MaTech.Common.Utils.UnityUtil;
 using static MaTech.Gameplay.ChartPlayer;
 
@@ -28,12 +29,22 @@ namespace MaTech.Gameplay.Display {
 
         [Serializable]
         public struct Events {
-            [Serializable]
-            public class RangeEvent : UnityEvent<float, float> { }
+            [Serializable] public class RangeEvent : UnityEvent<float, float> { }
+            [Serializable] public class LayerEvent : UnityEvent<NoteLayer> { }
+            [Serializable] public class CarrierEvent : UnityEvent<NoteCarrier> { }
             
-            public UnityEvent onInstantiate;
-            public UnityEvent onActivate;
-            public UnityEvent onDeactivate;
+            [FormerlySerializedAs("onInstantiate")]
+            public UnityEvent onAwake;
+            [FormerlySerializedAs("onActivate")]
+            public UnityEvent onInit;
+            [FormerlySerializedAs("onDeactivate")]
+            public UnityEvent onFinish;
+
+            [Space]
+            public LayerEvent onLayerChanged;
+            public CarrierEvent onCarrierChanged;
+            
+            [Space]
             public RangeEvent onUpdateRatio;
             public RangeEvent onUpdateDeltaY;
             public UnityEventFloat onUpdateRatioStart;
@@ -41,20 +52,22 @@ namespace MaTech.Gameplay.Display {
             public UnityEventFloat onUpdateDeltaYStart;
             public UnityEventFloat onUpdateDeltaYEnd;
         }
+        
+        [Space] public Events events;
+        [Space] public HitEvent[] hitEvents;
 
-        public Events events;
-        public HitEvent[] hitEvents;
-
-        void Awake() => events.onInstantiate.Invoke();
+        void Awake() => events.onAwake.Invoke();
 
         void IObjectVisual<NoteCarrier, NoteLayer>.InitVisual(NoteCarrier initCarrier, NoteLayer initLayer) {
-            Carrier = initCarrier;
             Layer = initLayer;
-            events.onActivate.Invoke();
+            Carrier = initCarrier;
+            events.onLayerChanged.Invoke(initLayer);
+            events.onCarrierChanged.Invoke(initCarrier);
+            events.onInit.Invoke();
         }
 
         void IObjectVisual<NoteCarrier, NoteLayer>.FinishVisual() {
-            events.onDeactivate.Invoke();
+            events.onFinish.Invoke();
             Carrier = null;
         }
 
