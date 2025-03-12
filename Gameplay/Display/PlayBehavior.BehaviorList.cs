@@ -205,5 +205,7 @@ namespace MaTech.Gameplay.Display {
                 list.TryRemove(this);
             }
         }
+        
+        // todo: remove virtual OnEnable/OnDisable probably with some event/injection or player loop delegate
     }
 }
