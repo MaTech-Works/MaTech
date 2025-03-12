@@ -7,45 +7,102 @@
 using System;
 using System.Collections.Generic;
 using Optional;
-using Optional.Unsafe;
-using static Optional.OptionExtensions;
 
 namespace MaTech.Common.Algorithm {
-    public class GenericMap<TSelf> {
-        private readonly Dictionary<Type, Delegate> dict;
-
-        public GenericMap(Action<GenericMap<TSelf>> init = null, int capacity = 2) { dict = new(capacity); init?.Invoke(this); }
-
-        public GenericMap<TSelf> Add<T>(Func<TSelf, T> mappingToValue) { if (mappingToValue is not null) dict.Add(typeof(T), mappingToValue); return this; }
-        public GenericMap<TSelf> Add<TKey, TValue>(Func<TSelf, Func<TKey, TValue>> mappingToFuncKeyValue) => Add<Func<TKey, TValue>>(mappingToFuncKeyValue);
-        public GenericMap<TSelf> Add<TKey, TValue>(Func<TSelf, FuncIn<TKey, TValue>> mappingToFuncKeyValue) => Add<FuncIn<TKey, TValue>>(mappingToFuncKeyValue);
+    public class GenericDelegate {
+        private readonly Dictionary<Type, Delegate> dict = new(2);
         
-        public bool Has<T>() => dict.ContainsKey(typeof(T));
-        public bool Has<TKey, TValue>() => dict.ContainsKey(typeof(Func<TKey, TValue>)) || dict.ContainsKey(typeof(FuncIn<TKey, TValue>));
+        public GenericDelegate(Action<GenericDelegate> init = null) { init?.Invoke(this); } // new(self => self.Set(...).Set(...)...)
+        
+        public GenericDelegate Define<T>(Delegate f) => Define(typeof(T), f);
+        public GenericDelegate Define(Type type, Delegate f) { if (f is not null) dict[type] = f; return this; }
+        
+        public bool Has<T>() => Has(typeof(T));
+        public bool Has(Type type) => dict.ContainsKey(type);
+        
+        public TFunc To<T, TFunc>() where TFunc : Delegate => To<TFunc>(typeof(T));
+        public TFunc To<TFunc>(Type type) where TFunc : Delegate => To(type) as TFunc;
+        public Delegate To<T>() => To(typeof(T));
+        public Delegate To(Type type) => dict.GetValueOrDefault(type);
+    }
+    
+    public class GenericDelegate<TFunc> where TFunc : Delegate {
+        private readonly Dictionary<Type, TFunc> dict = new(2);
+        
+        public GenericDelegate(Action<GenericDelegate<TFunc>> init = null) { init?.Invoke(this); } // new(self => self.Set(...).Set(...)...)
+        
+        public GenericDelegate<TFunc> Define<T>(TFunc f) => Define(typeof(T), f);
+        public GenericDelegate<TFunc> Define(Type type, TFunc f) { if (f is not null) dict[type] = f; return this; }
+        
+        public bool Has<T>() => Has(typeof(T));
+        public bool Has(Type type) => dict.ContainsKey(type);
+        
+        public TFunc To<T>() => To(typeof(T));
+        public TFunc To(Type type) => dict.GetValueOrDefault(type);
+    }
+    
+    public class GenericProperty<TSelf> {
+        private readonly GenericDelegate getters = new();
+        private readonly GenericDelegate setters = new();
+        
+        public delegate void Setter<TValue>(TSelf self, in TValue key);
+        
+        public GenericProperty(Action<GenericProperty<TSelf>> init = null) { init?.Invoke(this); } // new(self => self.Define(...).Define(...)...)
+        public GenericProperty<TSelf> Define<T>(Func<TSelf, T> getter) { getters.Define<T>(getter); return this; }
+        public GenericProperty<TSelf> Define<T>(Action<TSelf, T> setter) { setters.Define<T>(setter); return this; }
+        public GenericProperty<TSelf> Define<T>(Setter<T> setter) { setters.Define<T>(setter); return this; }
+        public GenericProperty<TSelf> Define<T>(Func<TSelf, T> getter, Action<TSelf, T> setter) { getters.Define<T>(getter); setters.Define<T>(setter); return this; }
+        public GenericProperty<TSelf> Define<T>(Func<TSelf, T> getter, Setter<T> setter) { getters.Define<T>(getter); setters.Define<T>(setter); return this; }
+        
+        public bool Has<T>() => getters.Has<T>() || setters.Has<T>();
+        public bool Has<T>(bool getter) => getter ? getters.Has<T>() : setters.Has<T>();
+        public Option<T> Get<T>(in TSelf self) => getters.To<T, Func<TSelf, T>>() is {} f ? f(self).Some() : Option.None<T>();
 
-        public Option<T> Get<T>(in TSelf self) => dict.TryGetValue(typeof(T), out Delegate f) ? ((Func<TSelf, T>)f)(self).Some() : Option.None<T>();
-        public Option<TValue> Map<TKey, TValue>(in TSelf self, in TKey key) {
-            if (Has<FuncIn<TKey, TValue>>()) Get<FuncIn<TKey, TValue>>(self).InvokeSome(key);
-            return Get<Func<TKey, TValue>>(self).InvokeSome(key);
+        public bool Set<T>(in TSelf self, in T value) {
+            var d = setters.To<T>();
+            if (d is Action<TSelf, T> action) action(self, value);
+            else if (d is Setter<T> setter) setter(self, value);
+            return d is not null;
         }
     }
-
-    public class GenericMap<TSelf, TValue> {
-        private readonly Dictionary<Type, Delegate> dict;
-
-        public GenericMap(Action<GenericMap<TSelf, TValue>> init = null, int capacity = 2) { dict = new(capacity); init?.Invoke(this); }
-
-        public GenericMap<TSelf, TValue> Add<TKey>(Func<TSelf, Func<TKey, TValue>> mappingToFuncKeyValue) { dict.Add(typeof(TKey), mappingToFuncKeyValue); return this; }
-        public GenericMap<TSelf, TValue> Add<TKey>(Func<TSelf, FuncIn<TKey, TValue>> mappingToFuncKeyValue) { dict.Add(typeof(TKey), mappingToFuncKeyValue); return this; }
+    
+    public class GenericMapping<TSelf> {
+        private readonly GenericDelegate delegates = new();
         
-        public bool Has<TKey>() => dict.ContainsKey(typeof(TKey));
+        public delegate TValue Mapping<TKey, out TValue>(TSelf self, in TKey key);
+
+        public GenericMapping(Action<GenericMapping<TSelf>> init = null) { init?.Invoke(this); } // new(self => self.Define(...).Define(...)...)
+        public GenericMapping<TSelf> Define<TKey, TValue>(Func<TSelf, TKey, TValue> mappingKeyValue) { delegates.Define<TKey>(mappingKeyValue); return this; }
+        public GenericMapping<TSelf> Define<TKey, TValue>(Mapping<TKey, TValue> mappingKeyValue) { delegates.Define<TKey>(mappingKeyValue); return this; }
         
-        private Delegate Get<TKey>(in TSelf self) => dict.TryGetValue(typeof(TKey), out Delegate f) ? ((Func<TSelf, Delegate>)f)(self) : null;
-        public Option<TValue> Map<TKey>(in TSelf self, in TKey key) {
-            var map = dict.TryGetValue(typeof(TKey), out Delegate f) ? ((Func<TSelf, Delegate>)f)(self) : null;
-            if (map is FuncIn<TKey, TValue> funcIn) return funcIn.Invoke(key).Some();
-            if (map is Func<TKey, TValue> func) return func.Invoke(key).Some();
+        public bool Has<TKey, TValue>() => delegates.Has<Func<TSelf, TKey, TValue>>() || delegates.Has<Mapping<TKey, TValue>>();
+
+        public Option<TValue> Map<TKey, TValue>(in TSelf self, in TKey key) {
+            var d = delegates.To<TKey>();
+            if (d is Func<TSelf, TKey, TValue> func) return func(self, key).Some();
+            if (d is Mapping<TKey, TValue> mapping) return mapping(self, key).Some();
             return Option.None<TValue>();
         }
     }
+
+    public class GenericMapping<TSelf, TValue> {
+        private readonly GenericDelegate delegates = new();
+        
+        public delegate TValue Mapping<TKey>(TSelf self, in TKey key);
+        
+        public GenericMapping(Action<GenericMapping<TSelf, TValue>> init = null) { init?.Invoke(this); } // new(self => self.Define(...).Define(...)...)
+        public GenericMapping<TSelf, TValue> Define<TKey>(Func<TSelf, TKey, TValue> mappingKeyValue) { delegates.Define<TKey>(mappingKeyValue); return this; }
+        public GenericMapping<TSelf, TValue> Define<TKey>(Mapping<TKey> mappingKeyValue) { delegates.Define<TKey>(mappingKeyValue); return this; }
+        
+        public bool Has<TKey>() => delegates.Has<Func<TSelf, TKey, TValue>>() || delegates.Has<Mapping<TKey>>();
+        
+        public Option<TValue> Map<TKey>(in TSelf self, in TKey key) {
+            var d = delegates.To<TKey>();
+            if (d is Func<TSelf, TKey, TValue> func) return func(self, key).Some();
+            if (d is Mapping<TKey> mapping) return mapping(self, key).Some();
+            return Option.None<TValue>();
+        }
+    }
+    
+    // there is nothing here like std::bind. do it with value tuples please.
 }

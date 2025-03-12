@@ -118,11 +118,11 @@ namespace MaTech.Gameplay.Data {
             return (v0 + (v1 - v0) * (interpolator?.Average(t0, t1) ?? 0.0)) * (tw ?? t1 - t0); // use Average since it handles divide by 0
         }
         
-        private Range<T> Range<T>() where T : struct, ITimeUnit<T> => rangeMap.Get<Range<T>>(this).ValueOrDefault();
+        private Range<T> Range<T>() where T : struct, ITimeUnit<T> => propertyRange.Get<Range<T>>(this).ValueOrDefault();
         private double ClampedRatioOf<T>(in T t) where T : struct, ITimeUnit<T> => Range<T>().RatioOf(t, clamped: true);
         private double ClampedLength<T>(in Range<T> range) where T : struct, ITimeUnit<T> => Range<T>().Clamp(range).Length().Value;
 
-        private static readonly GenericMap<Effect> rangeMap = new(map => map.Add(effect => effect.TimeRange).Add(effect => effect.BeatRange));
+        private static readonly GenericProperty<Effect> propertyRange = new(property => property.Define(effect => effect.TimeRange).Define(effect => effect.BeatRange));
         
         public Effect(DataEnum<EffectType> type, in Variant value, ITimePoint? time, IInterpolator? interpolator = null, Variant keyword = default) {
             this.type = type;

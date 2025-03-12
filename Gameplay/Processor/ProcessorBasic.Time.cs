@@ -46,17 +46,17 @@ namespace MaTech.Gameplay.Processor {
         private static readonly FuncAfterCarrier<BeatUnit> funcAfterCarrierByBeat = (Carrier carrier, in BeatUnit beat) => carrier.StartBeat > beat;
         private static readonly FuncAfterCarrier<double> funcAfterCarrierByRoll = (Carrier carrier, in double roll) => carrier.StartRoll > roll;
         
-        private static readonly GenericMap<ProcessorBasic, TimeCarrier> mapFindTimeCarrier = new(map => map
-            .Add<TimeUnit>(self => time => self.FindTimeCarrierByTime(time))
-            .Add<BeatUnit>(self => beat => self.FindTimeCarrierByBeat(beat))
-            .Add<double>(self => roll => self.FindTimeCarrierByRoll(roll)) // todo: roll should be a ITimeUnit to be here
+        private static readonly GenericMapping<ProcessorBasic, TimeCarrier> mappingFindTimeCarrier = new(mapping => mapping
+            .Define((ProcessorBasic self, in TimeUnit time) => self.FindTimeCarrierByTime(time))
+            .Define((ProcessorBasic self, in BeatUnit beat) => self.FindTimeCarrierByBeat(beat))
+            .Define((ProcessorBasic self, in double roll) => self.FindTimeCarrierByRoll(roll)) // todo: roll should be a ITimeUnit to be here
         );
         
         public TimeCarrier FindTimeCarrierByTime(in TimeUnit time) => FindTimeCarrierByFunc(timeListByTime, funcAfterCarrierByTime, time);
         public TimeCarrier FindTimeCarrierByBeat(in BeatUnit beat) => FindTimeCarrierByFunc(timeListByBeat, funcAfterCarrierByBeat, beat);
         public TimeCarrier FindTimeCarrierByRoll(in double roll) => FindTimeCarrierByFunc(timeListByRoll, funcAfterCarrierByRoll, roll);
 
-        public TimeCarrier FindTimeCarrier<T>(in T t) where T : struct, ITimeUnit<T> => mapFindTimeCarrier.Map(this, t).ValueOrFailure();
+        public TimeCarrier FindTimeCarrier<T>(in T t) where T : struct, ITimeUnit<T> => mappingFindTimeCarrier.Map(this, t).ValueOrFailure();
 
         public TimeCarrier FindTimeCarrier(ITimePoint timePoint, bool findByBeat = true) => findByBeat ? FindTimeCarrierByBeat(timePoint.Beat) : FindTimeCarrierByTime(timePoint.Time);
         
