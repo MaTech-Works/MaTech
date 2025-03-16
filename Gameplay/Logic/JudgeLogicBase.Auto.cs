@@ -8,7 +8,7 @@ using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Input;
 using UnityEngine.Assertions;
 
-namespace MaTech.Gameplay.Scoring {
+namespace MaTech.Gameplay.Logic {
     public abstract partial class JudgeLogicBase {
         public abstract class AutoPlayControllerBase : IPlayController {
             public bool IsPlayer => false;

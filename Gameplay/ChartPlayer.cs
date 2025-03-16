@@ -12,7 +12,7 @@ using MaTech.Common.Utils;
 using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Input;
-using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Logic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 

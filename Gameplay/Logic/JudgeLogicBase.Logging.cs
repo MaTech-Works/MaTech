@@ -7,7 +7,7 @@
 using MaTech.Common.Tools;
 using MaTech.Gameplay.Data;
 
-namespace MaTech.Gameplay.Scoring {
+namespace MaTech.Gameplay.Logic {
     public abstract partial class JudgeLogicBase {
         public delegate bool NoteHitFilterFunc(ChartPlayer.IJudgeUnit unit, NoteHitAction action, TimeUnit judgeTime, HitResult result);
         public delegate bool EmptyHitFilterFunc(EmptyHitAction action, TimeUnit judgeTime);

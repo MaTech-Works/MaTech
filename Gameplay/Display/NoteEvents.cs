@@ -7,8 +7,7 @@
 using System;
 using MaTech.Common.Tools;
 using MaTech.Gameplay.Data;
-using MaTech.Gameplay.Scoring;
-using MaTech.Gameplay.Utils;
+using MaTech.Gameplay.Logic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;

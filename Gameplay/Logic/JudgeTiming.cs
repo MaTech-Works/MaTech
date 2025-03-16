@@ -7,7 +7,7 @@
 using MaTech.Gameplay.Data;
 using static MaTech.Gameplay.ChartPlayer;
 
-namespace MaTech.Gameplay.Scoring {
+namespace MaTech.Gameplay.Logic {
     // TODO: 合并进JudgeLogic，不在核心层面定义判定数据接口
     public interface IJudgeTiming {
         void Init(IPlayInfo playInfo);

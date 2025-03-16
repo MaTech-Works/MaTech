@@ -6,7 +6,6 @@
 
 using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
-using MaTech.Common.Tools;
 using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
 using MaTech.Gameplay.Input;
@@ -14,7 +13,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using static MaTech.Gameplay.ChartPlayer;
 
-namespace MaTech.Gameplay.Scoring {
+namespace MaTech.Gameplay.Logic {
     public abstract partial class JudgeLogicBase : PlayBehavior {
         // 分发输入操作到note的处理逻辑。
         // 全部的回调都发生在主线程。

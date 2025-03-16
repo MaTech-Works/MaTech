@@ -8,16 +8,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MaTech.Common.Data;
-using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Data;
+using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
-using static MaTech.Gameplay.Scoring.JudgeLogicBase;
+using static MaTech.Gameplay.ChartPlayer;
+using static MaTech.Gameplay.Logic.HitMatchMethod;
+using static MaTech.Gameplay.Logic.JudgeLogicBase;
+using static MaTech.Gameplay.Logic.JudgeLogicBase.NoteHitAction;
+#if ODIN_INSPECTOR
+using Sirenix.Utilities.Editor;
+#endif
 
-namespace MaTech.Gameplay.Utils {
+namespace MaTech.Gameplay.Logic {
     [Serializable]
-    public enum FlagMatchMethod {
+    public enum HitMatchMethod {
         [Tooltip("要求判定结果和目标完全一样，没有缺少与多余，才会触发事件")] Exact,
         [Tooltip("判定结果和目标有任意的重合（有交集），就会触发事件")] HasAny,
         [Tooltip("判定结果完全包含目标时触发事件")] ContainsAll,
@@ -26,20 +32,20 @@ namespace MaTech.Gameplay.Utils {
     }
     
     [Serializable]
-    public struct HitEventCondition {
+    public struct HitCondition {
         public NoteHitAction[] allowedActions;
+        public HitMatchMethod matchMethod;
         public HitResult matchTarget;
-        public FlagMatchMethod matchMethod;
         
-        public bool Match(NoteHitAction action, HitResult result) {
+        public bool Match(in HitEvent hit) {
             foreach (NoteHitAction allowedAction in allowedActions) {
-                if (allowedAction != action) continue;
+                if (allowedAction != hit.action) continue;
                 switch (matchMethod) {
-                case FlagMatchMethod.Exact when result == matchTarget: break;
-                case FlagMatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
-                case FlagMatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
-                case FlagMatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
-                case FlagMatchMethod.HasNone when result.HasAnyFlagExcept(HitResult.None, matchTarget): break;
+                case Exact when hit.result == matchTarget: break;
+                case HasAny when hit.result.HasAnyFlag(matchTarget): break;
+                case ContainsAll when hit.result.HasAllFlag(matchTarget): break;
+                case InsideAll when matchTarget.HasAllFlag(hit.result): break;
+                case HasNone when hit.result.HasAnyFlagExcept(HitResult.None, matchTarget): break;
                 default: continue;
                 }
                 return true;
@@ -48,58 +54,86 @@ namespace MaTech.Gameplay.Utils {
         }
     }
     
+    // todo: always use this struct for OnHitNote and various methods
+    // todo: consider about class with pooling, could be done together with merging EmptyHit
     [Serializable]
-    public class HitEvent {
-        public NoteHitAction[] allowedActions;
-        public HitResult matchTarget;
-        public FlagMatchMethod matchMethod;
+    public readonly struct HitEvent {
+        public readonly TimeUnit time;
+        public readonly NoteHitAction action;
+        public readonly HitResult result;
+        public readonly IJudgeUnit unit;
 
-        public UnityEvent onHit;
+        public HitEvent(IJudgeUnit unit, NoteHitAction action, TimeUnit time, HitResult result) {
+            this.time = time;
+            this.action = action;
+            this.result = result;
+            this.unit = unit;
+        }
         
-        // todo: migrate to HitEventCondition[] and remove this method
-        public bool Match(NoteHitAction action, HitResult result) {
-            foreach (NoteHitAction allowedAction in allowedActions) {
-                if (allowedAction != action) continue;
-                switch (matchMethod) {
-                case FlagMatchMethod.Exact when result == matchTarget: break;
-                case FlagMatchMethod.ContainsAll when result.HasAllFlag(matchTarget): break;
-                case FlagMatchMethod.HasAny when result.HasAnyFlag(matchTarget): break;
-                case FlagMatchMethod.InsideAll when matchTarget.HasAllFlag(result): break;
-                case FlagMatchMethod.HasNone when result.HasAnyFlagExcept(HitResult.None, matchTarget): break;
-                default: continue;
-                }
-                return true;
-            }
-            return false;
-        }
+        public static HitEvent Empty => new();
+    }
 
-        public bool InvokeIfMatch(NoteHitAction action, HitResult result) {
-            if (Match(action, result)) {
-                onHit.Invoke();
-                return true;
+    [Serializable]
+    public class UnityEventHit : UnityEvent<HitEvent> {}
+    
+    [Serializable]
+    public class HitEventBinding : ISerializationCallbackReceiver {
+        [SerializeField, HideInInspector, Obsolete] private NoteHitAction[] allowedActions;
+        [SerializeField, HideInInspector, Obsolete] private HitMatchMethod matchMethod;
+        [SerializeField, HideInInspector, Obsolete] private HitResult matchTarget;
+        
+        #if ODIN_INSPECTOR
+        [ListDrawerSettings(ShowFoldout = false, ShowPaging = false, ShowIndexLabels = false, CustomAddFunction = "AddConditionWithDefaults")]
+        #endif
+        public List<HitCondition> conditions;
+        public UnityEventHit onHit;
+
+        public bool Invoke(in HitEvent hit) {
+            foreach (var condition in conditions) {
+                if (!condition.Match(hit))
+                    return false;
             }
-            return false;
+            onHit.Invoke(hit);
+            return true;
         }
+        
+        #pragma warning disable CS0612 // Type or member is obsolete
+        public void OnBeforeSerialize() {}
+        public void OnAfterDeserialize() {
+            if (allowedActions?.Length > 0 || matchTarget is not HitResult.None) {
+                conditions = new() { new() {
+                    allowedActions = allowedActions,
+                    matchMethod = matchMethod,
+                    matchTarget = matchTarget,
+                }};
+                allowedActions = null;
+                matchTarget = HitResult.None;
+            }
+        }
+        #pragma warning restore CS0612 // Type or member is obsolete
+        
+        #if ODIN_INSPECTOR
+        private static readonly NoteHitAction[] defaultActions = { Auto, Press, Hold, Release, Flick, Linked };
+        private void AddConditionWithDefaults() {
+            conditions ??= new();
+            conditions.Add(new(){ allowedActions = defaultActions, matchMethod = HasAny });
+        }
+        #endif
+    }
+
+    public static class HitEventExtensions {
+        public static void InvokeAll(this HitEventBinding[] bindings, in HitEvent hit) { foreach (var binding in bindings) { binding.Invoke(hit); } }
     }
 
 #if UNITY_EDITOR
-    [CustomPropertyDrawer(typeof(HitEvent))]
-    [CustomPropertyDrawer(typeof(HitEventCondition))]
+    [CustomPropertyDrawer(typeof(HitCondition))]
     public class HitEventDrawer : PropertyDrawer {
-        private readonly List<DataEnum<NoteHitAction>> cachedEnums = new List<DataEnum<NoteHitAction>>(10);
-        private readonly Dictionary<NoteHitAction, bool> cachedEnumState = new Dictionary<NoteHitAction, bool>(10);
+        private readonly List<DataEnum<NoteHitAction>> cachedEnums = new(10);
+        private readonly Dictionary<NoteHitAction, bool> cachedEnumState = new(10);
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-            if (property.FindPropertyRelative("onHit") is { } onHit) {
-                return EditorGUI.GetPropertyHeight(SerializedPropertyType.Boolean, null)
-                    + EditorGUI.GetPropertyHeight(SerializedPropertyType.Enum, null)
-                    + EditorGUI.GetPropertyHeight(onHit)
-                    + 16;
-            } else {
-                return EditorGUI.GetPropertyHeight(SerializedPropertyType.Boolean, null)
-                    + EditorGUI.GetPropertyHeight(SerializedPropertyType.Enum, null)
-                    + 16;
-            }
+            return EditorGUI.GetPropertyHeight(SerializedPropertyType.Boolean, null)
+                + EditorGUI.GetPropertyHeight(SerializedPropertyType.Enum, null) + 16;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
@@ -137,12 +171,6 @@ namespace MaTech.Gameplay.Utils {
 
             EditorGUIUtility.labelWidth = 86;
             EditorGUI.PropertyField(matchRect, matchProperty);
-
-            if (property.FindPropertyRelative("onHit") is { } onHit) {
-                Rect hitEventRect = position;
-                hitEventRect.xMin += 12;
-                EditorGUI.PropertyField(hitEventRect, onHit);
-            }
 
             EditorGUI.EndProperty();
         }

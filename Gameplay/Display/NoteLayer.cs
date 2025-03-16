@@ -5,7 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using MaTech.Gameplay.Data;
-using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Logic;
 
 namespace MaTech.Gameplay.Display {
     public class NoteLayer : ObjectLayer<ChartPlayer.NoteCarrier, NoteLayer> {

@@ -6,7 +6,7 @@
 
 using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
-using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Logic;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {

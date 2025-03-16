@@ -9,7 +9,7 @@
 using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
 
-namespace MaTech.Gameplay.Scoring {
+namespace MaTech.Gameplay.Logic {
     public enum ScoreType {
         Score, Combo, Accuracy, HP, IsFailed, IsFullCombo, IsAllPerfect
         // Tips: 可以使用 DataEnum 来扩展额外的 ScoreType

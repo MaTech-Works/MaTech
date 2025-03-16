@@ -6,7 +6,7 @@
 
 using MaTech.Common.Algorithm;
 using MaTech.Gameplay.Data;
-using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Logic;
 using UnityEngine.Scripting;
 
 [assembly: AlwaysLinkAssembly, Preserve]

@@ -5,12 +5,11 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace MaTech.Gameplay.Scoring {
+namespace MaTech.Gameplay.Logic {
     // TODO: 实现一个BitFlag结构体与简单的二进制加密
     [Flags, DebuggerDisplay("{HitResultInfo.ToEditorName(this)}")]
     public enum HitResult {

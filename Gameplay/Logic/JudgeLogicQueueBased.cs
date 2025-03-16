@@ -11,7 +11,7 @@ using MaTech.Common.Algorithm;
 using MaTech.Gameplay.Data;
 using static MaTech.Gameplay.ChartPlayer;
 
-namespace MaTech.Gameplay.Scoring {
+namespace MaTech.Gameplay.Logic {
     /// 基于队列的判定查询逻辑，根据队列是否为空来决定游戏是否结束
     /// 完全是特设功能，派生类需要知道这个类的完整实现，适用于大部分模式的判定
     public abstract class JudgeLogicQueueBased : JudgeLogicBase {

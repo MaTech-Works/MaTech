@@ -6,7 +6,7 @@
 
 using MaTech.Common.Tools;
 using MaTech.Gameplay.Data;
-using MaTech.Gameplay.Scoring;
+using MaTech.Gameplay.Logic;
 using UnityEngine;
 using static MaTech.Gameplay.ChartPlayer;
 
