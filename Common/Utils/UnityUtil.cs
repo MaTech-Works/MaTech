@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -16,6 +17,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using static System.Reflection.BindingFlags;
 using Object = UnityEngine.Object;
 using UnityScene = UnityEngine.SceneManagement.Scene;
 
@@ -32,6 +34,19 @@ namespace MaTech.Common.Utils {
         [Serializable] public class UnityEventVector4 : UnityEvent<Vector4> { }
         [Serializable] public class UnityEventException : UnityEvent<Exception> { }
         [Serializable] public class UnityEventGameObject : UnityEvent<GameObject> { }
+        
+        private const BindingFlags InstanceBinding = Public | NonPublic | Instance;
+        private static FieldInfo fieldCallList = typeof(UnityEventBase).GetField("m_Calls", InstanceBinding);
+        private static FieldInfo fieldRuntime = typeof(UnityEventBase).GetField("m_RuntimeCalls", InstanceBinding);
+        private static object Get(this object self, FieldInfo fieldInfo) => self is null ? null : fieldInfo?.GetValue(self);
+        private static T Get<T>(this object self, FieldInfo fieldInfo) where T : class => self is null ? null : fieldInfo?.GetValue(self) as T;
+
+        public static int? ListenerCount(this UnityEventBase self) => self.Get(fieldCallList).Get<ICollection>(fieldRuntime)?.Count;
+        public static int? TotalCount(this UnityEventBase self) => self.GetPersistentEventCount() + self.ListenerCount();
+        
+        public static bool IsEmpty(this UnityEventBase self) => self.GetPersistentEventCount() == 0 && self.ListenerCount() == 0;
+        public static bool HasCalls(this UnityEventBase self) => self.GetPersistentEventCount() > 0 || self.ListenerCount() > 0;
+        public static bool NotEmpty(this UnityEventBase self) => !self.IsEmpty(); // includes the maybe cases, since we are not sure if ListenerCount is valid
 
         public static void DestroyAllChildren(this Transform transform) => transform.DestroyChildren();
         public static void DestroyChildren(this Transform transform, int start = 0, int count = -1) {
@@ -364,7 +379,6 @@ namespace MaTech.Common.Utils {
             return property.boxedValue;
             #else
             object target = property.serializedObject.targetObject;
-            
             string[] tokens = property.propertyPath.Replace(".Array.data[",".").Replace("]", "").Split('.'); // x.Array.data[i] --> x.i
             foreach (var token in tokens) {
                 if (target == null) return null;
@@ -375,7 +389,6 @@ namespace MaTech.Common.Utils {
                     target = GetBoxedValue_GetField(target, token);
                 }
             }
-            
             return target;
             #endif
         }
@@ -383,7 +396,7 @@ namespace MaTech.Common.Utils {
         private static object GetBoxedValue_GetField(object target, string token) {
             var targetType = target.GetType();
             while (targetType != null) {
-                var field = targetType.GetField(token, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var field = targetType.GetField(token, InstanceBinding);
                 if (field != null) return field.GetValue(target);
                 targetType = targetType.BaseType;
             }
@@ -396,7 +409,6 @@ namespace MaTech.Common.Utils {
             return true;
             #else
             object target = property.serializedObject.targetObject;
-            
             string[] tokens = property.propertyPath.Replace(".Array.data[",".").Trim(']').Split('.'); // x.Array.data[i] --> x.i
             var lastToken = tokens.Last();
             foreach (var token in tokens) {
@@ -417,7 +429,6 @@ namespace MaTech.Common.Utils {
                     }
                 }
             }
-            
             return true;
             #endif
         }
@@ -425,7 +436,7 @@ namespace MaTech.Common.Utils {
         private static bool SetBoxedValue_SetField(object target, string token, object value) {
             var targetType = target.GetType();
             while (targetType != null) {
-                var field = targetType.GetField(token, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var field = targetType.GetField(token, InstanceBinding);
                 if (field != null) {
                     if (field.FieldType.IsInstanceOfType(value)) {
                         field.SetValue(target, value);
