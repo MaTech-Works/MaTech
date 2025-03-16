@@ -108,7 +108,7 @@ namespace MaTech.Gameplay.Display {
             
             /// <summary> 循环全object种类，每次给一种类型buffer一个实例，直到pool内数额足够（无视每帧buffer额度） </summary>
             public void BufferGameObjectsUntilFull(int? overrideTotalCount = null) {
-                if (!Application.isPlaying) return; // Unity seems to be executing tasks after play stopped
+                if (!Application.IsPlaying(self)) return; // Unity seems to be executing tasks after play stopped
                 int targetCount = overrideTotalCount ?? prefabEntry.bufferCountInPool;
                 for (int count = bufferedGameObjects.Count; count < targetCount; ++count) {
                     BufferSingleGameObject();
@@ -118,7 +118,7 @@ namespace MaTech.Gameplay.Display {
             /// <summary> 循环全object种类，每次给一种类型buffer一个实例，直到pool内数额足够，或者到达本帧buffer额度上限 </summary>
             /// <returns> 若buffer在budget限度内完全填满返回true，否则返回false </returns>
             public bool BufferGameObjectsForFrame(bool resetInstantiationCount = true) {
-                if (!Application.isPlaying) return false; // Unity seems to be executing tasks after play stopped
+                if (!Application.IsPlaying(self)) return false; // Unity seems to be executing tasks after play stopped
                 if (resetInstantiationCount) instantiationCountThisFrame = 0;
                 while (bufferedGameObjects.Count < prefabEntry.bufferCountInPool) {
                     if (!CanInstantiateInBudgetThisFrame) return false;
