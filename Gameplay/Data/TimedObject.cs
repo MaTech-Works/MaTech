@@ -23,13 +23,13 @@ namespace MaTech.Gameplay.Data {
         public virtual ITimePoint? End => null;
 
         /// <summary> 物件的定位（effect等的参考时间）与排序基准 </summary>
-        public virtual ITimePoint Anchor => Start ?? End ?? TimePoint.MinValue;
+        public virtual ITimePoint Anchor => Start ?? End ?? TimePoint.minValue;
 
         public bool HasStart => Start != null;
         public bool HasEnd => End != null;
         
-        public ITimePoint SafeStart => Start ?? TimePoint.MinValue;
-        public ITimePoint SafeEnd => End ?? TimePoint.MaxValue;
+        public ITimePoint SafeStart => Start ?? TimePoint.minValue;
+        public ITimePoint SafeEnd => End ?? TimePoint.maxValue;
         
         public Range<TimeUnit> TimeRange => new(TimeStart, TimeEnd);
         public TimeUnit TimeStart => SafeStart.Time;

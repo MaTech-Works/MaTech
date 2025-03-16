@@ -127,7 +127,7 @@ namespace MaTech.Gameplay.Processor {
                 var lastTimeCarrier = initTimeCarrier;
                 
                 while (temposSorted.NextOrDefault() is var tempo) {
-                    var nextTempoTimePoint = tempo?.Start ?? TimePoint.MaxValue;
+                    var nextTempoTimePoint = tempo?.Start ?? TimePoint.maxValue;
                     while (effectEdges.NextIf(t => t.timePoint.Beat.CompareTo(nextTempoTimePoint.Beat) <= 0) is { effect: not null, timePoint: var effectTimePoint } t) {
                         if (t.isStart) activeEffects.OrderedInsert(t.effect, effectIndexComparer);
                         else activeEffects.Remove(t.effect);

@@ -100,7 +100,7 @@ namespace MaTech.Gameplay.Processor {
                 lastTempo ??= tempo;
                 for (; barIndex < barCount; ++barIndex) {
                     var timePoint = bars[barIndex].timePoint;
-                    if (timePoint.Beat.Fraction >= (tempo?.Start ?? TimePoint.MaxValue).Beat.Fraction)
+                    if (timePoint.Beat.Fraction >= (tempo?.Start ?? TimePoint.maxValue).Beat.Fraction)
                         break;
                     timePoint.Time = lastTempo.CalculateTimeFromBeat(timePoint.Beat);
                 }
@@ -112,6 +112,6 @@ namespace MaTech.Gameplay.Processor {
             return bars;
         }
 
-        private static readonly TempoChange tempoAtInfinity = new(double.PositiveInfinity, TimePoint.MaxValue);
+        private static readonly TempoChange tempoAtInfinity = new(TimePoint.maxValue, double.PositiveInfinity);
     }
 }

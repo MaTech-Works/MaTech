@@ -61,7 +61,7 @@ namespace MaTech.Gameplay.Data {
         /// <summary> Fallbacks when no effect exists or resolves to None on sampling effects </summary>
         public static Dictionary<DataEnum<EffectType>, Effect> GlobalFallbacks { get; } = new();
         public static void AddGlobalFallback(in DataEnum<EffectType> type, in Variant value) {
-            GlobalFallbacks[type] = new(type, value, (TimePoint.MinValue, TimePoint.MaxValue));
+            GlobalFallbacks[type] = new(type, value, (TimePoint.minValue, TimePoint.maxValue));
         }
 
         static Effect() {

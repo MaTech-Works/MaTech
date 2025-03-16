@@ -32,11 +32,22 @@ namespace MaTech.Gameplay.Data {
         public TimeUnit Delay { get; }
     }
 
+    public static class TimePointExtensions {
+        public static TimePoint Clone(this ITimePoint self) => new(self);
+    }
+
     /// <summary> 基于节拍与时间双重定位的乐理时间码 </summary>
     /// todo: rename to TimeMarker
     public class TimePoint : ITimePoint {
-        public static TimePoint MinValue { get; } = new() { Beat = BeatUnit.MinValue, Time = TimeUnit.MinValue };
-        public static TimePoint MaxValue { get; } = new() { Beat = BeatUnit.MaxValue, Time = TimeUnit.MaxValue };
+        internal static readonly TimePoint minValue = new() { Beat = BeatUnit.MinValue, Time = TimeUnit.MinValue };
+        internal static readonly TimePoint maxValue = new() { Beat = BeatUnit.MaxValue, Time = TimeUnit.MaxValue };
+        internal static readonly TimePoint zero = new();
+        
+        public static TimePoint CreateMin() => minValue.Clone();
+        public static TimePoint CreateMax() => maxValue.Clone();
+        public static TimePoint CreateZero() => zero.Clone();
+
+        public static TimePoint Create(BeatUnit beat, TimeUnit time, TimeUnit? delay) => new() { Beat = beat, Time = time, Delay = delay ?? TimeUnit.Zero };
 
         private BeatUnit beat = 0;
         private TimeUnit time = TimeUnit.Zero;
@@ -90,8 +101,8 @@ namespace MaTech.Gameplay.Data {
             this.delay = delay;
         }
 
-        public void SetToMaxValue() => CopyFrom(MaxValue);
-        public void SetToMinValue() => CopyFrom(MinValue);
+        public void SetToMaxValue() => CopyFrom(maxValue);
+        public void SetToMinValue() => CopyFrom(minValue);
 
         private class ComparerBeatImpl : IComparer<ITimePoint> {
             public int Compare(ITimePoint left, ITimePoint right) => left.Beat.CompareTo(right.Beat);
