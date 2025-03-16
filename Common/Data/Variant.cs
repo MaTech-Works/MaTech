@@ -105,20 +105,21 @@ namespace MaTech.Common.Data {
         public readonly MetaEnum ToEnum() => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
         public readonly DataEnum<TEnum>? ToEnum<TEnum>() where TEnum : unmanaged, Enum, IConvertible => ToEnum().As<TEnum>();
         
-        public static Variant From<T>(T value) where T : class => new(value);
-        public readonly T As<T>() where T : class => o as T;
+        public static Variant From(object value) => new(value); // note: null resolves into Variant.None
+        public static Variant Box<T>(T value) => new(value); // note: Nullable<T> is also boxed; can be handled with To<T> conversion
+        public readonly T As<T>() => o is T t ? t : default;
         
-        // todo: in theory we can cache boxer func for each type and hide boxing process, in the end not having separate method for generic struct and class
-        // todo: do we immediately recycle the box upon Unbox<T>? provide Ref<T> and To<T> in this case
-        public static Variant Box<T>(T value) where T : struct => new(value);
-        public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
+        // todo: recycled boxes and cached boxer delegates for each type hiding boxing process
+        // todo: recycle the box upon Unbox<T> or possibly a member method Box<T> to replace the box on the existing variant
+        //public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
+
+        public readonly bool Is<T>() => o is T;
         
-        // todo: a nested Box<T> and thread local reuse boxes and remove boxed methods?
         // todo: a ref method, how to do it for class, mixed struct, 16-byte unmanaged struct, and trivial types all?
         //public ref T Ref<T>() { } 
         
         // todo: a To<T> method with BoxlessConvert
-        //public Optional<T> To<T>() { } 
+        //public Option<T> To<T>() { } 
 
         public static implicit operator Variant(bool value) => new(value);
         public static implicit operator Variant(int value) => new(value);
@@ -127,7 +128,7 @@ namespace MaTech.Common.Data {
         public static implicit operator Variant(MetaEnum value) => new(value);
         public static implicit operator Variant(Fraction value) => new(value);
         public static implicit operator Variant(FractionSimple value) => new(value);
-        public static implicit operator Variant(string value) => new(value);
+        public static implicit operator Variant(string value) => new(value); // note: also handles null
 
         readonly bool IConvertible.ToBoolean(IFormatProvider provider) => Bool;
 
@@ -271,5 +272,4 @@ namespace MaTech.Common.Data {
         public static bool operator==(Variant left, Variant right) => left.Equals(right);
         public static bool operator!=(Variant left, Variant right) => !left.Equals(right);
     }
-
 }
