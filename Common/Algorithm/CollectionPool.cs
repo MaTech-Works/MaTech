@@ -9,22 +9,16 @@ using System.Collections.Generic;
 
 namespace MaTech.Common.Algorithm {
     public class CollectionPool<T, TItem> : Pool<T> where T : class, ICollection<TItem> {
-        protected CollectionPool(int capacityPool, Func<T> factory)
-            : base(factory, null, collection => collection.Clear(), capacityPool) { }
+        protected CollectionPool(int spare, Func<T> factory) : base(factory, null, collection => collection.Clear()) { SpareCount = spare; }
     }
     
     public class ListPool<T> : CollectionPool<List<T>, T> {
-        public ListPool(int capacityPool = 1, int capacityCollection = 0)
-            : base(capacityPool, () => new List<T>(capacityCollection)) { }
+        public ListPool(int spare = 1, int capacityOfCollection = 0) : base(spare, () => new List<T>(capacityOfCollection)) { }
     }
-    
     public class HashSetPool<T> : CollectionPool<HashSet<T>, T> {
-        public HashSetPool(int capacityPool = 1, int capacityCollection = 0)
-            : base(capacityPool, () => new HashSet<T>(capacityCollection)) { }
+        public HashSetPool(int spare = 1, int capacityOfCollection = 0) : base(spare, () => new HashSet<T>(capacityOfCollection)) { }
     }
-    
     public class DictPool<TKey, TValue> : CollectionPool<Dictionary<TKey, TValue>, KeyValuePair<TKey, TValue>> {
-        public DictPool(int capacityPool = 1, int capacityCollection = 0)
-            : base(capacityPool, () => new Dictionary<TKey, TValue>(capacityCollection)) { }
+        public DictPool(int spare = 1, int capacityOfCollection = 0) : base(spare, () => new Dictionary<TKey, TValue>(capacityOfCollection)) { }
     }
 }
