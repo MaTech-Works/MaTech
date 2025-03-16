@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MaTech.Common.Algorithm;
+using MaTech.Common.Data;
 using MaTech.Common.Unity;
 using UnityEditor;
 using UnityEngine;
@@ -28,12 +29,15 @@ namespace MaTech.Common.Utils {
         [Serializable] public class UnityEventFloat : UnityEvent<float> { }
         [Serializable] public class UnityEventDouble : UnityEvent<double> { }
         [Serializable] public class UnityEventString : UnityEvent<string> { }
+        [Serializable] public class UnityEventObject : UnityEvent<object> { }
         [Serializable] public class UnityEventColor : UnityEvent<Color> { }
         [Serializable] public class UnityEventVector2 : UnityEvent<Vector2> { }
         [Serializable] public class UnityEventVector3 : UnityEvent<Vector3> { }
         [Serializable] public class UnityEventVector4 : UnityEvent<Vector4> { }
+        [Serializable] public class UnityEventVariant : UnityEvent<Variant> { }
         [Serializable] public class UnityEventException : UnityEvent<Exception> { }
         [Serializable] public class UnityEventGameObject : UnityEvent<GameObject> { }
+        [Serializable] public class UnityEventUnityObject : UnityEvent<Object> { }
         
         private const BindingFlags InstanceBinding = Public | NonPublic | Instance;
         private static FieldInfo fieldCallList = typeof(UnityEventBase).GetField("m_Calls", InstanceBinding);
