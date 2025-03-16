@@ -10,7 +10,7 @@ using MaTech.Gameplay.Logic;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
-        // todo: 支持在prefab中任意位置接受回调
+        // todo: 支持同个prefab上存在多个behavior，在prefab中任意位置接受回调，并且分开事件、状态和Hit接口
         public interface IObjectVisual<in TCarrier, in TLayer>
             where TCarrier : ObjectCarrier<TCarrier, TLayer>
             where TLayer : ObjectLayer<TCarrier, TLayer> {
@@ -22,7 +22,7 @@ namespace MaTech.Gameplay {
             void UpdateVisual();
             /// <summary> 是否应当尽快结束音符显示（无论音符是否超出显示范围）；若指定IgnoreDisplayWindow为true忽视显示范围，这个属性会成为结束显示的唯一标准 </summary>
             bool IsVisualFinished { get; }
-            /// <summary> 是否在超出Y值和判定所规定的显示范围时自动移除音符（无论音符是否标记了IsVisualFinished）；比如音符被击打后可以设置为false，以便让击打动画完整播放，完成后指定IsFinished为true结束显示 </summary>
+            /// <summary> 是否在超出显示范围时自动移除音符（无论音符是否标记了IsVisualFinished）；比如音符被击打后可以设置为false，以便让击打动画完整播放，完成后指定IsFinished为true结束显示 </summary>
             bool IgnoreDisplayWindow { get; }
         }
 
