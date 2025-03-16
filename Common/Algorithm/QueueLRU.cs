@@ -22,7 +22,7 @@ namespace MaTech.Common.Algorithm {
         private readonly Node tailNode = new Node(); // Most recently used
 
         public QueueLRU(int initCapacity = 0) {
-            pool = new Pool<Node>(() => new Node(), initCapacity);
+            pool = new Pool<Node>(() => new Node(), spare: initCapacity);
             nodes = new Dictionary<T, Node>(initCapacity);
             headNode.next = tailNode;
             tailNode.prev = headNode;
