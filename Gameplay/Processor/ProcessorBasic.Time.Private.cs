@@ -20,7 +20,7 @@ namespace MaTech.Gameplay.Processor {
             => CarrierTiming.FromTimePoint(timePoint, relative?.SampleRoll(timePoint.Time));
         
         private TimeCarrier CreateTimeCarrierForTempo(TempoChange tempo, TimeCarrier relative = null, IEnumerable<Effect> effects = null) {
-            double scale = ReferenceBeatLength / tempo.timePerBeat;
+            double scale = ReferenceBeatLength / tempo.beatSeconds;
             var result = new TimeCarrier() {
                 start = CreateTiming(tempo.SafeStart, relative),
                 tempo = tempo,
@@ -46,7 +46,7 @@ namespace MaTech.Gameplay.Processor {
 
             int tempoCount = Tempos.Count;
             if (Objects == null || Objects.Count == 0 || tempoCount == 1)
-                return Tempos[0].timePerBeat;
+                return Tempos[0].beatSeconds;
 
             double minTime = Objects.Select(o => o.SafeStart.Time.Seconds).Min();
             double maxTime = Objects.Select(o => o.SafeEnd.Time.Seconds).Max();
