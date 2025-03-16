@@ -10,21 +10,22 @@ namespace MaTech.Gameplay.Data {
     public class TempoChange : TimedObject {
         private readonly ITimePoint start;
         
-        public readonly TimeUnit timePerBeat = TimeUnit.FromSeconds(0.5);
-        public double BPM => 60000 / timePerBeat.Milliseconds;
+        public readonly double beatSeconds;
+        public readonly double beatsPerSecond;
+        
+        public double BPM => beatsPerSecond * 60;
 
-        public TempoChange(double bpm, ITimePoint? injectedStart = null) {
-            start = injectedStart ?? new TimePoint();
-            timePerBeat =  TimeUnit.FromSeconds(60 / bpm);
+        public TempoChange(ITimePoint start, double bpm) {
+            this.start = start;
+            beatSeconds = 60 / bpm;
+            beatsPerSecond = bpm / 60;
         }
 
         public override ITimePoint Start => start;
         public override ITimePoint? End => null;
-        
-        public TimePoint? MutableStart => start as TimePoint;
 
-        public TimeUnit CalculateTimeFromBeat(BeatUnit beat) => TimeUnit.FromSeconds(beat.DeltaSince(start.Beat) * timePerBeat.Seconds).OffsetBy(start.Time);
-        public BeatUnit CalculateBeatFromTime(TimeUnit time) => BeatUnit.FromValue(time.DeltaSince(start.Time) / timePerBeat.Seconds).OffsetBy(start.Beat);
+        public TimeUnit CalculateTimeFromBeat(BeatUnit beat) => TimeUnit.FromSeconds(beat.DeltaSince(start.Beat).Value * beatSeconds).OffsetBy(start.Time);
+        public BeatUnit CalculateBeatFromTime(TimeUnit time) => BeatUnit.FromValue(time.DeltaSince(start.Time).Seconds * beatsPerSecond).OffsetBy(start.Beat);
     }
 
     public static class TempoChangeExtensionMethods {

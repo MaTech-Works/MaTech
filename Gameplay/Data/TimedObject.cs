@@ -28,6 +28,10 @@ namespace MaTech.Gameplay.Data {
         public bool HasStart => Start != null;
         public bool HasEnd => End != null;
         
+        public TimePoint? MutableStart => Start as TimePoint;
+        public TimePoint? MutableEnd => End as TimePoint;
+        public TimePoint? MutableAnchor => Anchor as TimePoint;
+        
         public ITimePoint SafeStart => Start ?? TimePoint.minValue;
         public ITimePoint SafeEnd => End ?? TimePoint.maxValue;
         
