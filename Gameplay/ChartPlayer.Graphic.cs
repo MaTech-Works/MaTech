@@ -15,7 +15,7 @@ namespace MaTech.Gameplay {
             where TCarrier : ObjectCarrier<TCarrier, TLayer>
             where TLayer : ObjectLayer<TCarrier, TLayer> {
             /// <summary> 元件作为新音符被显示时调用 </summary>
-            void InitVisual(TCarrier initCarrier, TLayer initLayer);
+            void StartVisual(TCarrier carrier, TLayer layer);
             /// <summary> 元件所代表的音符结束显示时调用 </summary>
             void FinishVisual();
             /// <summary> 元件所代表的音符仍在显示时的每帧被调用 </summary>
