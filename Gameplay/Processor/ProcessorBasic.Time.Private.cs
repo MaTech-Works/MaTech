@@ -90,7 +90,7 @@ namespace MaTech.Gameplay.Processor {
                 var o = list[i];
                 sortList.Add(new SortData<TCarrier, TLayer> {
                     // ReSharper disable once CompareOfFloatsByEqualityOperator
-                    sortY = windowDeltaRoll is null ? o.StartRoll : o.RollOnWindow(windowDeltaRoll.Value, byStart),
+                    sortY = windowDeltaRoll is null ? o.StartRoll : o.TargetRoll(windowDeltaRoll.Value, byStart),
                     carrier = o
                 });
             }

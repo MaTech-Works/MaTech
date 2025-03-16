@@ -26,6 +26,7 @@ namespace MaTech.Gameplay.Display {
         where TLayer : ObjectLayer<TCarrier, TLayer> {
         
         // todo: rename every "Y" to "roll"
+        // todo: remove ratio calculate methods and give out Range<RollUnit>
         // todo: 支持为每个VisualUnit实例化图形，而非为每个NoteCarrier实例化图形
         
         #region Private Fields - Runtime Containers
@@ -211,46 +212,20 @@ namespace MaTech.Gameplay.Display {
                 UpdateGraphics();
             }
         }
-
-        public ((double start, double end) deltaY, (float start, float end) ratio) CalculateDeltaYAndRatioRanges(TCarrier carrier, bool clampToDisplayWindow) {
-            var deltaY = CalculateDeltaYRange(carrier, clampToDisplayWindow);
-            var ratio = (DeltaYToRatio(deltaY.start), DeltaYToRatio(deltaY.end));
-            return (deltaY, ratio);
-        }
-
-        public (float start, float end) CalculateRatioRange(TCarrier carrier, bool clampToDisplayWindow) {
-            var start = CalculateRatio(carrier.StartRoll, carrier, clampToDisplayWindow);
-            var end = CalculateRatio(carrier.EndRoll, carrier, clampToDisplayWindow);
-            return (start, end);
-        }
-        public (double start, double end) CalculateDeltaYRange(TCarrier carrier, bool clampToDisplayWindow) {
-            var start = CalculateDeltaY(carrier.StartRoll, carrier, clampToDisplayWindow);
-            var end = CalculateDeltaY(carrier.EndRoll, carrier, clampToDisplayWindow);
-            return (start, end);
-        }
-
-        public (double deltaY, float ratio) CalculateDeltaYAndRatio(double displayY, TCarrier carrier, bool clampToDisplayWindow)
-            => CalculateDeltaYAndRatio(displayY, carrier.scale, clampToDisplayWindow);
-        public (double deltaY, float ratio) CalculateDeltaYAndRatio(double displayY, double scaleY, bool clampToDisplayWindow) {
-            var deltaY = CalculateDeltaY(displayY, scaleY, clampToDisplayWindow);
-            var ratio = DeltaYToRatio(deltaY);
-            return (deltaY, ratio);
-        }
         
-        public float CalculateRatio(double displayY, TCarrier carrier, bool clampToDisplayWindow)
-            => CalculateRatio(displayY, carrier.scale, clampToDisplayWindow);
-        public double CalculateDeltaY(double displayY, TCarrier carrier, bool clampToDisplayWindow)
-            => CalculateDeltaY(displayY, carrier.scale, clampToDisplayWindow);
-
-        public float CalculateRatio(double displayY, double scaleY, bool clampToDisplayWindow)
-            => DeltaYToRatio(CalculateDeltaY(displayY, scaleY, clampToDisplayWindow));
-        public double CalculateDeltaY(double displayY, double scaleY, bool clampToDisplayWindow) {
-            var deltaY = (displayY - PlayTime.DisplayY) * scaleY * speedScale;
-            if (clampToDisplayWindow) return MathUtil.Clamp(deltaY, displayWindowDownY, displayWindowUpY);
-            return deltaY;
-        }
+        public float DeltaRollToRatio(double roll) => (float)(roll / displayWindowUpY);
         
-        private float DeltaYToRatio(double deltaY) => (float)(deltaY / displayWindowUpY);
+        public float CalculateRatio(double roll, TCarrier carrier, bool clampToDisplayWindow) => DeltaRollToRatio(CalculateDeltaRoll(roll, carrier, clampToDisplayWindow));
+        public double CalculateDeltaRoll(double roll, TCarrier carrier, bool clampToDisplayWindow) {
+            var deltaRoll = carrier.DeltaRoll(PlayTime.GlobalRoll, roll) * speedScale;
+            if (clampToDisplayWindow) return MathUtil.Clamp(deltaRoll, displayWindowDownY, displayWindowUpY);
+            return deltaRoll;
+        }
+
+        public (double roll, float ratio) CalculateDeltaRollAndRatio(double roll, TCarrier carrier, bool clampToDisplayWindow) {
+            var deltaRoll = CalculateDeltaRoll(roll, carrier, clampToDisplayWindow);
+            return (deltaRoll, DeltaRollToRatio(deltaRoll));
+        }
 
         public IObjectVisual<TCarrier, TLayer>? FindVisual(TCarrier carrier) => hashsetCarrierRealized.GetOrNull(carrier);
         public T? FindVisual<T>(TCarrier carrier) where T : class, IObjectVisual<TCarrier, TLayer> => FindVisual(carrier) as T;
@@ -271,11 +246,11 @@ namespace MaTech.Gameplay.Display {
             if (!isActionAndFuncCached) {
                 cachedCarrierSelectCondition = carrier => pools.ContainsKey(carrier.type);
                 cachedIterateStopConditions = new Func<TCarrier, bool>[] {
-                    carrier => carrier.RollOnWindow(DisplayWindowUpScaled, true) > PlayTime.DisplayY, // UpY Forward
-                    carrier => carrier.RollOnWindow(DisplayWindowUpScaled, true) < PlayTime.DisplayY, // UpY Backward
-                    carrier => carrier.RollOnWindow(DisplayWindowDownScaled, false) > PlayTime.DisplayY, // DownY Forward
-                    carrier => carrier.RollOnWindow(DisplayWindowDownScaled, false) < PlayTime.DisplayY, // DownY Backward
-                    carrier => carrier.StartTime - judgeWindowUp > PlayTime.JudgeTime.Seconds,   // UpTime Forward
+                    carrier => carrier.TargetRoll(DisplayWindowUpScaled, true) > PlayTime.GlobalRoll, // UpY Forward
+                    carrier => carrier.TargetRoll(DisplayWindowUpScaled, true) < PlayTime.GlobalRoll, // UpY Backward
+                    carrier => carrier.TargetRoll(DisplayWindowDownScaled, false) > PlayTime.GlobalRoll, // DownY Forward
+                    carrier => carrier.TargetRoll(DisplayWindowDownScaled, false) < PlayTime.GlobalRoll, // DownY Backward
+                    carrier => carrier.StartTime - judgeWindowUp > PlayTime.InputTime.Seconds,   // UpTime Forward
                 };
                 cachedRealizationAction = RealizeCarrierIfInRange;
                 cachedVirtualizationAction = tuple => {
@@ -357,7 +332,7 @@ namespace MaTech.Gameplay.Display {
             }
             
             // 从几个listCarrier中顺序找到经过边界位置的，将新进入展示范围的carrier加入展示列表
-            if (PlayTime.DisplayY >= lastDisplayY) {
+            if (PlayTime.GlobalRoll >= lastDisplayY) {
                 IterateForward(listCarrierDownY, cachedIterateStopConditions[2], cachedRealizationAction);
                 IterateForward(listCarrierUpY, cachedIterateStopConditions[0], cachedRealizationAction);
             } else {
@@ -366,7 +341,7 @@ namespace MaTech.Gameplay.Display {
             }
             IterateForward(listCarrierUpTime, cachedIterateStopConditions[4], cachedRealizationAction);
             
-            lastDisplayY = PlayTime.DisplayY;
+            lastDisplayY = PlayTime.GlobalRoll;
             
             // 遍历展示列表，更新note图形
             foreach (var tuple in listObjectRealized) {
@@ -437,7 +412,7 @@ namespace MaTech.Gameplay.Display {
             var obj = pool.GetPooledGameObject();
             
             var tuple = new ObjectTuple(carrier, obj);
-            tuple.visual.InitVisual(carrier, (TLayer)this);
+            tuple.visual.StartVisual(carrier, (TLayer)this);
             
             if (tuple.visual.IsVisualFinished) {
                 tuple.visual.FinishVisual();
@@ -448,7 +423,7 @@ namespace MaTech.Gameplay.Display {
             listObjectRealized.Add(tuple);
             hashsetCarrierRealized.Add(carrier, tuple.visual);
 
-            if (logRealization) Debug.Log($"Realize {carrier.StartRoll:F2} - {carrier.EndRoll:F2} at {PlayTime.DisplayY:F2} (delta: {carrier.ScaledDeltaRoll(PlayTime.DisplayY, true):F2} - {carrier.ScaledDeltaRoll(PlayTime.DisplayY, false):F2})");
+            if (logRealization) Debug.Log($"Realize {carrier.StartRoll:F2} - {carrier.EndRoll:F2} at {PlayTime.GlobalRoll:F2} (delta: {carrier.DeltaRoll(PlayTime.GlobalRoll, true):F2} - {carrier.DeltaRoll(PlayTime.GlobalRoll, false):F2})");
         }
 
         private void VirtualizeObject(ObjectTuple tuple) {
@@ -462,7 +437,7 @@ namespace MaTech.Gameplay.Display {
             tuple.visual.FinishVisual();
             pool.RecycleGameObject(tuple.obj);
             
-            if (logRealization) Debug.Log($"Virtualize {tuple.carrier.StartRoll:F2} - {tuple.carrier.EndRoll:F2} at {PlayTime.DisplayY:F2} (delta: {tuple.carrier.ScaledDeltaRoll(PlayTime.DisplayY, true):F2} - {tuple.carrier.ScaledDeltaRoll(PlayTime.DisplayY, false):F2})");
+            if (logRealization) Debug.Log($"Virtualize {tuple.carrier.StartRoll:F2} - {tuple.carrier.EndRoll:F2} at {PlayTime.GlobalRoll:F2} (delta: {tuple.carrier.DeltaRoll(PlayTime.GlobalRoll, true):F2} - {tuple.carrier.DeltaRoll(PlayTime.GlobalRoll, false):F2})");
         }
 
         #endregion
@@ -476,8 +451,8 @@ namespace MaTech.Gameplay.Display {
         }
 
         private bool IsCarrierInRange(TCarrier carrier) {
-            return (carrier.StartTime <= PlayTime.JudgeTime.Seconds + judgeWindowUp && carrier.EndTime >= PlayTime.JudgeTime.Seconds + judgeWindowDown) ||
-                   (carrier.ScaledDeltaRoll(PlayTime.DisplayY, true) <= DisplayWindowUpScaled * EpsilonK && carrier.ScaledDeltaRoll(PlayTime.DisplayY, false) >= DisplayWindowDownScaled * EpsilonK);
+            return (carrier.StartTime <= PlayTime.InputTime.Seconds + judgeWindowUp && carrier.EndTime >= PlayTime.InputTime.Seconds + judgeWindowDown) ||
+                   (carrier.DeltaRoll(PlayTime.GlobalRoll, true) <= DisplayWindowUpScaled * EpsilonK && carrier.DeltaRoll(PlayTime.GlobalRoll, false) >= DisplayWindowDownScaled * EpsilonK);
         }
         
         #endregion

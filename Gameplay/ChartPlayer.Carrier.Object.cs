@@ -30,9 +30,15 @@ namespace MaTech.Gameplay {
             
             /// <summary> 物体的移动速度相对卷轴速度的倍率 </summary>
             public double scale = 1;
+            
+            // todo: support Range<RollUnit>
 
-            public double ScaledDeltaRoll(double roll, bool byStart) => ((byStart ? StartRoll : EndRoll) - roll) * scale;
-            public double RollOnWindow(double windowDeltaRoll, bool byStart) => (byStart ? StartRoll : EndRoll) - windowDeltaRoll / scale;
+            public double DeltaRoll(double targetRoll, double noteRoll) => (noteRoll - targetRoll) * scale;
+            public double TargetRoll(double deltaRoll, double noteRoll) => noteRoll - deltaRoll / scale;
+            public double NoteRoll(double targetRoll, double deltaRoll) => targetRoll + deltaRoll / scale;
+            
+            public double DeltaRoll(double targetRoll, bool byStart) => DeltaRoll(targetRoll, byStart ? StartRoll : EndRoll);
+            public double TargetRoll(double deltaRoll, bool byStart) => TargetRoll(deltaRoll, byStart ? StartRoll : EndRoll);
         }
 
         /// <summary> note载体: 用于将逻辑note和图形note关联起来的中间桥梁，同时承载与显示相关的计算得到的note数据 </summary>
@@ -46,6 +52,5 @@ namespace MaTech.Gameplay {
         /// <summary> 小节线载体: 用于承载小节线信息，没有直接对应的逻辑数据 </summary>
         /// todo: 把NoteCarrier和BarCarrier合并到ObjectCarrier，不再在核心管线层面用类型区分Note和Bar等视觉元素
         public class BarCarrier : ObjectCarrier<BarCarrier, BarLayer> {};
-
     }
 }

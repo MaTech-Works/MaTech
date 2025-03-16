@@ -5,27 +5,34 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using MaTech.Common.Tools;
-using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Logic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 using static MaTech.Common.Utils.UnityUtil;
 using static MaTech.Gameplay.ChartPlayer;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
 
 namespace MaTech.Gameplay.Display {
-    public class NoteEvents : MonoBehaviour, INoteVisual {
-        [field: SerializeField, ReadOnlyInInspector]
-        public NoteLayer Layer { get; private set; }
-        public NoteCarrier Carrier { get; private set; }
-
-        [field: SerializeField, ReadOnlyInInspector] public bool IsVisualFinished { get; set; } = false;
-        [field: SerializeField, ReadOnlyInInspector] public bool IgnoreDisplayWindow { get; set; } = false;
+    public class NoteEvents : NoteBehavior {
+        public bool setActiveOnInitFinish = false;
+        public bool clampToDisplayWindow = false;
         
         [Space]
-        public bool clampToDisplayWindow = false;
-
+        public Events events;
+        public HitEventBinding[] hitEvents;
+        
+        #if ODIN_INSPECTOR
+        [ShowInInspector, ReadOnly, HideLabel, InlineProperty]
+        [FoldoutGroup("Last Hit", Expanded = false)]
+        #endif
+        public HitEvent LastHit { get; private set; }
+        
+        #if ODIN_INSPECTOR
+        [InlineProperty, HideLabel]
+        #endif
         [Serializable]
         public struct Events {
             [Serializable] public class RangeEvent : UnityEvent<float, float> { }
@@ -33,58 +40,79 @@ namespace MaTech.Gameplay.Display {
             [Serializable] public class CarrierEvent : UnityEvent<NoteCarrier> { }
             
             [FormerlySerializedAs("onInstantiate")]
-            public UnityEvent onAwake;
+            [FoldoutGroup("Lifetime Events")] public UnityEvent onInit;
             [FormerlySerializedAs("onActivate")]
-            public UnityEvent onInit;
+            [FoldoutGroup("Lifetime Events")] public UnityEvent onStart;
             [FormerlySerializedAs("onDeactivate")]
-            public UnityEvent onFinish;
+            [FoldoutGroup("Lifetime Events")] public UnityEvent onFinish;
 
-            [Space]
-            public LayerEvent onLayerChanged;
-            public CarrierEvent onCarrierChanged;
+            [FoldoutGroup("Ownership Events")] public LayerEvent onUpdateLayer;
+            [FoldoutGroup("Ownership Events")] public CarrierEvent onUpdateCarrier;
             
-            [Space]
-            public RangeEvent onUpdateRatio;
-            public RangeEvent onUpdateDeltaY;
-            public UnityEventFloat onUpdateRatioStart;
-            public UnityEventFloat onUpdateRatioEnd;
-            public UnityEventFloat onUpdateDeltaYStart;
-            public UnityEventFloat onUpdateDeltaYEnd;
+            [FoldoutGroup("Positional Events")] public RangeEvent onUpdateRoll;
+            [FoldoutGroup("Positional Events")] public RangeEvent onUpdateRatio;
+            [FoldoutGroup("Positional Events")] public UnityEventFloat onUpdateRollStart;
+            [FoldoutGroup("Positional Events")] public UnityEventFloat onUpdateRatioStart;
+            [FoldoutGroup("Positional Events")] public UnityEventFloat onUpdateRollEnd;
+            [FoldoutGroup("Positional Events")] public UnityEventFloat onUpdateRatioEnd;
+
+            public void UpdateRange(((double start, double end) roll, (float start, float end) ratio) range) {
+                onUpdateRoll.Invoke((float)range.roll.start, (float)range.roll.end);
+                onUpdateRatio.Invoke(range.ratio.start, range.ratio.end);
+                UpdateStart((range.roll.start, range.ratio.start));
+                UpdateEnd((range.roll.end, range.ratio.end));
+            }
+            public void UpdateStart((double roll, float ratio) start) {
+                onUpdateRollStart.Invoke((float)start.roll);
+                onUpdateRatioStart.Invoke(start.ratio);
+            }
+            public void UpdateEnd((double roll, float ratio) end) {
+                onUpdateRollEnd.Invoke((float)end.roll);
+                onUpdateRatioEnd.Invoke(end.ratio);
+            }
+
+            public bool HasRange => onUpdateRoll.NotEmpty() || onUpdateRatio.NotEmpty();
+            public bool HasStart => onUpdateRollStart.NotEmpty() || onUpdateRatioStart.NotEmpty();
+            public bool HasEnd => onUpdateRollEnd.NotEmpty() || onUpdateRatioEnd.NotEmpty();
+
+            public (bool start, bool end) NeedCalculation => HasRange ? (true, true) : (HasStart, HasEnd);
         }
-        
-        [Space] public Events events;
-        [Space] public HitEvent[] hitEvents;
 
-        void Awake() => events.onAwake.Invoke();
-
-        void IObjectVisual<NoteCarrier, NoteLayer>.InitVisual(NoteCarrier initCarrier, NoteLayer initLayer) {
-            Layer = initLayer;
-            Carrier = initCarrier;
-            events.onLayerChanged.Invoke(initLayer);
-            events.onCarrierChanged.Invoke(initCarrier);
+        protected override void NoteInit() {
             events.onInit.Invoke();
         }
 
-        void IObjectVisual<NoteCarrier, NoteLayer>.FinishVisual() {
+        protected override void NoteStart() {
+            LastHit = HitEvent.Empty;
+            events.onUpdateLayer.Invoke(Layer);
+            events.onUpdateCarrier.Invoke(Carrier);
+            if (setActiveOnInitFinish) gameObject.SetActive(true);
+            events.onStart.Invoke();
+        }
+
+        protected override void NoteFinish() {
             events.onFinish.Invoke();
-            Carrier = null;
+            if (setActiveOnInitFinish) gameObject.SetActive(false);
         }
 
-        void IObjectVisual<NoteCarrier, NoteLayer>.UpdateVisual() {
-            var (startRatio, endRatio) = Layer.CalculateRatioRange(Carrier, clampToDisplayWindow);
-            var (startDeltaY, endDeltaY) = Layer.CalculateDeltaYRange(Carrier, clampToDisplayWindow);
-            events.onUpdateRatio.Invoke(startRatio, endRatio);
-            events.onUpdateDeltaY.Invoke((float)startDeltaY, (float)endDeltaY);
-            events.onUpdateRatioStart.Invoke(startRatio);
-            events.onUpdateRatioEnd.Invoke(endRatio);
-            events.onUpdateDeltaYStart.Invoke((float)startDeltaY);
-            events.onUpdateDeltaYEnd.Invoke((float)endDeltaY);
-        }
-
-        void INoteVisual.OnHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result) {
-            foreach (var e in hitEvents) {
-                e.InvokeIfMatch(action, result);
+        protected override void NoteUpdate() {
+            var calc = events.NeedCalculation;
+            var start = calc.start ? Layer.CalculateDeltaRollAndRatio(Carrier.StartRoll, Carrier, clampToDisplayWindow) : default;
+            var end = calc.end ? Layer.CalculateDeltaRollAndRatio(Carrier.EndRoll, Carrier, clampToDisplayWindow) : default;
+            if (calc is (true, true)) {
+                events.onUpdateRoll.Invoke((float)start.roll, (float)end.roll);
+                events.onUpdateRatio.Invoke(start.ratio, end.ratio);
+            }
+            if (calc is (true, _)) {
+                events.onUpdateRollStart.Invoke((float)start.roll);
+                events.onUpdateRatioStart.Invoke(start.ratio);
+            }
+            if (calc is (_, true)) {
+                events.onUpdateRollEnd.Invoke((float)end.roll);
+                events.onUpdateRatioEnd.Invoke(end.ratio);
             }
         }
+
+        protected override void NoteHit(in HitEvent hitEvent) => hitEvents.InvokeAll(LastHit = hitEvent);
     }
 }

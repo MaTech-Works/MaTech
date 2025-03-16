@@ -30,7 +30,7 @@ namespace MaTech.Gameplay.Input {
         private IPlayControl playControl;
 
         // TODO: 令外部送入帧同步非实时的时间码，以便这里根据高精度计时器和平台定义的输入时间码来相对计算JudgeTime
-        private TimeUnit RealtimeJudgeTime => PlayTime.JudgeTime;
+        private TimeUnit RealtimeJudgeTime => PlayTime.InputTime;
         
         private void SendKeyInput(KeyCode keyCode, bool isDown) => SendKeyInput(keyCode, isDown, RealtimeJudgeTime);
         private void SendKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {

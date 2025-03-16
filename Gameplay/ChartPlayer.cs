@@ -79,7 +79,7 @@ namespace MaTech.Gameplay {
         public bool IsPlaying => playing;
         public bool IsFinished => judgeLogic.IsFinished;
         public bool IsResumeRewinding => rewinding;
-        public bool AllowPause => playing && PlayTime.JudgeTime.Seconds >= timeNextAllowedPause;
+        public bool AllowPause => playing && PlayTime.InputTime.Seconds >= timeNextAllowedPause;
         public int PlayCount => playCount;
 
         private bool loaded;
@@ -275,7 +275,7 @@ namespace MaTech.Gameplay {
             // TODO: 对外暴露Offset设置接口
             // TODO: 将PlayTime的类型定义封装成ChartPlayer的nested类
             timeSetter = new PlayTime.Setter {
-                offsetDisplay = 0,
+                offsetVisual = 0,
                 offsetAudio = 0,
             };
             timeSetter.UpdateTime(timeTrackStart, true);
@@ -339,7 +339,7 @@ namespace MaTech.Gameplay {
             if (CheckBusy("Pause")) return;
             if (!loaded || !playing) return;
 
-            timeNextAllowedPause = PlayTime.ChartTime + timePauseCooldown;
+            timeNextAllowedPause = PlayTime.LogicTime + timePauseCooldown;
 
             DisableController();
 

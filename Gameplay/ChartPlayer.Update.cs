@@ -52,9 +52,9 @@ namespace MaTech.Gameplay {
             Profiler.BeginSample("ChartPlayer.UpdateEarly()", this);
 
             try {
-                TimeUnit judgeTimeBeforeInput = PlayTime.JudgeTime;
+                TimeUnit judgeTimeBeforeInput = PlayTime.InputTime;
                 UpdateTime();
-                TimeUnit judgeTimeAfterInput = PlayTime.JudgeTime;
+                TimeUnit judgeTimeAfterInput = PlayTime.InputTime;
                 
                 bool canUpdateJudgeLogic = !finishing && UnityUtil.IsAssigned(judgeLogic);
                 if (canUpdateJudgeLogic) {
@@ -92,7 +92,7 @@ namespace MaTech.Gameplay {
                         layer.UpdateGraphics();
                 }
 
-                if (!finishing && PlayTime.ChartTime > timeFinishCheck) {
+                if (!finishing && PlayTime.LogicTime > timeFinishCheck) {
                     // ReSharper disable once SimplifyConditionalTernaryExpression  <-- if in doubt, try it yourself
                     finishing = finishByJudgeLogic && UnityUtil.IsAssigned(judgeLogic) ? judgeLogic.IsFinished : true;
                     if (finishing) {
@@ -130,7 +130,7 @@ namespace MaTech.Gameplay {
             }
 
             if (rewinding || playing) {
-                timeSetter.UpdateDisplayY(processor.CurrentRoll);
+                timeSetter.UpdateGlobalRoll(processor.CurrentRoll);
             }
         }
 

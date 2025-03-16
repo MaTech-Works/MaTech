@@ -51,14 +51,14 @@ namespace MaTech.Gameplay {
         }
         
         private void ResetController() {
-            TimeUnit judgeTime = PlayTime.JudgeTime;
+            TimeUnit judgeTime = PlayTime.InputTime;
             controller?.ResetControl(judgeTime);
             lastControllerJudgeTime = judgeTime;
         }
         
         private void UpdateController() {
-            TimeUnit judgeTime = PlayTime.JudgeTime;
-            controller?.UpdateControl(lastControllerJudgeTime = PlayTime.JudgeTime);
+            TimeUnit judgeTime = PlayTime.InputTime;
+            controller?.UpdateControl(lastControllerJudgeTime = PlayTime.InputTime);
             lastControllerJudgeTime = judgeTime;
         }
         

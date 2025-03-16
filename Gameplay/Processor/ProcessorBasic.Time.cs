@@ -69,7 +69,7 @@ namespace MaTech.Gameplay.Processor {
         public double SampleRoll(ITimePoint timePoint, bool findByBeat = true, in Variant keyword = default) => FindTimeCarrier(timePoint, findByBeat).SampleRoll(timePoint.Time, keyword); 
         public double SampleRoll(in TimeUnit time, in Variant keyword = default) => FindTimeCarrierByTime(time).SampleRoll(time, keyword);
 
-        public override double CurrentRoll => SampleRoll(PlayTime.DisplayTime);
+        public override double CurrentRoll => SampleRoll(PlayTime.VisualTime);
         
         public double SampleNoteSpeed(ITimePoint timePoint, bool findByBeat = true, bool sampleByBeat = true, in Variant keyword = default)
             => FindTimeCarrier(timePoint, findByBeat).SampleNoteSpeed(timePoint, sampleByBeat, keyword);
