@@ -49,15 +49,10 @@ namespace MaTech.Common.Utils {
         public static bool NotEmpty(this UnityEventBase self) => !self.IsEmpty(); // includes the maybe cases, since we are not sure if ListenerCount is valid
 
         public static void DestroyAllChildren(this Transform transform) => transform.DestroyChildren();
-        public static void DestroyChildren(this Transform transform, int start = 0, int count = -1) {
-            if (transform.childCount == 0) return;
-            if (count == -1 || count > transform.childCount) {
-                count = transform.childCount;
-            }
-
-            for (int i = start + count - 1; i >= start; i--) {
+        public static void DestroyChildren(this Transform transform, int start = 0, int count = int.MaxValue) {
+            if (transform is not { childCount: var max } || max <= 0 || count <= 0) return;
+            for (int i = Math.Clamp(start + count, 0, max) - 1; i >= Math.Clamp(start, 0, max); --i) {
                 var obj = transform.GetChild(i);
-                obj.SetParent(null);
                 Object.Destroy(obj.gameObject);
             }
         }
