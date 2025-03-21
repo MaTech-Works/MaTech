@@ -60,7 +60,7 @@ namespace MaTech.Gameplay.Logic {
         public static string NameOfBit(int i) => overriddenNames?.ElementAtOrDefault(i) ?? internalNames.ElementAtOrDefault(i);
 
         public static string ToEditorName(this HitResult result) {
-            return string.Join(", ", SelectValidBits(result).Select(i => NameOfBit(i)));
+            return string.Join(", ", SelectValidBits(result).Select(NameOfBit));
         }
 
         private static string[] overriddenNames;
@@ -84,6 +84,7 @@ namespace MaTech.Gameplay.Logic {
     public static class EnumFlagBoilerplates {
         public static bool HasAnyFlag(this HitResult self, HitResult any) => (self & any) != 0;
         public static bool HasAllFlag(this HitResult self, HitResult all) => (self & all) == all;
+        public static bool HasNoneFlag(this HitResult self, HitResult except) => (self & except) == 0;
         public static bool HasAnyFlagExcept(this HitResult self, HitResult any, HitResult except) => (self & any) != 0 && (self & except) == 0;
         public static bool HasAllFlagExcept(this HitResult self, HitResult all, HitResult except) => (self & all) == all && (self & except) == 0;
         

@@ -30,9 +30,6 @@ namespace MaTech.Gameplay.Data {
     // todo: implement Rational struct and replace with it here
     // todo: after Rational, make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
-    #if ODIN_INSPECTOR
-    [DisplayAsString]
-    #endif
     public struct BeatUnit : ITimeUnit<BeatUnit>, IComparable<BeatUnit>, IEquatable<BeatUnit> {
         public readonly Fraction fraction;
         public readonly float decimals; // todo: not caching the decimals when fraction is used, so no precision loss is accumulated throughout calculation
@@ -118,9 +115,6 @@ namespace MaTech.Gameplay.Data {
     // todo: implement Rational struct and replace with it here
     // todo: after Rational, make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
-    #if ODIN_INSPECTOR
-    [DisplayAsString]
-    #endif
     public struct TimeUnit : ITimeUnit<TimeUnit>, IComparable<TimeUnit> {
         public readonly int integer;
         public readonly float decimals;

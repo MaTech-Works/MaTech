@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
-using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
@@ -18,7 +17,7 @@ using static MaTech.Gameplay.Logic.HitMatchMethod;
 using static MaTech.Gameplay.Logic.JudgeLogicBase;
 using static MaTech.Gameplay.Logic.JudgeLogicBase.NoteHitAction;
 #if ODIN_INSPECTOR
-using Sirenix.Utilities.Editor;
+using Sirenix.OdinInspector;
 #endif
 
 namespace MaTech.Gameplay.Logic {
@@ -45,7 +44,7 @@ namespace MaTech.Gameplay.Logic {
                 case HasAny when hit.result.HasAnyFlag(matchTarget): break;
                 case ContainsAll when hit.result.HasAllFlag(matchTarget): break;
                 case InsideAll when matchTarget.HasAllFlag(hit.result): break;
-                case HasNone when hit.result.HasAnyFlagExcept(HitResult.None, matchTarget): break;
+                case HasNone when hit.result.HasNoneFlag(matchTarget): break;
                 default: continue;
                 }
                 return true;
@@ -54,10 +53,11 @@ namespace MaTech.Gameplay.Logic {
         }
     }
     
+    // todo: a custom drawer for odin, either this struct or HitResult
     // todo: always use this struct for OnHitNote and various methods
-    // todo: consider about class with pooling, could be done together with merging EmptyHit
     [Serializable]
     public readonly struct HitEvent {
+        [DisplayAsString]
         public readonly TimeUnit time;
         public readonly NoteHitAction action;
         public readonly HitResult result;
