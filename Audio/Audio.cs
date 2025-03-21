@@ -111,6 +111,10 @@ namespace MaTech.Audio {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MaAudio_GetMixerVolume")]
         public static extern float GetMixerVolume(Mixer mixer);
         
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MaAudio_SetMasterVolume")]
+        public static extern bool SetMasterVolume(float volume);
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MaAudio_GetMasterVolume")]
+        public static extern float GetMasterVolume();
         #endregion
         
         #region Audio System Properties
