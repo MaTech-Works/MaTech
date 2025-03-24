@@ -21,13 +21,10 @@ namespace MaTech.Gameplay.Data {
     public interface ITimePoint {
         /// <summary> 根据 BPM (Beat Per Minutes) 定义的节拍值，一拍通常是一个四分音符 </summary>
         public BeatUnit Beat { get; }
-
         /// <summary> 音轨时间，若音源在音轨0秒处开始播放，则对应音源的时间 </summary>
         public TimeUnit Time { get; }
-
         /// <summary> 按照 Beat 所定位的延迟前时间，Time = TimeOfBeat + Delay </summary>
         public TimeUnit TimeOfBeat { get; }
-
         /// <summary> Time 属性相对于 Beat 所定位的时间点的延迟，Time = TimeOfBeat + Delay </summary>
         public TimeUnit Delay { get; }
     }

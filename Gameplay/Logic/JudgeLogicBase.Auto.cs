@@ -17,14 +17,14 @@ namespace MaTech.Gameplay.Logic {
             public void AttachController(IPlayControl playControl) => control = playControl;
             public void DetachController() => control = null;
 
-            public void ResetControl(TimeUnit judgeTime) => ResetAutoPlay(judgeTime);
-            public void UpdateControl(TimeUnit judgeTime) {
+            public void ResetControl(TimeUnit time) => ResetAutoPlay(time);
+            public void UpdateControl(TimeUnit time) {
                 Assert.IsNotNull(control);
-                UpdateAutoPlay(judgeTime, control);
+                UpdateAutoPlay(time, control);
             }
 
-            protected abstract void ResetAutoPlay(TimeUnit judgeTime);
-            protected abstract void UpdateAutoPlay(TimeUnit judgeTime, IPlayControl control);
+            protected abstract void ResetAutoPlay(TimeUnit time);
+            protected abstract void UpdateAutoPlay(TimeUnit time, IPlayControl control);
 
         }
     }

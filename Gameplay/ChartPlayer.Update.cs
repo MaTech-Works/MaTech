@@ -52,20 +52,20 @@ namespace MaTech.Gameplay {
             Profiler.BeginSample("ChartPlayer.UpdateEarly()", this);
 
             try {
-                TimeUnit judgeTimeBeforeInput = PlayTime.InputTime;
+                TimeUnit timeBeforeInput = PlayTime.InputTime;
                 UpdateTime();
-                TimeUnit judgeTimeAfterInput = PlayTime.InputTime;
+                TimeUnit timeAfterInput = PlayTime.InputTime;
                 
                 bool canUpdateJudgeLogic = !finishing && UnityUtil.IsAssigned(judgeLogic);
                 if (canUpdateJudgeLogic) {
-                    judgeLogic.OnUpdateLogicBeforeInput(judgeTimeBeforeInput, judgeTimeAfterInput);
+                    judgeLogic.OnUpdateLogicBeforeInput(timeBeforeInput, timeAfterInput);
                 }
                 
                 UpdateController();
                 FlushPendingInput();
                 
                 if (canUpdateJudgeLogic) {
-                    judgeLogic.OnUpdateLogicAfterInput(judgeTimeBeforeInput, judgeTimeAfterInput);
+                    judgeLogic.OnUpdateLogicAfterInput(timeBeforeInput, timeAfterInput);
                 }
 
             } catch (Exception ex) {

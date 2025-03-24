@@ -17,6 +17,6 @@ namespace MaTech.Gameplay.Logic {
         /// <summary> 判定逻辑的结束生效范围，返回正的绝对值（返回负数会让结束位置比音符更早）。 </summary>
         TimeUnit WindowLate { get; }
             
-        HitResult JudgeNoteHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime);
+        HitResult JudgeNoteHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit time);
     }
 }

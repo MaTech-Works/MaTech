@@ -71,7 +71,7 @@ namespace MaTech.Gameplay {
             
             protected IPlayControl control;
 
-            protected int lastJudgeTime = 0;
+            protected int lastTime = 0;
             protected int nextRecordIndex = 0;
 
             private const int fingerCapacity = 100; // trying to be mercy
@@ -84,25 +84,25 @@ namespace MaTech.Gameplay {
             public void AttachController(IPlayControl playControl) => control = playControl;
             public void DetachController() => control = null;
 
-            public virtual void ResetControl(int judgeTime) {
+            public virtual void ResetControl(int time) {
                 listRecordSorted.Clear();
                 if (ReplayFile?.Records != null) {
                     listRecordSorted.AddRange(ReplayFile.Records);
                     listRecordSorted.Sort(compareRecord);
                 }
 
-                lastJudgeTime = judgeTime;
-                nextRecordIndex = listRecordSorted.FindIndex(record => record.Time >= judgeTime);
+                lastTime = time;
+                nextRecordIndex = listRecordSorted.FindIndex(record => record.Time >= time);
             }
 
-            public virtual void UpdateControl(int judgeTime) {
+            public virtual void UpdateControl(int time) {
                 Score.Snapshot scoreSnapshot = default;
                 scoreSnapshot.source = Score.ScoreSource.Replay;
 
                 var hasScore = false;
                 for (int n = listRecordSorted.Count; nextRecordIndex < n; ++nextRecordIndex) {
                     var record = listRecordSorted[nextRecordIndex];
-                    if (record.Time > judgeTime) break;
+                    if (record.Time > time) break;
                     
                     if (record.Cells == null) {
                         Debug.LogError("[Replay] null cell list???");
@@ -175,9 +175,9 @@ namespace MaTech.Gameplay {
                 }
                 
                 if (hasScore) {
-                    control.PlayScoreInput(scoreSnapshot, judgeTime);
+                    control.PlayScoreInput(scoreSnapshot, time);
                 }
-                lastJudgeTime = judgeTime;
+                lastTime = time;
             }
             
         }

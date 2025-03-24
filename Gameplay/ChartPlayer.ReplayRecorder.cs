@@ -21,15 +21,15 @@ namespace MaTech.Gameplay {
         
         public interface IReplayRecordInput {
             void FlushRecords();
-            void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime);
-            void RecordTouchInput(PlayInput.Finger finger, TimeUnit judgeTime);
-            void RecordIndexedInput(int index, bool isDown, TimeUnit judgeTime);
+            void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit time);
+            void RecordTouchInput(PlayInput.Finger finger, TimeUnit time);
+            void RecordIndexedInput(int index, bool isDown, TimeUnit time);
         }
         
         public interface IReplayRecordJudgeScore {
-            void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime, HitResult result);
-            void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeUnit judgeTime);
-            void RecordScoreUpdate(IScore score, TimeUnit judgeTime);
+            void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeUnit time, HitResult result);
+            void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeUnit time);
+            void RecordScoreUpdate(IScore score, TimeUnit time);
         }
         
         private interface IReplayRecorder : IReplayFileSource, IReplayRecordInput, IReplayRecordJudgeScore {}
@@ -108,13 +108,13 @@ namespace MaTech.Gameplay {
             /// <summary>
             /// 将一个cell放到time相同的record内，保证不会放到最近一次flush操作前已有的record中。
             /// </summary>
-            private void AddCellToRecord(ReplayFile.Types.Cell cell, TimeUnit judgeTime) {
+            private void AddCellToRecord(ReplayFile.Types.Cell cell, TimeUnit time) {
                 Assert.IsNotNull(cell, "null cells not supported by default. what do you want to do?");
 
                 ReplayFile.Types.Record activeRecord = null;
                 for (int i = activeRecordsStartIndex, n = ReplayFile.Records.Count; i < n; ++i) {
                     var record = ReplayFile.Records[i];
-                    if (record.Time == judgeTime) {
+                    if (record.Time == time) {
                         activeRecord = record;
                         break;
                     }
@@ -122,7 +122,7 @@ namespace MaTech.Gameplay {
 
                 if (activeRecord == null) {
                     activeRecord = new ReplayFile.Types.Record {
-                        Time = judgeTime,
+                        Time = time,
                         Index = nextRecordIndex++,
                     };
                     ReplayFile.Records.Add(activeRecord);
@@ -130,19 +130,19 @@ namespace MaTech.Gameplay {
 
                 activeRecord.Cells.Add(cell);
                 foreach (var behavior in PlayBehavior.ListReplayHander) {
-                    behavior.OnNewReplay(cell, judgeTime);
+                    behavior.OnNewReplay(cell, time);
                 }
             }
 
-            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {
+            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {
                 if (isDown) {
-                    AddCellToRecord(new ReplayFile.Types.Cell {InputKeyDown = (uint)keyCode}, judgeTime);
+                    AddCellToRecord(new ReplayFile.Types.Cell {InputKeyDown = (uint)keyCode}, time);
                 } else {
-                    AddCellToRecord(new ReplayFile.Types.Cell {InputKeyUp = (uint)keyCode}, judgeTime);
+                    AddCellToRecord(new ReplayFile.Types.Cell {InputKeyUp = (uint)keyCode}, time);
                 }
             }
 
-            public void RecordTouchInput(PlayInput.Finger finger, TimeUnit judgeTime) {
+            public void RecordTouchInput(PlayInput.Finger finger, TimeUnit time) {
                 var cell = new ReplayFile.Types.CellInputTouch {
                     Id = finger.ID,
                     Phase = (int)finger.Phase,
@@ -151,42 +151,42 @@ namespace MaTech.Gameplay {
                 ReplayUtil.SerializeRay(finger.Ray, cell.Ray);
                 ReplayUtil.SerialVector2Int(finger.Coord, cell.Coord);
 
-                AddCellToRecord(new ReplayFile.Types.Cell {InputTouch = cell}, judgeTime);
+                AddCellToRecord(new ReplayFile.Types.Cell {InputTouch = cell}, time);
             }
 
-            public void RecordIndexedInput(int index, bool isDown, TimeUnit judgeTime) {
+            public void RecordIndexedInput(int index, bool isDown, TimeUnit time) {
                 if (index < 0) return;
                 if (isDown) {
-                    AddCellToRecord(new ReplayFile.Types.Cell {InputIndexedDown = (uint)index}, judgeTime);
+                    AddCellToRecord(new ReplayFile.Types.Cell {InputIndexedDown = (uint)index}, time);
                 } else {
-                    AddCellToRecord(new ReplayFile.Types.Cell {InputIndexedUp = (uint)index}, judgeTime);
+                    AddCellToRecord(new ReplayFile.Types.Cell {InputIndexedUp = (uint)index}, time);
                 }
             }
 
-            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitResult result, int index, TimeUnit judgeTime, HitResult result) {
+            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitResult result, int index, TimeUnit time, HitResult result) {
                 var cell = new ReplayFile.Types.CellHitNote {
                     Index = index,
                     Result = (int)result,
                     Timing = (int)result,
                 };
 
-                AddCellToRecord(new ReplayFile.Types.Cell {HitNote = cell}, judgeTime);
+                AddCellToRecord(new ReplayFile.Types.Cell {HitNote = cell}, time);
             }
 
-            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitResult result, int index, TimeUnit judgeTime) {
+            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitResult result, int index, TimeUnit time) {
                 var cell = new ReplayFile.Types.CellHitEmpty {
                     Index = index,
                     Result = (int)result,
                 };
 
-                AddCellToRecord(new ReplayFile.Types.Cell {HitEmpty = cell}, judgeTime);
+                AddCellToRecord(new ReplayFile.Types.Cell {HitEmpty = cell}, time);
             }
 
-            public void RecordScoreUpdate(Score score, TimeUnit judgeTime) {
-                AddCellToRecord(new ReplayFile.Types.Cell {Score = score.FinalScore}, judgeTime);
-                AddCellToRecord(new ReplayFile.Types.Cell {Combo = score.FinalCombo}, judgeTime);
-                AddCellToRecord(new ReplayFile.Types.Cell {Acc = score.FinalAcc}, judgeTime);
-                AddCellToRecord(new ReplayFile.Types.Cell {Hp = score.FinalHP}, judgeTime);
+            public void RecordScoreUpdate(Score score, TimeUnit time) {
+                AddCellToRecord(new ReplayFile.Types.Cell {Score = score.FinalScore}, time);
+                AddCellToRecord(new ReplayFile.Types.Cell {Combo = score.FinalCombo}, time);
+                AddCellToRecord(new ReplayFile.Types.Cell {Acc = score.FinalAcc}, time);
+                AddCellToRecord(new ReplayFile.Types.Cell {Hp = score.FinalHP}, time);
             }
         }
         */
@@ -199,13 +199,13 @@ namespace MaTech.Gameplay {
 
             public void FlushRecords() {}
 
-            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {}
-            public void RecordTouchInput(PlayInput.Finger finger, TimeUnit judgeTime) {}
-            public void RecordIndexedInput(int index, bool isDown, TimeUnit judgeTime) {}
+            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {}
+            public void RecordTouchInput(PlayInput.Finger finger, TimeUnit time) {}
+            public void RecordIndexedInput(int index, bool isDown, TimeUnit time) {}
 
-            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeUnit judgeTime, HitResult result) {}
-            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeUnit judgeTime) {}
-            public void RecordScoreUpdate(IScore score, TimeUnit judgeTime) {}
+            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeUnit time, HitResult result) {}
+            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeUnit time) {}
+            public void RecordScoreUpdate(IScore score, TimeUnit time) {}
         }
 
     }

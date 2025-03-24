@@ -35,7 +35,7 @@ namespace MaTech.Gameplay.Logic {
             Down, Move, Up, Flick,
         }
 
-        public delegate void ActionHitNote(IJudgeUnit unit, NoteHitAction action, in TimeUnit judgeTime, HitResult result);
+        public delegate void ActionHitNote(IJudgeUnit unit, NoteHitAction action, in TimeUnit time, HitResult result);
 
         // 以下组件getter在OnLoadChart后应当指向一个有效的实例
         // todo: 有没有更好的方法给这些组件添加工厂函数？是否将这些全部移动到一个ModeRule类，全部从外部传入这里？
@@ -72,15 +72,15 @@ namespace MaTech.Gameplay.Logic {
         /// <summary>
         /// 每帧游戏逻辑更新时被调用，与帧率关联的回调。
         /// </summary>
-        public virtual void OnUpdateLogicBeforeInput(TimeUnit judgeTimeBeforeInput, TimeUnit judgeTimeAfterInput) {}
-        public virtual void OnUpdateLogicAfterInput(TimeUnit judgeTimeBeforeInput, TimeUnit judgeTimeAfterInput) {}
+        public virtual void OnUpdateLogicBeforeInput(TimeUnit timeBeforeInput, TimeUnit timeAfterInput) {}
+        public virtual void OnUpdateLogicAfterInput(TimeUnit timeBeforeInput, TimeUnit timeAfterInput) {}
 
         /// <summary>
         /// 处理按键或触控输入，详见 PlayInput 类。
         /// </summary>
-        public virtual void OnIndexedInput(int index, bool isDown, TimeUnit judgeTime) {}
-        public virtual void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {}
-        public virtual void OnTouchInput(PlayInput.Finger finger, TimeUnit judgeTime) {}
+        public virtual void OnIndexedInput(int index, bool isDown, TimeUnit time) {}
+        public virtual void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {}
+        public virtual void OnTouchInput(PlayInput.Finger finger, TimeUnit time) {}
 
         public override void OnFinish(bool isFailed) => Score.Finish(isFailed);
 
@@ -91,31 +91,31 @@ namespace MaTech.Gameplay.Logic {
         /// <summary>
         /// 向判定数值Timing查询给定音符的判定结果。
         /// </summary>
-        protected HitResult JudgeNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit judgeTime) {
-            return Timing?.JudgeNoteHit(unit, action, judgeTime) ?? HitResult.None;
+        protected HitResult JudgeNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit time) {
+            return Timing?.JudgeNoteHit(unit, action, time) ?? HitResult.None;
         }
         
         /// <summary>
         /// 记录判定结果，并将判定发送至图形。
         /// </summary>
-        protected void HandleNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit judgeTime, HitResult result) {
-            LogNoteHit(unit, action, judgeTime, result);
+        protected void HandleNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit time, HitResult result) {
+            LogNoteHit(unit, action, time, result);
             
             // Note and Behavior callbacks
             Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): NoteBehavior.OnHit", this);
-            OnHitNote(unit, action, judgeTime, result);
+            OnHitNote(unit, action, time, result);
             Profiler.EndSample();
             
             Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): PlayBehavior.OnHitNote", this);
             foreach (var behavior in PlayBehavior.ListNoteHitResult) {
-                behavior.OnHitNote(unit, action, judgeTime, result);
+                behavior.OnHitNote(unit, action, time, result);
             }
             Profiler.EndSample();
 
             // Update score & Broadcast score change
             if (Score != null) {
                 Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): Score.HandleScoreResult", this);
-                Score.HandleScoreResult(result, judgeTime);
+                Score.HandleScoreResult(result, time);
                 Profiler.EndSample();
 
                 Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): ScoreSnapshot", this);
@@ -132,9 +132,9 @@ namespace MaTech.Gameplay.Logic {
             // Record replay
             if (Recorder != null) {
                 Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): Recorder", this);
-                Recorder.RecordJudgeNoteHit(action, judgeTime, result);
+                Recorder.RecordJudgeNoteHit(action, time, result);
                 if (Score != null) {
-                    Recorder.RecordScoreUpdate(Score, judgeTime);
+                    Recorder.RecordScoreUpdate(Score, time);
                 }
                 Profiler.EndSample();
             }
@@ -143,18 +143,18 @@ namespace MaTech.Gameplay.Logic {
         /// <summary>
         /// 将空击消息传递给所有子元件上的JudgeResultBehaviour
         /// </summary>
-        protected void HandleEmptyHit(EmptyHitAction action, TimeUnit judgeTime) {
-            LogEmptyHit(action, judgeTime);
+        protected void HandleEmptyHit(EmptyHitAction action, TimeUnit time) {
+            LogEmptyHit(action, time);
 
             Profiler.BeginSample("JudgeLogicBase.HandleEmptyHit(): PlayBehavior", this);
             foreach (var behavior in PlayBehavior.ListNoteHitResult) {
-                behavior.OnHitEmpty(action, judgeTime);
+                behavior.OnHitEmpty(action, time);
             }
             Profiler.EndSample();
             
             if (Recorder != null) {
                 Profiler.BeginSample("JudgeLogicBase.HandleEmptyHit(): Recorder", this);
-                Recorder.RecordJudgeEmptyHit(action, judgeTime);
+                Recorder.RecordJudgeEmptyHit(action, time);
                 Profiler.EndSample();
             }
         }

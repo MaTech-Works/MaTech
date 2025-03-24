@@ -23,7 +23,7 @@ namespace MaTech.Gameplay {
             [FieldOffset(4)] public KeyCode keyCode;
             [FieldOffset(8)] public bool isDown;
             [FieldOffset(4)] public int touchIndex;
-            [FieldOffset(12)] public TimeUnit judgeTime;
+            [FieldOffset(12)] public TimeUnit time;
         }
 
         private readonly List<InputData> listPendingInput = new List<InputData>(32);
@@ -31,51 +31,51 @@ namespace MaTech.Gameplay {
         
         private MetaTable<ScoreType> pendingScoreSnapshot;
         
-        private void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit judgeTime) {
+        private void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {
             if (judgeLogic == null) return;
             foreach (var behavior in PlayBehavior.ListKeyInputEarly) {
-                behavior.OnKeyInputEarly(keyCode, isDown, judgeTime);
+                behavior.OnKeyInputEarly(keyCode, isDown, time);
             }
             lock (listPendingInput) {
                 listPendingInput.Add(new InputData {
                     type = InputData.Type.Key,
                     keyCode = keyCode,
                     isDown = isDown,
-                    judgeTime = judgeTime,
+                    time = time,
                 });
             }
         }
 
-        private void OnTouchInput(PlayInput.Finger finger, TimeUnit judgeTime) {
+        private void OnTouchInput(PlayInput.Finger finger, TimeUnit time) {
             if (judgeLogic == null) return;
             foreach (var behavior in PlayBehavior.ListTouchInputEarly) {
-                behavior.OnTouchInputEarly(finger, judgeTime);
+                behavior.OnTouchInputEarly(finger, time);
             }
             lock (listPendingInput) {
                 listPendingInput.Add(new InputData {
                     type = InputData.Type.Touch,
                     touchIndex = AllocateTouchIndex(finger),
-                    judgeTime = judgeTime,
+                    time = time,
                 });
             }
         }
 
-        private void OnIndexedInput(int index, bool isDown, TimeUnit judgeTime) {
+        private void OnIndexedInput(int index, bool isDown, TimeUnit time) {
             if (judgeLogic == null) return;
             foreach (var behavior in PlayBehavior.ListIndexedInputEarly) {
-                behavior.OnIndexedInputEarly(index, isDown, judgeTime);
+                behavior.OnIndexedInputEarly(index, isDown, time);
             }
             lock (listPendingInput) {
                 listPendingInput.Add(new InputData {
                     type = InputData.Type.Indexed,
                     index = index,
                     isDown = isDown,
-                    judgeTime = judgeTime,
+                    time = time,
                 });
             }
         }
 
-        private void OnScoreUpdate(MetaTable<ScoreType> scoreSnapshot, TimeUnit judgeTime) {
+        private void OnScoreUpdate(MetaTable<ScoreType> scoreSnapshot, TimeUnit time) {
             if (judgeLogic == null) return;
             lock (listPendingInput) {
                 pendingScoreSnapshot = scoreSnapshot;
@@ -92,34 +92,34 @@ namespace MaTech.Gameplay {
             // Replay录制简则
             // - 对于每个Input，录制先于JudgeLogic发生，其后JudgeLogic内可后附额外录制信息
             // - FlushPendingInput的开头和结尾都flush一次record，将这部分的处理内容始终分发到一组独立的record
-            // - 三种Input与JudgeLogic内不进行flush，产生的任何判定结果和输入根据judgeTime自动匹配record
+            // - 三种Input与JudgeLogic内不进行flush，产生的任何判定结果和输入根据time自动匹配record
             inputRecorder?.FlushRecords();
             
             foreach (var i in listPendingInputDumped) {
                 switch (i.type) {
                 case InputData.Type.Key: {
                     foreach (var behavior in PlayBehavior.ListKeyInput) {
-                        behavior.OnKeyInput(i.keyCode, i.isDown, i.judgeTime);
+                        behavior.OnKeyInput(i.keyCode, i.isDown, i.time);
                     }
-                    inputRecorder?.RecordKeyInput(i.keyCode, i.isDown, i.judgeTime);
-                    judgeLogic.OnKeyInput(i.keyCode, i.isDown, i.judgeTime);
+                    inputRecorder?.RecordKeyInput(i.keyCode, i.isDown, i.time);
+                    judgeLogic.OnKeyInput(i.keyCode, i.isDown, i.time);
                     break;
                 }
                 case InputData.Type.Touch: {
                     var finger = DeallocateTouchIndex(i.touchIndex);
                     foreach (var behavior in PlayBehavior.ListTouchInput) {
-                        behavior.OnTouchInput(finger, i.judgeTime);
+                        behavior.OnTouchInput(finger, i.time);
                     }
-                    inputRecorder?.RecordTouchInput(finger, i.judgeTime);
-                    judgeLogic.OnTouchInput(finger, i.judgeTime);
+                    inputRecorder?.RecordTouchInput(finger, i.time);
+                    judgeLogic.OnTouchInput(finger, i.time);
                     break;
                 }
                 case InputData.Type.Indexed: {
                     foreach (var behavior in PlayBehavior.ListIndexedInput) {
-                        behavior.OnIndexedInput(i.index, i.isDown, i.judgeTime);
+                        behavior.OnIndexedInput(i.index, i.isDown, i.time);
                     }
-                    inputRecorder?.RecordIndexedInput(i.index, i.isDown, i.judgeTime);
-                    judgeLogic.OnIndexedInput(i.index, i.isDown, i.judgeTime);
+                    inputRecorder?.RecordIndexedInput(i.index, i.isDown, i.time);
+                    judgeLogic.OnIndexedInput(i.index, i.isDown, i.time);
                     break;
                 }
                 }

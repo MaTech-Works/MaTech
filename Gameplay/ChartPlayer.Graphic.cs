@@ -28,7 +28,7 @@ namespace MaTech.Gameplay {
 
         public interface INoteVisual : IObjectVisual<NoteCarrier, NoteLayer> {
             /// <summary> 接受JudgeLogic传递的判定消息 </summary>
-            void OnHit(IJudgeUnit judgeUnit, JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result);
+            void OnHit(IJudgeUnit judgeUnit, JudgeLogicBase.NoteHitAction action, in TimeUnit time, HitResult result);
         }
 
         public interface IBarVisual : IObjectVisual<BarCarrier, BarLayer> {}

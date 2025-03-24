@@ -9,14 +9,14 @@ using MaTech.Gameplay.Logic;
 
 namespace MaTech.Gameplay.Display {
     public class NoteLayer : ObjectLayer<ChartPlayer.NoteCarrier, NoteLayer> {
-        public int HandleNoteHit(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit judgeTime, HitResult result) {
+        public int HandleNoteHit(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit time, HitResult result) {
             int count = 0;
             foreach (var carrier in RealizedCarriers) {
                 if (carrier is not ChartPlayer.NoteCarrier noteCarrier) continue;
                 if (!noteCarrier.ContainsUnit(unit)) continue;
                 var visual = FindVisual<ChartPlayer.INoteVisual>(noteCarrier);
                 if (visual == null) continue;
-                visual.OnHit(unit, action, judgeTime, result);
+                visual.OnHit(unit, action, time, result);
                 count += 1;
             }
             return count;
