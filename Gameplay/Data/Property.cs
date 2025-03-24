@@ -27,8 +27,8 @@ namespace MaTech.Gameplay.Data {
             scalar = new Value<ScalarUnit>(value, unit ?? ScalarUnit.one);
         }
         
-        public Option<T> To<T>() => scalar.To<T>();
-        public T Cast<T>() => scalar.To<T>().ValueOrDefault();
+        public Option<T> As<T>() => scalar.As<T>();
+        public T To<T>() => scalar.As<T>().ValueOrDefault();
 
         public static implicit operator Property<TDefine>(int number) => new(number, define.UnitForInt);
         public static implicit operator Property<TDefine>(float value) => new(value);
@@ -36,16 +36,16 @@ namespace MaTech.Gameplay.Data {
         public static implicit operator Property<TDefine>((int a, int b) x) => new(FractionSimple.Valid(x.a, x.b));
         public static implicit operator Property<TDefine>((int n, int a, int b) x) => new(Fraction.Valid(x.n, x.a, x.b));
 
-        public static implicit operator Variant(in Property<TDefine> t) => t.Cast<Variant>();
+        public static implicit operator Variant(in Property<TDefine> t) => t.To<Variant>();
         
-        public static implicit operator int(in Property<TDefine> t) => t.Cast<int>();
-        public static implicit operator float(in Property<TDefine> t) => t.Cast<float>();
-        public static implicit operator double(in Property<TDefine> t) => t.Cast<double>();
+        public static implicit operator int(in Property<TDefine> t) => t.To<int>();
+        public static implicit operator float(in Property<TDefine> t) => t.To<float>();
+        public static implicit operator double(in Property<TDefine> t) => t.To<double>();
         
-        public static implicit operator Fraction(in Property<TDefine> t) => t.Cast<Fraction>();
-        public static implicit operator FractionSimple(in Property<TDefine> t) => t.Cast<FractionSimple>();
+        public static implicit operator Fraction(in Property<TDefine> t) => t.To<Fraction>();
+        public static implicit operator FractionSimple(in Property<TDefine> t) => t.To<FractionSimple>();
 
-        public static implicit operator TimeUnit(in Property<TDefine> t) => TimeUnit.FromMilliseconds(t.Cast<double>()); // todo: implement with unit adopt
+        public static implicit operator TimeUnit(in Property<TDefine> t) => TimeUnit.FromMilliseconds(t.To<double>()); // todo: implement with unit adopt
     }
 
     // todo: finish TEnum and original design
