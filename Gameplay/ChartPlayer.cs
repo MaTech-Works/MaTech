@@ -49,8 +49,6 @@ namespace MaTech.Gameplay {
        
         [Tooltip("继续游戏的时候，谱面以怎样的速度回退多少时间，单位秒")]
         public AnimationCurve timeCurveResumeRewind = AnimationCurve.EaseInOut(0, 0, 1, -2);
-        [Tooltip("继续游戏以后多少时间允许再次暂停")]
-        public double timePauseCooldown = 1;
         
         [Space]
         [Header("Display Options")]
@@ -78,8 +76,9 @@ namespace MaTech.Gameplay {
         public bool IsLoaded => loaded;
         public bool IsPlaying => playing;
         public bool IsFinished => judgeLogic.IsFinished;
+        public bool IsPaused => loaded && !playing;
         public bool IsResumeRewinding => rewinding;
-        public bool AllowPause => playing && PlayTime.InputTime.Seconds >= timeNextAllowedPause;
+        public bool IsRetry => playCount > 0;
         public int PlayCount => playCount;
 
         private bool loaded;
@@ -99,8 +98,6 @@ namespace MaTech.Gameplay {
 
         private float unityTimeLastResume;  // 对应Unity的Time.time
         private double audioTimeLastResume;  // 对应ChartAudioPlayer的时间
-        
-        private double timeNextAllowedPause = double.MinValue;
         
         private double speedScale = 1.0;
         public double SpeedScale {
@@ -322,7 +319,6 @@ namespace MaTech.Gameplay {
             playing = true;
             finishing = false;
             playCount += 1;
-            timeNextAllowedPause = double.MinValue;
 
             ResetController();
             EnableController();
@@ -338,8 +334,6 @@ namespace MaTech.Gameplay {
         public void Pause() {
             if (CheckBusy("Pause")) return;
             if (!loaded || !playing) return;
-
-            timeNextAllowedPause = PlayTime.LogicTime + timePauseCooldown;
 
             DisableController();
 
