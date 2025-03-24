@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MaTech.Common.Algorithm {
     public readonly struct Recycler<T> : IDisposable where T : class {
@@ -25,12 +26,14 @@ namespace MaTech.Common.Algorithm {
         private readonly Func<T> factory;
         private readonly Action<T>? init;
         private readonly Action<T>? reset;
+        private readonly Action<T>? trim;
 
-        public Pool(Func<T> factory, Action<T>? init = null, Action<T>? reset = null, int spare = 0) {
+        public Pool(Func<T> factory, Action<T>? init = null, Action<T>? reset = null, Action<T>? trim = null, int spare = 0) {
             this.factory = factory;
             this.init = init;
             this.reset = reset;
-            SpareCount = spare;
+            this.trim = trim;
+            if (spare > 0) SpareCount = spare;
         }
 
         public int SpareCount {
@@ -38,7 +41,7 @@ namespace MaTech.Common.Algorithm {
             set {
                 int delta = Math.Max(value, 0) - bin.Count;
                 for (; delta > 0; --delta) bin.Recycle(factory.Invoke());
-                for (; delta < 0; ++delta) bin.Trim();
+                for (; delta < 0; ++delta) if (bin.Get() is var item and true) trim?.Invoke(item!);
             }
         }
 
@@ -62,19 +65,24 @@ namespace MaTech.Common.Algorithm {
         private readonly Func<T> factory;
         private readonly InitFunc? init;
         private readonly Action<T>? reset;
+        private readonly Action<T>? trim;
 
         public delegate void InitFunc(T item, in TData data);
         private static InitFunc? With(Action<T, TData>? init) => init is null ? null : (T item, in TData data) => init(item, data);
 
-        public Pool(Func<T> factory, Action<T, TData>? init = null, Action<T>? reset = null) {
+        public Pool(Func<T> factory, Action<T, TData>? init = null, Action<T>? reset = null, Action<T>? trim = null, int spare = 0) {
             this.factory = factory;
             this.init = With(init);
             this.reset = reset;
+            this.trim = trim;
+            if (spare > 0) SpareCount = spare;
         }
-        public Pool(Func<T> factory, InitFunc? init = null, Action<T>? reset = null) {
+        public Pool(Func<T> factory, InitFunc? init = null, Action<T>? reset = null, Action<T>? trim = null, int spare = 0) {
             this.factory = factory;
             this.init = init;
             this.reset = reset;
+            this.trim = trim;
+            if (spare > 0) SpareCount = spare;
         }
 
         public int SpareCount {
@@ -82,7 +90,7 @@ namespace MaTech.Common.Algorithm {
             set {
                 int delta = Math.Max(value, 0) - bin.Count;
                 for (; delta > 0; --delta) bin.Recycle(factory.Invoke());
-                for (; delta < 0; ++delta) bin.Trim();
+                for (; delta < 0; ++delta) if (bin.Get() is var item and true) trim?.Invoke(item!);
             }
         }
 
@@ -108,7 +116,10 @@ namespace MaTech.Common.Algorithm {
         public virtual int Count => spare.Count;
 
         public Recycler<T> Get() {
-            if (recent.TryPop(out var item)) return new(this, item);
+            if (recent.TryPop(out var item)) {
+                spare.Remove(item);
+                return new(this, item);
+            }
             return new(this, null);
         } 
         
@@ -116,14 +127,6 @@ namespace MaTech.Common.Algorithm {
             if (spare.Contains(item)) return false;
             recent.Push(item);
             spare.Add(item);
-            return true;
-        }
-
-        public bool Trim() {
-            if (!recent.TryPop(out var item)) return false;
-            if (item is IDisposable disposable)
-                disposable.Dispose();
-            spare.Remove(item);
             return true;
         }
     }
