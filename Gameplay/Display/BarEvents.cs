@@ -16,11 +16,10 @@ using Sirenix.OdinInspector;
 
 namespace MaTech.Gameplay.Display {
     public class BarEvents : BarBehavior {
-        public bool setActiveForLifetime = true;
+        public bool setActiveUponLifetime = true;
         public bool clampToDisplayWindow = false;
 
-        [Space]
-        public Events events;
+        [Space] public Events events;
         
         #if ODIN_INSPECTOR
         [InlineProperty, HideLabel]
@@ -46,19 +45,19 @@ namespace MaTech.Gameplay.Display {
         
         protected override void BarInit() {
             events.onInit.Invoke();
-            if (setActiveForLifetime) gameObject.SetActive(false);
+            if (setActiveUponLifetime) gameObject.SetActive(false);
         }
         
         protected override void BarStart() {
             events.onUpdateLayer.Invoke(Layer);
             events.onUpdateCarrier.Invoke(Carrier);
-            if (setActiveForLifetime) gameObject.SetActive(true);
+            if (setActiveUponLifetime) gameObject.SetActive(true);
             events.onStart.Invoke();
         }
         
         protected override void BarFinish() {
             events.onFinish.Invoke();
-            if (setActiveForLifetime) gameObject.SetActive(false);
+            if (setActiveUponLifetime) gameObject.SetActive(false);
         }
         
         protected override void BarUpdate() {

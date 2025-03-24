@@ -17,12 +17,11 @@ using Sirenix.OdinInspector;
 
 namespace MaTech.Gameplay.Display {
     public class NoteEvents : NoteBehavior {
-        public bool setActiveOnInitFinish = false;
+        public bool setActiveUponLifetime = true;
         public bool clampToDisplayWindow = false;
         
-        [Space]
-        public Events events;
-        public HitEventBinding[] hitEvents;
+        [Space] public HitEventBinding[] hitEvents;
+        [Space] public Events events;
         
         #if ODIN_INSPECTOR
         [ShowInInspector, ReadOnly, HideLabel, InlineProperty]
@@ -80,19 +79,20 @@ namespace MaTech.Gameplay.Display {
 
         protected override void NoteInit() {
             events.onInit.Invoke();
+            if (setActiveUponLifetime) gameObject.SetActive(false);
         }
 
         protected override void NoteStart() {
             LastHit = HitEvent.Empty;
             events.onUpdateLayer.Invoke(Layer);
             events.onUpdateCarrier.Invoke(Carrier);
-            if (setActiveOnInitFinish) gameObject.SetActive(true);
+            if (setActiveUponLifetime) gameObject.SetActive(true);
             events.onStart.Invoke();
         }
 
         protected override void NoteFinish() {
             events.onFinish.Invoke();
-            if (setActiveOnInitFinish) gameObject.SetActive(false);
+            if (setActiveUponLifetime) gameObject.SetActive(false);
         }
 
         protected override void NoteUpdate() {
