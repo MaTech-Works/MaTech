@@ -70,8 +70,8 @@ namespace MaTech.Gameplay.Logic {
             Score = CreateScore(playInfo);
             Timing = CreateJudgeTiming(playInfo);
             
-            Score.Init(playInfo);
-            Timing.Init(playInfo);
+            Score.ResetScore(playInfo);
+            Timing.ResetScore(playInfo);
             
             pendingCarriers.Clear();
             activeCarriers.Clear();

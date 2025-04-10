@@ -82,7 +82,7 @@ namespace MaTech.Gameplay.Logic {
         public virtual void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {}
         public virtual void OnTouchInput(PlayInput.Finger finger, TimeUnit time) {}
 
-        public override void OnFinish(bool isFailed) => Score.Finish(isFailed);
+        public override void OnFinish(bool isFailed) => Score.FinishScore(isFailed);
 
         #endregion
 
@@ -92,7 +92,7 @@ namespace MaTech.Gameplay.Logic {
         /// 向判定数值Timing查询给定音符的判定结果。
         /// </summary>
         protected HitResult JudgeNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit time) {
-            return Timing?.JudgeNoteHit(unit, action, time) ?? HitResult.None;
+            return Timing?.JudgeNote(unit, action, time) ?? HitResult.None;
         }
         
         /// <summary>
