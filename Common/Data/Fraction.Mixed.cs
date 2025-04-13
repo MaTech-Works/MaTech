@@ -17,7 +17,7 @@ namespace MaTech.Common.Data {
         public static readonly FractionMixed invalid = default;
         public static readonly FractionMixed zero = new(0);
         public static readonly FractionMixed maxValue = new(int.MaxValue);
-        public static readonly FractionMixed minValue = new(int.MinValue);
+        public static readonly FractionMixed minValue = -maxValue; // avoid int.MinValue for negation overflow
 
         [SerializeField, FormerlySerializedAs("_int")] private int n;
         [SerializeField, FormerlySerializedAs("_num")] private int a;
@@ -33,8 +33,8 @@ namespace MaTech.Common.Data {
         public int Denominator { readonly get => b; set => b = value; }
 
         public readonly bool IsZero => n == 0 && a == 0;
-        public readonly bool IsValid => b != 0;
-        public readonly bool IsInvalid => b == 0;
+        public readonly bool IsValid => b != 0 && n != int.MaxValue;
+        public readonly bool IsInvalid => b == 0 || n == int.MaxValue;
 
         public readonly float Float => n + (float)a / b;
         public readonly double Double => n + (double)a / b;
@@ -122,7 +122,6 @@ namespace MaTech.Common.Data {
         public static bool operator==(FractionMixed x, FractionMixed y) => x.b != 0 && y.b != 0 && x.CompareTo(y) == 0;
         public static bool operator!=(FractionMixed x, FractionMixed y) => x.b != 0 && y.b != 0 && x.CompareTo(y) != 0;
         
-        public static FractionMixed New(int integer, int numerator, int denominator) => new(integer, numerator, denominator);
         public static FractionMixed Valid(int integer, int numerator, int denominator) => denominator == 0 ? invalid : new(integer, numerator, denominator);
         public static FractionMixed Normal(int integer, int numerator, int denominator) => new FractionMixed(integer, numerator, denominator).Normalized;
         public static FractionMixed Reduce(int integer, int numerator, int denominator) => new FractionMixed(integer, numerator, denominator).Reduced;

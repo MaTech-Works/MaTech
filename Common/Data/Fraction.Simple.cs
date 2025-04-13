@@ -19,7 +19,7 @@ namespace MaTech.Common.Data {
         public static readonly FractionSimple invalid = default;
         public static readonly FractionSimple zero = new(0);
         public static readonly FractionSimple maxValue = new(int.MaxValue);
-        public static readonly FractionSimple minValue = new(int.MinValue);
+        public static readonly FractionSimple minValue = -maxValue; // avoid int.MinValue for negation overflow
 
         [SerializeField, FormerlySerializedAs("_num")] private int a;
         [SerializeField, FormerlySerializedAs("_den")] private int b;
@@ -33,8 +33,8 @@ namespace MaTech.Common.Data {
         public int Denominator { readonly get => b; set => b = value; }
 
         public readonly bool IsZero => a == 0;
-        public readonly bool IsValid => b != 0;
-        public readonly bool IsInvalid => b == 0;
+        public readonly bool IsValid => b != 0 && a != int.MinValue;
+        public readonly bool IsInvalid => b == 0 || a == int.MinValue;
 
         public readonly float Float => (float)a / b;
         public readonly double Double => (double)a / b;
@@ -65,7 +65,7 @@ namespace MaTech.Common.Data {
         public readonly FractionSimple Reduced { get { var clone = this; clone.Reduce(); return clone; } }
         public readonly FractionSimple Simplified { get { var clone = Normalized; clone.Reduce(); return clone; } }
 
-        public readonly FractionSimple Negated => Valid(-a, b);
+        public readonly FractionSimple Negated => IsValid ? new(-a, b) : invalid;
         public readonly FractionSimple Inversed => Valid(b, a);
         
         public readonly int Floored => b == 0 ? 0 : a / b;
@@ -74,20 +74,20 @@ namespace MaTech.Common.Data {
         
         public static FractionSimple operator-(FractionSimple x) => x.Negated;
 
-        public static FractionSimple operator+(FractionSimple x, FractionSimple y) => Simple(x.a * y.b + y.a * x.b, x.b * y.b);
-        public static FractionSimple operator-(FractionSimple x, FractionSimple y) => Simple(x.a * y.b - y.a * x.b, x.b * y.b);
-        public static FractionSimple operator*(FractionSimple x, FractionSimple y) => Simple(x.a * y.a, x.b * y.b);
-        public static FractionSimple operator/(FractionSimple x, FractionSimple y) => Simple(x.a * y.b, x.b * y.a);
+        public static FractionSimple operator+(FractionSimple x, FractionSimple y) => checked(Simple(x.a * y.b + y.a * x.b, x.b * y.b));
+        public static FractionSimple operator-(FractionSimple x, FractionSimple y) => checked(Simple(x.a * y.b - y.a * x.b, x.b * y.b));
+        public static FractionSimple operator*(FractionSimple x, FractionSimple y) => checked(Simple(x.a * y.a, x.b * y.b));
+        public static FractionSimple operator/(FractionSimple x, FractionSimple y) => checked(Simple(x.a * y.b, x.b * y.a));
 
-        public static FractionSimple operator+(FractionSimple x, int value) => Valid(x.a + value * x.b, x.b);
-        public static FractionSimple operator-(FractionSimple x, int value) => Valid(x.a - value * x.b, x.b);
-        public static FractionSimple operator*(FractionSimple x, int value) => Reduce(x.a * value, x.b);
-        public static FractionSimple operator/(FractionSimple x, int value) => Reduce(x.a, x.b * value);
+        public static FractionSimple operator+(FractionSimple x, int value) => checked(Valid(x.a + value * x.b, x.b));
+        public static FractionSimple operator-(FractionSimple x, int value) => checked(Valid(x.a - value * x.b, x.b));
+        public static FractionSimple operator*(FractionSimple x, int value) => checked(Reduce(x.a * value, x.b));
+        public static FractionSimple operator/(FractionSimple x, int value) => checked(Reduce(x.a, x.b * value));
         
-        public static FractionSimple operator+(int value, FractionSimple x) => Valid(x.a + value * x.b, x.b);
-        public static FractionSimple operator-(int value, FractionSimple x) => Valid(x.a - value * x.b, x.b);
-        public static FractionSimple operator*(int value, FractionSimple x) => Reduce(x.a * value, x.b);
-        public static FractionSimple operator/(int value, FractionSimple x) => Reduce(x.b * value, x.a);
+        public static FractionSimple operator+(int value, FractionSimple x) => checked(Valid(x.a + value * x.b, x.b));
+        public static FractionSimple operator-(int value, FractionSimple x) => checked(Valid(x.a - value * x.b, x.b));
+        public static FractionSimple operator*(int value, FractionSimple x) => checked(Reduce(x.a * value, x.b));
+        public static FractionSimple operator/(int value, FractionSimple x) => checked(Reduce(x.b * value, x.a));
         
         public static FractionSimple Max(FractionSimple x, FractionSimple y) => x > y ? x : y;
         public static FractionSimple Min(FractionSimple x, FractionSimple y) => x < y ? x : y;
@@ -106,8 +106,7 @@ namespace MaTech.Common.Data {
         public static bool operator==(FractionSimple x, FractionSimple y) => x.b != 0 && y.b != 0 && x.CompareTo(y) == 0;
         public static bool operator!=(FractionSimple x, FractionSimple y) => x.b != 0 && y.b != 0 && x.CompareTo(y) != 0;
         
-        public static FractionSimple New(int numerator, int denominator) => new(numerator, denominator);
-        public static FractionSimple Valid(int numerator, int denominator) => denominator == 0 ? invalid : new(numerator, denominator);
+        public static FractionSimple Valid(int numerator, int denominator) => new FractionSimple(numerator, denominator).Validated;
         public static FractionSimple Reduce(int numerator, int denominator) => new FractionSimple(numerator, denominator).Reduced;
         public static FractionSimple Normal(int numerator, int denominator) => new FractionSimple(numerator, denominator).Normalized;
         public static FractionSimple Simple(int numerator, int denominator) => new FractionSimple(numerator, denominator).Simplified;
@@ -131,38 +130,34 @@ namespace MaTech.Common.Data {
         /// <param name="value"> The float-point value </param>
         /// <param name="maxDenominator"> Maximum denominator that can be produced </param>
         public static FractionSimple FromFloat(double value, int maxDenominator = 1000) {
-            try {
-                int a0 = (int)Math.Round(value);
-                FractionSimple result = new FractionSimple(a0);
+            int a0 = (int)Math.Round(value);
+            FractionSimple result = new FractionSimple(a0);
 
-                // 连分数 a0+1/(a1+1/(a2+1/(...(an+1/x)...))) 中的剩余展开值 x，其后迭代运算直至分母超过限制达到最优解
-                double remain = value - a0;
-                
-                double invMaxDenominator = 1.0 / maxDenominator;
-                if (Math.Abs(remain) < invMaxDenominator) { // 做一个浮点数比较，如果 remain * 2 小于 1/maxDenominator 了，那分母势必大于 maxDenominator，而且有可能爆int
-                    if (Math.Abs(remain) * 2 < invMaxDenominator) return result; // 分母太小，不忍直视
-                    return new FractionSimple(Math.Sign(remain), maxDenominator); // 0 与 1/maxDenominator 比起来，1/maxDenominator 更优的情况
-                }
-
-                List<int> arr = threadLocalCachedList.Value;
-                arr.Clear();
-                arr.Add(a0);
-
-                while (Math.Abs(remain) * 2 >= invMaxDenominator) { // 先为 remain 判断，避免爆int
-                    double invRemain = 1 / remain;
-                    int a = (int)Math.Round(invRemain);
-                    remain = invRemain - a;
-                    arr.Add(a);
-
-                    FractionSimple next = FromContinuousFraction(arr); // 由于连分数为反序计算，所以无法重用前一次迭代的计算结果
-                    if (Math.Abs(next.b) > maxDenominator) break;
-                    result = next;
-                }
-
-                return result.Normalized;
-            } catch (OverflowException) {
-                return new FractionSimple();
+            // 连分数 a0+1/(a1+1/(a2+1/(...(an+1/x)...))) 中的剩余展开值 x，其后迭代运算直至分母超过限制达到最优解
+            double remain = value - a0;
+            
+            double invMaxDenominator = 1.0 / maxDenominator;
+            if (Math.Abs(remain) < invMaxDenominator) { // 做一个浮点数比较，如果 remain * 2 小于 1/maxDenominator 了，那分母势必大于 maxDenominator，而且有可能爆int
+                if (Math.Abs(remain) * 2 < invMaxDenominator) return result; // 分母太小，不忍直视
+                return new FractionSimple(Math.Sign(remain), maxDenominator); // 0 与 1/maxDenominator 比起来，1/maxDenominator 更优的情况
             }
+
+            List<int> arr = threadLocalCachedList.Value;
+            arr.Clear();
+            arr.Add(a0);
+
+            while (Math.Abs(remain) * 2 >= invMaxDenominator) { // 先为 remain 判断，避免爆int
+                double invRemain = 1 / remain;
+                int a = (int)Math.Round(invRemain);
+                remain = invRemain - a;
+                arr.Add(a);
+
+                FractionSimple next = FromContinuousFraction(arr); // 由于连分数为反序计算，所以无法重用前一次迭代的计算结果
+                if (Math.Abs(next.b) > maxDenominator) break;
+                result = next;
+            }
+
+            return result.Normalized;
             
             FractionSimple FromContinuousFraction(List<int> values) { // 反序取倒数相加
                 var result = zero;
@@ -175,41 +170,57 @@ namespace MaTech.Common.Data {
         }
         private static readonly ThreadLocal<List<int>> threadLocalCachedList = new(() => new List<int>());
         
-        public static FractionSimple SafeAdd(FractionSimple x, FractionSimple y) {
+        public static FractionSimple SafeAdd(in FractionSimple x, in FractionSimple y) {
             if (x.b == 0 || y.b == 0) return invalid;
-            if (x.b == y.b) {
-                return Normal(x.a + y.a, x.b);
+            try {
+                if (x.b == y.b) {
+                    return Normal(x.a + y.a, x.b);
+                }
+                int d = MathUtil.GCD(x.b, y.b);
+                int xd = x.b / d;
+                int yd = y.b / d;
+                return Normal(x.a * yd + y.a * xd, x.b * yd);
+            } catch (OverflowException) {
+                return invalid;
             }
-            int d = MathUtil.GCD(x.b, y.b);
-            int xd = x.b / d;
-            int yd = y.b / d;
-            return Normal(x.a * yd + y.a * xd, x.b * yd);
         }
-        public static FractionSimple SafeSubtract(FractionSimple x, FractionSimple y) {
+        public static FractionSimple SafeSubtract(in FractionSimple x, in FractionSimple y) {
             if (x.b == 0 || y.b == 0) return invalid;
-            if (x.b == y.b) {
-                return Normal(x.a - y.a, x.b);
+            try {
+                if (x.b == y.b) {
+                    return Normal(x.a - y.a, x.b);
+                }
+                int d = MathUtil.GCD(x.b, y.b);
+                int xd = x.b / d;
+                int yd = y.b / d;
+                return Normal(x.a * yd - y.a * xd, x.b * yd);
+            } catch (OverflowException) {
+                return invalid;
             }
-            int d = MathUtil.GCD(x.b, y.b);
-            int xd = x.b / d;
-            int yd = y.b / d;
-            return Normal(x.a * yd - y.a * xd, x.b * yd);
         }
-        public static FractionSimple SafeMultiply(FractionSimple x, FractionSimple y) {
+        public static FractionSimple SafeMultiply(in FractionSimple x, in FractionSimple y) {
             if (x.b == 0 || y.b == 0) return invalid;
-            var s = x.Reduced;
-            var t = y.Reduced;
-            s = Reduce(s.a, t.b);
-            t = Reduce(t.a, s.b);
-            return Normal(s.a * t.a, s.b * t.b);
+            try {
+                var s = x.Reduced;
+                var t = y.Reduced;
+                s = Reduce(s.a, t.b);
+                t = Reduce(t.a, s.b);
+                return Normal(s.a * t.a, s.b * t.b);
+            } catch (OverflowException) {
+                return invalid;
+            }
         }
-        public static FractionSimple SafeDivide(FractionSimple x, FractionSimple y) {
+        public static FractionSimple SafeDivide(in FractionSimple x, in FractionSimple y) {
             if (x.b == 0 || y.b == 0) return invalid;
-            var s = x.Reduced;
-            var t = y.Reduced; // notice that t is inversed on the next step
-            s = Reduce(s.a, t.a);
-            t = Reduce(t.b, s.b);
-            return Normal(x.a * y.b, x.b * y.a);
+            try {
+                var s = x.Reduced;
+                var t = y.Reduced; // notice that t is inversed on the next step
+                s = Reduce(s.a, t.a);
+                t = Reduce(t.b, s.b);
+                return Normal(x.a * y.b, x.b * y.a);
+            } catch (OverflowException) {
+                return invalid;
+            }
         }
 
         public override readonly string ToString() { return b == 0 ? "Invalid" : $"{a}/{b}"; }
