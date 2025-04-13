@@ -40,15 +40,15 @@ namespace MaTech.Gameplay {
             
             public double StartTime => start.time.Seconds;
             public double StartRoll => start.roll;
-            public Fraction StartBeat => start.beat.Fraction;
+            public FractionMixed StartBeat => start.beat.Fraction;
             
             public double EndTime => end.time.Seconds;
             public double EndRoll => end.roll;
-            public Fraction EndBeat => end.beat.Fraction;
+            public FractionMixed EndBeat => end.beat.Fraction;
 
             public double LengthTime => end.time.Seconds - start.time.Seconds;
             public double LengthRoll => end.roll - start.roll;
-            public Fraction LengthBeat => end.beat.Fraction - start.beat.Fraction;
+            public FractionMixed LengthBeat => end.beat.Fraction - start.beat.Fraction;
             
             // todo: Range<U> and RollUnit (notice that multi-dimension roll can be supported as multiple tracks)
             // todo: reverse word order for naming, such as StartTime

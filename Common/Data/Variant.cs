@@ -66,7 +66,7 @@ namespace MaTech.Common.Data {
         public readonly float Float => (float)d;
         public readonly double Double => d;
         public readonly MetaEnum Enum => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
-        public readonly Fraction Fraction => f;
+        public readonly FractionMixed Fraction => f;
         public readonly FractionSimple FractionSimple => f;
         public readonly string String => o as string;
         public readonly object Object => o;
@@ -76,7 +76,7 @@ namespace MaTech.Common.Data {
         public readonly Option<float> TryFloat => Type == VariantType.Float ? Option.Some((float)d) : Option.None<float>();
         public readonly Option<double> TryDouble => Type == VariantType.Double ? Option.Some(d) : Option.None<double>();
         public readonly Option<MetaEnum> TryEnum => Type == VariantType.Enum ? Option.Some(ToEnum()) : Option.None<MetaEnum>();
-        public readonly Option<Fraction> TryFraction => Type == VariantType.Fraction ? Option.Some((Fraction)f) : Option.None<Fraction>();
+        public readonly Option<FractionMixed> TryFraction => Type == VariantType.Fraction ? Option.Some((FractionMixed)f) : Option.None<FractionMixed>();
         public readonly Option<FractionSimple> TryFractionSimple => Type == VariantType.FractionSimple ? Option.Some(f) : Option.None<FractionSimple>();
         public readonly Option<string> TryString => Type == VariantType.String ? Option.Some((string)o) : Option.None<string>();
         public readonly Option<object> TryObject => Type == VariantType.Object ? Option.Some(o) : Option.None<object>();
@@ -126,7 +126,7 @@ namespace MaTech.Common.Data {
         public static implicit operator Variant(float value) => new(value);
         public static implicit operator Variant(double value) => new(value);
         public static implicit operator Variant(MetaEnum value) => new(value);
-        public static implicit operator Variant(Fraction value) => new(value);
+        public static implicit operator Variant(FractionMixed value) => new(value);
         public static implicit operator Variant(FractionSimple value) => new(value);
         public static implicit operator Variant(string value) => new(value); // note: also handles null
 
@@ -164,7 +164,7 @@ namespace MaTech.Common.Data {
         
         readonly T IBoxlessConvertible.ToType<T>(IFormatProvider provider) {
             var type = typeof(T);
-            if (type == typeFraction) return BoxlessConvert.Identity<Fraction, T>(Fraction);
+            if (type == typeFraction) return BoxlessConvert.Identity<FractionMixed, T>(Fraction);
             if (type == typeFractionSimple) return BoxlessConvert.Identity<FractionSimple, T>(FractionSimple);
             // TODO: 支持enum
             if (IsObject) return (T)Convert.ChangeType(o, type, provider);

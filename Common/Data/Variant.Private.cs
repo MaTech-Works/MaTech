@@ -39,7 +39,7 @@ namespace MaTech.Common.Data {
             d = f.Numerator;
             o = value.Name;
         }
-        private Variant(Fraction value) {
+        private Variant(FractionMixed value) {
             Type = VariantType.Fraction;
             f = value;
             d = f.Double;
@@ -71,7 +71,7 @@ namespace MaTech.Common.Data {
             }
         }
         
-        private static readonly Type typeFraction = typeof(Fraction);
+        private static readonly Type typeFraction = typeof(FractionMixed);
         private static readonly Type typeFractionSimple = typeof(FractionSimple);
         
         private static readonly HashSet<Type> typesConvertible = new HashSet<Type>() {

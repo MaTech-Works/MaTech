@@ -22,11 +22,11 @@ namespace MaTech.Gameplay.Data {
         [Serializable]
         public struct SignatureChange : IComparable<SignatureChange> {
             public int barAtChange;
-            public Fraction beatAtChange;
+            public FractionMixed beatAtChange;
             public FractionSimple beatsPerBar;
             public FractionSimple quarterNotesPerBeat;
-            public Fraction BeatAt(int bar) => beatAtChange + (Fraction)beatsPerBar * (bar - barAtChange);
-            public Fraction BeatAt(Fraction barPlusSubPosition) => beatAtChange + (Fraction)beatsPerBar * (barPlusSubPosition - barAtChange);
+            public FractionMixed BeatAt(int bar) => beatAtChange + (FractionMixed)beatsPerBar * (bar - barAtChange);
+            public FractionMixed BeatAt(FractionMixed barPlusSubPosition) => beatAtChange + (FractionMixed)beatsPerBar * (barPlusSubPosition - barAtChange);
             public int CompareTo(SignatureChange other) => barAtChange.CompareTo(other.barAtChange);
         }
 
@@ -38,7 +38,7 @@ namespace MaTech.Gameplay.Data {
         public SignatureTimeline(FractionSimple defaultBeatPerBar, FractionSimple? defaultQuarterNotesPerBeat = null) {
             signatures.Add(new SignatureChange {
                 barAtChange = 0,
-                beatAtChange = Fraction.zero,
+                beatAtChange = FractionMixed.zero,
                 beatsPerBar = defaultBeatPerBar,
                 quarterNotesPerBeat = defaultQuarterNotesPerBeat ?? new FractionSimple(1),
             });
@@ -55,7 +55,7 @@ namespace MaTech.Gameplay.Data {
 
             var referenceSignature = signatures[indexInserted == 0 ? 0 : indexInserted - 1];
             if (indexInserted == 0)
-                referenceSignature.beatAtChange = Fraction.zero;
+                referenceSignature.beatAtChange = FractionMixed.zero;
             
             for (int i = indexInserted; i < signatures.Count; ++i) {
                 var signature = signatures[i];
@@ -81,10 +81,10 @@ namespace MaTech.Gameplay.Data {
             return index > 0 ? null : signatures[index - 1];
         }
 
-        public Fraction? BeatAt(int bar) => GetSignatureAt(bar)?.BeatAt(bar);
-        public Fraction? BeatAt(Fraction barPlusSubPosition) => GetSignatureAt(barPlusSubPosition.Integer)?.BeatAt(barPlusSubPosition);
-        public Fraction UnclampedBeatAt(int bar) => GetSignatureAt(Math.Max(0, bar))!.Value.BeatAt(bar);
-        public Fraction UnclampedBeatAt(Fraction barPlusSubPosition) => GetSignatureAt(Math.Max(0, barPlusSubPosition.Integer))!.Value.BeatAt(barPlusSubPosition);
+        public FractionMixed? BeatAt(int bar) => GetSignatureAt(bar)?.BeatAt(bar);
+        public FractionMixed? BeatAt(FractionMixed barPlusSubPosition) => GetSignatureAt(barPlusSubPosition.Integer)?.BeatAt(barPlusSubPosition);
+        public FractionMixed UnclampedBeatAt(int bar) => GetSignatureAt(Math.Max(0, bar))!.Value.BeatAt(bar);
+        public FractionMixed UnclampedBeatAt(FractionMixed barPlusSubPosition) => GetSignatureAt(Math.Max(0, barPlusSubPosition.Integer))!.Value.BeatAt(barPlusSubPosition);
 
         public void OnBeforeSerialize() {}
         public void OnAfterDeserialize() {

@@ -31,10 +31,10 @@ namespace MaTech.Gameplay.Data {
     // todo: after Rational, make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
     public struct BeatUnit : ITimeUnit<BeatUnit>, IComparable<BeatUnit>, IEquatable<BeatUnit> {
-        public readonly Fraction fraction;
+        public readonly FractionMixed fraction;
         public readonly float decimals; // todo: not caching the decimals when fraction is used, so no precision loss is accumulated throughout calculation
         
-        public readonly Fraction Fraction => IsMax ? Fraction.maxValue : IsMin ? Fraction.minValue : fraction;
+        public readonly FractionMixed Fraction => IsMax ? FractionMixed.maxValue : IsMin ? FractionMixed.minValue : fraction;
         public readonly double Value => IsMax ? double.PositiveInfinity : IsMin ? double.NegativeInfinity : fraction.Integer + decimals;
 
         public readonly bool IsMax => fraction >= maxFraction;
@@ -46,10 +46,10 @@ namespace MaTech.Gameplay.Data {
         }
         private BeatUnit(double value, int? denominator = null) {
             value = MathUtil.Clamp(value, -MaxInteger, MaxInteger);
-            fraction = denominator is null ? Fraction.FromFloat(value) : Fraction.FromFloatRounded(value, denominator.Value);
+            fraction = denominator is null ? FractionMixed.FromFloat(value) : FractionMixed.FromFloatRounded(value, denominator.Value);
             decimals = (float)(value - fraction.Integer);
         }
-        private BeatUnit(in Fraction value, double? knownValue = null) {
+        private BeatUnit(in FractionMixed value, double? knownValue = null) {
             fraction = MathUtil.Clamp(value, minFraction, maxFraction);
             decimals = (float?)(knownValue - fraction.Integer) ?? fraction.DecimalFloat;
         }
@@ -66,13 +66,13 @@ namespace MaTech.Gameplay.Data {
         public readonly BeatUnit DeltaSince(in BeatUnit smaller) => new(this, smaller.Negate());
         public readonly double RatioTo(in BeatUnit divisor) => Value / divisor.Value;
         
-        public readonly BeatUnit ScaleByFraction(in Fraction scale) => new(Fraction * scale);
+        public readonly BeatUnit ScaleByFraction(in FractionMixed scale) => new(Fraction * scale);
 
         public static implicit operator double(in BeatUnit obj) => obj.Value;
-        public static implicit operator Fraction(in BeatUnit obj) => obj.fraction;
+        public static implicit operator FractionMixed(in BeatUnit obj) => obj.fraction;
         public static implicit operator BeatUnit(int value) => new(value);
         public static implicit operator BeatUnit(double value) => new(value);
-        public static implicit operator BeatUnit(Fraction value) => new(value);
+        public static implicit operator BeatUnit(FractionMixed value) => new(value);
         public static implicit operator BeatUnit(FractionSimple value) => new(value);
         public static implicit operator BeatUnit((int a, int b) t) => FromFraction(t.a, t.b);
         public static implicit operator BeatUnit((int n, int a, int b) t) => FromFraction(t.n, t.a, t.b);
@@ -83,7 +83,7 @@ namespace MaTech.Gameplay.Data {
         
         public static BeatUnit FromCount(int count) => new(count);
         public static BeatUnit FromFraction(int a, int b) => new(FractionSimple.Simple(a, b));
-        public static BeatUnit FromFraction(int n, int a, int b) => new(Fraction.Simple(n, a, b));
+        public static BeatUnit FromFraction(int n, int a, int b) => new(FractionMixed.Simple(n, a, b));
         public static BeatUnit FromValue(double value) => new(value);
         public static BeatUnit FromValueRounded(double value, int denominator) => new(value, denominator);
 
@@ -107,8 +107,8 @@ namespace MaTech.Gameplay.Data {
         }
         
         private const int MaxInteger = 1000000000;
-        private static readonly Fraction maxFraction = new(MaxInteger);
-        private static readonly Fraction minFraction = new(-MaxInteger);
+        private static readonly FractionMixed maxFraction = new(MaxInteger);
+        private static readonly FractionMixed minFraction = new(-MaxInteger);
     }
 
     // todo: rename to TimeValue

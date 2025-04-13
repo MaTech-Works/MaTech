@@ -77,7 +77,7 @@ namespace MaTech.Common.Data {
                         variant = new FractionSimple(arr[0], arr[1]);
                         break;
                     case 3:
-                        variant = new Fraction(arr[0], arr[1], arr[2]);
+                        variant = new FractionMixed(arr[0], arr[1], arr[2]);
                         break;
                     default:
                         variant = Variant.None;

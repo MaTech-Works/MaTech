@@ -13,19 +13,19 @@ using Newtonsoft.Json;
 using UnityEngine.Assertions;
 
 namespace MaTech.Common.Data {
-    [JsonConverter(typeof(FractionJsonConverter))] public partial struct Fraction { }
+    [JsonConverter(typeof(FractionJsonConverter))] public partial struct FractionMixed { }
     [JsonConverter(typeof(FractionJsonConverter))] public partial struct FractionSimple { }
 
     // todo: move implementation to a separate IMeta serialization module and make Json.net optional
     public class FractionJsonConverter : JsonConverter {
-        public override bool CanConvert(Type objectType) => objectType == typeof(Fraction) || objectType == typeof(FractionSimple);
+        public override bool CanConvert(Type objectType) => objectType == typeof(FractionMixed) || objectType == typeof(FractionSimple);
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
             switch (value) {
             case FractionSimple fs:
                 serializer.Serialize(writer, fs.ToArray());
                 break;
-            case Fraction f:
+            case FractionMixed f:
                 serializer.Serialize(writer, f.ToArray());
                 break;
             }
@@ -42,7 +42,7 @@ namespace MaTech.Common.Data {
                 return FractionOfType(objectType, value);
             }
             if (arrInt.Count == 3) {
-                var value = new Fraction(arrInt[0], arrInt[1], arrInt[2]);
+                var value = new FractionMixed(arrInt[0], arrInt[1], arrInt[2]);
                 return FractionOfType(objectType, value);
             }
 
@@ -51,8 +51,8 @@ namespace MaTech.Common.Data {
                 new JsonSerializationException($"Cannot read beat value '{reader.Path}'. It needs to be an array of 2 or 3 integers.");
         }
 
-        private object FractionOfType(Type type, Fraction value) => type == typeof(Fraction) ? value : value.Improper;
-        private object FractionOfType(Type type, FractionSimple value) => type == typeof(Fraction) ? (Fraction)value : value;
+        private object FractionOfType(Type type, FractionMixed value) => type == typeof(FractionMixed) ? value : value.Improper;
+        private object FractionOfType(Type type, FractionSimple value) => type == typeof(FractionMixed) ? (FractionMixed)value : value;
 
         public static List<int> ReadIntArrayForFraction(JsonReader reader) {
             List<int> arrInt = new List<int>(3);

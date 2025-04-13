@@ -32,7 +32,7 @@ namespace MaTech.Common.Data {
             Adopters<ScalarUnit>.To<int>() = (in ScalarUnit unit, in Variant value) => unit.scale.Int * value.Int;
             Adopters<ScalarUnit>.To<float>() = (in ScalarUnit unit, in Variant value) => unit.scale.Float * value.Float;
             Adopters<ScalarUnit>.To<double>() = (in ScalarUnit unit, in Variant value) => unit.scale.Double * value.Double;
-            Adopters<ScalarUnit>.To<Fraction>() = (in ScalarUnit unit, in Variant value) => unit.scale.Fraction * value.Fraction;
+            Adopters<ScalarUnit>.To<FractionMixed>() = (in ScalarUnit unit, in Variant value) => unit.scale.Fraction * value.Fraction;
             Adopters<ScalarUnit>.To<FractionSimple>() = (in ScalarUnit unit, in Variant value) => unit.scale.FractionSimple * value.FractionSimple;
             Adopters<ScalarUnit>.To<Variant>() = (in ScalarUnit unit, in Variant value) => value.Type switch {
                 VariantType.Int => unit.scale.IsFloatPoint ? unit.scale.Double * value.Int : unit.scale.Fraction * value.Int,

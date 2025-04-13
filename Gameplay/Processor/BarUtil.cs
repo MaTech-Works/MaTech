@@ -28,16 +28,16 @@ namespace MaTech.Gameplay.Processor {
         /// 用effect列表生成bar的beat位置，time留空。
         /// 输入的effect列表需要按照beat顺序排序，第一个signature表示bar的开始。
         /// </summary>
-        public static List<BarInfo> GenerateBarBeats(IList<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+        public static List<BarInfo> GenerateBarBeats(IList<Effect> effects, in FractionMixed endBeat, int maxBarCount = 99999) {
             // TODO: 封装成EffectTimeline
             // TODO: 处理Signature和ShowBar的End
             
-            Fraction barLength = new Fraction(4);
+            FractionMixed barLength = new FractionMixed(4);
             bool showBar = true;
             
             // Extract beat-signature and beat-showBar info from effects
-            var listSign = new List<(Fraction, Fraction)>();
-            var listShowBar = new List<(Fraction, bool)>();
+            var listSign = new List<(FractionMixed, FractionMixed)>();
+            var listShowBar = new List<(FractionMixed, bool)>();
             foreach (var effect in effects) {
                 switch (effect.type.Value) {
                 case EffectType.Signature when effect.Start == null: barLength = effect.value.start.Fraction; break;
@@ -47,17 +47,17 @@ namespace MaTech.Gameplay.Processor {
                 }
             }
             
-            listSign.Add((Fraction.maxValue, Fraction.maxValue));
-            listShowBar.Add((Fraction.maxValue, true));
+            listSign.Add((FractionMixed.maxValue, FractionMixed.maxValue));
+            listShowBar.Add((FractionMixed.maxValue, true));
             
             var listBar = new List<BarInfo>();
             
-            Fraction nextSignBeat = listSign[0].Item1;
-            Fraction nextShowBarBeat = listShowBar[0].Item1;
+            FractionMixed nextSignBeat = listSign[0].Item1;
+            FractionMixed nextShowBarBeat = listShowBar[0].Item1;
             int indexSign = 0;
             int indexShowBar = 0;
             
-            for (Fraction currBeat = nextSignBeat; currBeat <= endBeat; currBeat += barLength) {
+            for (FractionMixed currBeat = nextSignBeat; currBeat <= endBeat; currBeat += barLength) {
                 while (nextSignBeat <= currBeat) {
                     // IMPORTANT: Reset currBeat to the beginning of signature changes;
                     // We restart the bar counting on each signature change.
@@ -85,7 +85,7 @@ namespace MaTech.Gameplay.Processor {
         /// 用effect和tempo列表生成bar的beat和offset。
         /// 输入的effect和tempo列表需要按照beat顺序排序。
         /// </summary>
-        public static List<BarInfo> GenerateBars(IList<TempoChange> tempos, IList<Effect> effects, in Fraction endBeat, int maxBarCount = 99999) {
+        public static List<BarInfo> GenerateBars(IList<TempoChange> tempos, IList<Effect> effects, in FractionMixed endBeat, int maxBarCount = 99999) {
             List<BarInfo> bars = GenerateBarBeats(effects, endBeat, maxBarCount);
 
             int barCount = bars.Count;
