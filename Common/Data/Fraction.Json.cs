@@ -6,6 +6,8 @@
 
 #nullable enable
 
+#if MATECH_USE_NEWTONSOFT_JSON
+
 using System;
 using System.Collections.Generic;
 using MaTech.Common.Utils;
@@ -81,3 +83,5 @@ namespace MaTech.Common.Data {
         }
     }
 }
+
+#endif // MATECH_USE_NEWTONSOFT_JSON
