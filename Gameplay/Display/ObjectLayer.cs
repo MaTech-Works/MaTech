@@ -16,6 +16,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using static MaTech.Gameplay.ChartPlayer;
 
 #nullable enable
@@ -25,7 +26,6 @@ namespace MaTech.Gameplay.Display {
         where TCarrier : ObjectCarrier<TCarrier, TLayer>
         where TLayer : ObjectLayer<TCarrier, TLayer> {
         
-        // todo: rename every "Y" to "roll"
         // todo: remove ratio calculate methods and give out Range<RollUnit>
         // todo: 支持为每个VisualUnit实例化图形，而非为每个NoteCarrier实例化图形
         
@@ -42,9 +42,9 @@ namespace MaTech.Gameplay.Display {
             }
         }
         
-        private PointerList<TCarrier> listCarrierUpY = null!;       // 按经过UpY的时机排序
-        private PointerList<TCarrier> listCarrierDownY = null!;     // 按经过DownY的时机排序
-        private PointerList<TCarrier> listCarrierUpTime = null!;    // 按判定时间排序
+        private PointerList<TCarrier> listCarrierEarlyRoll = null!;    // 按远端卷轴进入顺序排序
+        private PointerList<TCarrier> listCarrierLateRoll = null!;     // 按近端卷轴退出顺序排序
+        private PointerList<TCarrier> listCarrierEarlyTime = null!;    // 按判定时间进入顺序排序
         
         private readonly Dictionary<Carrier, IObjectVisual<TCarrier, TLayer>> hashsetCarrierRealized = new();
         private readonly List<ObjectTuple> listObjectRealized = new();
@@ -150,17 +150,17 @@ namespace MaTech.Gameplay.Display {
 
         [Tooltip("是否重载判定逻辑给定的最大范围，不选择重载则数值会在运行时自动更新。")]
         public bool overrideJudgeWindow;
-        [Tooltip("判定时机的最大范围（较晚一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideJudgeWindow")] 
-        public double judgeWindowUp = 0.5;
-        [Tooltip("判定时机的最大范围（较早一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideJudgeWindow")] 
-        public double judgeWindowDown = -0.5;
+        [Tooltip("判定时机的最大范围（较晚一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideJudgeWindow"), FormerlySerializedAs("judgeWindowUp")] 
+        public double windowDeltaTimeEarly = 0.5;
+        [Tooltip("判定时机的最大范围（较早一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideJudgeWindow"), FormerlySerializedAs("judgeWindowDown")] 
+        public double windowDeltaTimeLate = -0.5;
         
         [Tooltip("是否重载ChartPlayer中指定的显示范围，不选择重载则数值会在运行时自动更新。")]
         public bool overrideDisplayWindow;
-        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideDisplayWindow")] 
-        public double displayWindowUpY = 1;
-        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideDisplayWindow")] 
-        public double displayWindowDownY = -0.1;
+        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideDisplayWindow"), FormerlySerializedAs("displayWindowUpY")] 
+        public double windowDeltaRollEarly = 1;
+        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。"), EnableIf("overrideDisplayWindow"), FormerlySerializedAs("displayWindowDownY")] 
+        public double windowDeltaRollLate = -0.1;
 
         [Header("Debugging")]
 
@@ -172,7 +172,7 @@ namespace MaTech.Gameplay.Display {
 
         [HideInInspector]
         [Tooltip("Whether the layer should be updating itself using Unity's Update callback, or let it to be driven by others. " +
-                 "This should be false when passed to a ChartPlayer.")]
+                 "This will be set to false when passed to a ChartPlayer.")]
         public bool updateSelf; // todo: 把这个过程自动化
 
         [HideInInspector]
@@ -184,13 +184,13 @@ namespace MaTech.Gameplay.Display {
         
         private bool isLoaded = false;
         
-        private double lastDisplayY = double.MinValue;
+        private double lastRoll = double.MinValue;
 
         private double speedScale = 1.0;
         private double invSpeedScale = 1.0;
 
-        private double DisplayWindowUpScaled => displayWindowUpY * invSpeedScale;
-        private double DisplayWindowDownScaled => displayWindowDownY * invSpeedScale;
+        private double WindowDeltaRollScaledEarly => windowDeltaRollEarly * invSpeedScale;
+        private double WindowDeltaRollScaledLate => windowDeltaRollLate * invSpeedScale;
         
         private Func<TCarrier, bool> cachedCarrierSelectCondition = null!;
         private Func<TCarrier, bool>[] cachedIterateStopConditions = null!;
@@ -213,12 +213,12 @@ namespace MaTech.Gameplay.Display {
             }
         }
         
-        public float DeltaRollToRatio(double roll) => (float)(roll / displayWindowUpY);
+        public float DeltaRollToRatio(double roll) => (float)(roll / windowDeltaRollEarly);
         
         public float CalculateRatio(double roll, TCarrier carrier, bool clampToDisplayWindow) => DeltaRollToRatio(CalculateDeltaRoll(roll, carrier, clampToDisplayWindow));
         public double CalculateDeltaRoll(double roll, TCarrier carrier, bool clampToDisplayWindow) {
             var deltaRoll = carrier.DeltaRoll(PlayTime.GlobalRoll, roll) * speedScale;
-            if (clampToDisplayWindow) return MathUtil.Clamp(deltaRoll, displayWindowDownY, displayWindowUpY);
+            if (clampToDisplayWindow) return MathUtil.Clamp(deltaRoll, windowDeltaRollLate, windowDeltaRollEarly);
             return deltaRoll;
         }
 
@@ -246,12 +246,12 @@ namespace MaTech.Gameplay.Display {
             if (!isActionAndFuncCached) {
                 cachedCarrierSelectCondition = carrier => pools.ContainsKey(carrier.type);
                 cachedIterateStopConditions = new Func<TCarrier, bool>[] {
-                    carrier => carrier.TargetRoll(DisplayWindowUpScaled, true) > PlayTime.GlobalRoll, // UpY Forward
-                    carrier => carrier.TargetRoll(DisplayWindowUpScaled, true) < PlayTime.GlobalRoll, // UpY Backward
-                    carrier => carrier.TargetRoll(DisplayWindowDownScaled, false) > PlayTime.GlobalRoll, // DownY Forward
-                    carrier => carrier.TargetRoll(DisplayWindowDownScaled, false) < PlayTime.GlobalRoll, // DownY Backward
-                    carrier => carrier.StartTime - judgeWindowUp > PlayTime.InputTime.Seconds,   // UpTime Forward
-                };
+                    carrier => carrier.TargetRoll(WindowDeltaRollScaledEarly, true) > PlayTime.GlobalRoll, // Early Roll Forward
+                    carrier => carrier.TargetRoll(WindowDeltaRollScaledEarly, true) < PlayTime.GlobalRoll, // Early Roll Backward
+                    carrier => carrier.TargetRoll(WindowDeltaRollScaledLate, false) > PlayTime.GlobalRoll, // Late Roll Forward
+                    carrier => carrier.TargetRoll(WindowDeltaRollScaledLate, false) < PlayTime.GlobalRoll, // Late Roll Backward
+                    carrier => carrier.StartTime - windowDeltaTimeEarly > PlayTime.InputTime.Seconds,   // Early Time Forward
+                }; 
                 cachedRealizationAction = RealizeCarrierIfInRange;
                 cachedVirtualizationAction = tuple => {
                     bool outOfRange = !IsCarrierInRange(tuple.carrier);
@@ -294,9 +294,9 @@ namespace MaTech.Gameplay.Display {
             // Sorted lists
             
             var selectedCarriers = carriers.Where(cachedCarrierSelectCondition).ToArray();
-            listCarrierUpY = new PointerList<TCarrier>(selectedCarriers);
-            listCarrierDownY = new PointerList<TCarrier>(selectedCarriers);
-            listCarrierUpTime = new PointerList<TCarrier>(selectedCarriers);
+            listCarrierEarlyRoll = new PointerList<TCarrier>(selectedCarriers);
+            listCarrierLateRoll = new PointerList<TCarrier>(selectedCarriers);
+            listCarrierEarlyTime = new PointerList<TCarrier>(selectedCarriers);
             
             SortCarriers();
             
@@ -311,7 +311,7 @@ namespace MaTech.Gameplay.Display {
             
             // Finish
 
-            lastDisplayY = double.MinValue;
+            lastRoll = double.MinValue;
             isLoaded = true;
         }
 
@@ -332,16 +332,16 @@ namespace MaTech.Gameplay.Display {
             }
             
             // 从几个listCarrier中顺序找到经过边界位置的，将新进入展示范围的carrier加入展示列表
-            if (PlayTime.GlobalRoll >= lastDisplayY) {
-                IterateForward(listCarrierDownY, cachedIterateStopConditions[2], cachedRealizationAction);
-                IterateForward(listCarrierUpY, cachedIterateStopConditions[0], cachedRealizationAction);
+            if (PlayTime.GlobalRoll >= lastRoll) {
+                IterateForward(listCarrierLateRoll, cachedIterateStopConditions[2], cachedRealizationAction);
+                IterateForward(listCarrierEarlyRoll, cachedIterateStopConditions[0], cachedRealizationAction);
             } else {
-                IterateBackward(listCarrierUpY, cachedIterateStopConditions[1], cachedRealizationAction);
-                IterateBackward(listCarrierDownY, cachedIterateStopConditions[3], cachedRealizationAction);
+                IterateBackward(listCarrierEarlyRoll, cachedIterateStopConditions[1], cachedRealizationAction);
+                IterateBackward(listCarrierLateRoll, cachedIterateStopConditions[3], cachedRealizationAction);
             }
-            IterateForward(listCarrierUpTime, cachedIterateStopConditions[4], cachedRealizationAction);
+            IterateForward(listCarrierEarlyTime, cachedIterateStopConditions[4], cachedRealizationAction);
             
-            lastDisplayY = PlayTime.GlobalRoll;
+            lastRoll = PlayTime.GlobalRoll;
             
             // 遍历展示列表，更新note图形
             foreach (var tuple in listObjectRealized) {
@@ -370,9 +370,9 @@ namespace MaTech.Gameplay.Display {
 
         private void SortCarriers() {
             // 排序后carrier会按顺序经过这些边界位置；经过这些边界位置的carrier均需测试是否需要实例化音符。
-            ProcessorBasic.SortCarriersByRoll<TCarrier, TLayer>(listCarrierUpY, true, DisplayWindowUpScaled);
-            ProcessorBasic.SortCarriersByRoll<TCarrier, TLayer>(listCarrierDownY, false, DisplayWindowDownScaled);
-            ShellSort.Hibbard(listCarrierUpTime, Carrier.ComparerStartTime());
+            ProcessorBasic.SortCarriersByRoll<TCarrier, TLayer>(listCarrierEarlyRoll, true, WindowDeltaRollScaledEarly);
+            ProcessorBasic.SortCarriersByRoll<TCarrier, TLayer>(listCarrierLateRoll, false, WindowDeltaRollScaledLate);
+            ShellSort.Hibbard(listCarrierEarlyTime, Carrier.ComparerStartTime());
         }
         
         private void IterateForward(PointerList<TCarrier> list, Func<TCarrier, bool> stopCondition, Action<TCarrier> actionOnForward) {
@@ -451,8 +451,8 @@ namespace MaTech.Gameplay.Display {
         }
 
         private bool IsCarrierInRange(TCarrier carrier) {
-            return (carrier.StartTime <= PlayTime.InputTime.Seconds + judgeWindowUp && carrier.EndTime >= PlayTime.InputTime.Seconds + judgeWindowDown) ||
-                   (carrier.DeltaRoll(PlayTime.GlobalRoll, true) <= DisplayWindowUpScaled * EpsilonK && carrier.DeltaRoll(PlayTime.GlobalRoll, false) >= DisplayWindowDownScaled * EpsilonK);
+            return (carrier.StartTime <= PlayTime.InputTime.Seconds + windowDeltaTimeEarly && carrier.EndTime >= PlayTime.InputTime.Seconds + windowDeltaTimeLate) ||
+                   (carrier.DeltaRoll(PlayTime.GlobalRoll, true) <= WindowDeltaRollScaledEarly * EpsilonK && carrier.DeltaRoll(PlayTime.GlobalRoll, false) >= WindowDeltaRollScaledLate * EpsilonK);
         }
         
         #endregion

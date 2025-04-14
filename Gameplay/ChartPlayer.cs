@@ -15,6 +15,7 @@ using MaTech.Gameplay.Input;
 using MaTech.Gameplay.Logic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MaTech.Gameplay {
     public partial class ChartPlayer : MonoBehaviour {
@@ -53,10 +54,10 @@ namespace MaTech.Gameplay {
         [Space]
         [Header("Display Options")]
         
-        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。用于各layer无override时的运行时缺省值。")]
-        public double displayWindowUpY = 1;
-        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。用于各layer无override时的运行时缺省值。")]
-        public double displayWindowDownY = -0.1;
+        [Tooltip("图形轴的显示范围（较晚一侧），在此范围内音符的图形不会被移除。用于各layer无override时的运行时缺省值。"), FormerlySerializedAs("displayWindowUpY")]
+        public double windowDeltaRollEarly = 1;
+        [Tooltip("图形轴的显示范围（较早一侧），在此范围内音符的图形不会被移除。用于各layer无override时的运行时缺省值。"), FormerlySerializedAs("displayWindowDownY")]
+        public double windowDeltaRollLate = -0.1;
 
         [Space]
         [Header("Audio & Time Options")]

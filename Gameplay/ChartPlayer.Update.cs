@@ -144,30 +144,30 @@ namespace MaTech.Gameplay {
                 judgeWindowDown = -timing.WindowLate.Seconds;
             }
 
-            var effectiveDisplayWindowUp = displayWindowUpY;
-            var effectiveDisplayWindowDown = displayWindowDownY;
+            var effectiveDeltaRollEarly = windowDeltaRollEarly;
+            var effectiveDeltaRollLate = windowDeltaRollLate;
 
             foreach (var layer in noteLayers) {
                 if (UnityUtil.IsUnassigned(layer)) continue;
                 if (!layer.overrideJudgeWindow) {
-                    layer.judgeWindowUp = judgeWindowUp;
-                    layer.judgeWindowDown = judgeWindowDown;
+                    layer.windowDeltaTimeEarly = judgeWindowUp;
+                    layer.windowDeltaTimeLate = judgeWindowDown;
                 }
                 if (!layer.overrideDisplayWindow) {
-                    layer.displayWindowUpY = effectiveDisplayWindowUp;
-                    layer.displayWindowDownY = effectiveDisplayWindowDown;
+                    layer.windowDeltaRollEarly = effectiveDeltaRollEarly;
+                    layer.windowDeltaRollLate = effectiveDeltaRollLate;
                 }
             }
 
             foreach (var layer in barLayers) {
                 if (UnityUtil.IsUnassigned(layer)) continue;
                 if (!layer.overrideJudgeWindow) {
-                    layer.judgeWindowUp = 0;
-                    layer.judgeWindowDown = 0;
+                    layer.windowDeltaTimeEarly = 0;
+                    layer.windowDeltaTimeLate = 0;
                 }
                 if (!layer.overrideDisplayWindow) {
-                    layer.displayWindowUpY = effectiveDisplayWindowUp;
-                    layer.displayWindowDownY = effectiveDisplayWindowDown;
+                    layer.windowDeltaRollEarly = effectiveDeltaRollEarly;
+                    layer.windowDeltaRollLate = effectiveDeltaRollLate;
                 }
             }
         }
@@ -188,6 +188,8 @@ namespace MaTech.Gameplay {
         private void CollectLayersFromScene() {
             noteLayers = FindObjectsByType<NoteLayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             barLayers = FindObjectsByType<BarLayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var layer in noteLayers) layer.updateSelf = false;
+            foreach (var layer in barLayers) layer.updateSelf = false;
         }
     }
 }
