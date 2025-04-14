@@ -19,7 +19,7 @@ namespace MaTech.Gameplay.Logic {
         public IJudgeUnit LastUnit => LastHit.unit;
         public NoteHitAction LastAction => LastHit.action;
         public HitResult LastResult => LastHit.result;
-        public TimeUnit LastTime => LastHit.time;
+        public TimeValue LastTime => LastHit.time;
     }
     
     public class HitEventMethod : MonoBehaviour, IHitEventSource {

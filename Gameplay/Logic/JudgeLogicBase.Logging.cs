@@ -9,20 +9,20 @@ using MaTech.Gameplay.Data;
 
 namespace MaTech.Gameplay.Logic {
     public abstract partial class JudgeLogicBase {
-        public delegate bool NoteHitFilterFunc(ChartPlayer.IJudgeUnit unit, NoteHitAction action, TimeUnit time, HitResult result);
-        public delegate bool EmptyHitFilterFunc(EmptyHitAction action, TimeUnit time);
+        public delegate bool NoteHitFilterFunc(ChartPlayer.IJudgeUnit unit, NoteHitAction action, TimeValue time, HitResult result);
+        public delegate bool EmptyHitFilterFunc(EmptyHitAction action, TimeValue time);
 
         public NoteHitFilterFunc logFilterOnNoteHit;
         public EmptyHitFilterFunc logFilterOnEmptyHit;
 
-        private void LogNoteHit(ChartPlayer.IJudgeUnit unit, NoteHitAction action, TimeUnit time, HitResult result) {
+        private void LogNoteHit(ChartPlayer.IJudgeUnit unit, NoteHitAction action, TimeValue time, HitResult result) {
             if (DebugLogHistory.HasInstances && logFilterOnNoteHit is not null) {
                 if (logFilterOnNoteHit(unit, action, time, result))
                     DebugLogHistory.PushHistory("play", $"{time}: note hit {action} [{unit}] -- [{result.ToEditorName()}]");
             }
         }
 
-        private void LogEmptyHit(EmptyHitAction action, TimeUnit time) {
+        private void LogEmptyHit(EmptyHitAction action, TimeValue time) {
             if (DebugLogHistory.HasInstances && logFilterOnEmptyHit is not null) {
                 if (logFilterOnEmptyHit(action, time))
                     DebugLogHistory.PushHistory("play", $"{time}: empty hit {action}");

@@ -15,40 +15,40 @@ namespace MaTech.Gameplay.Display {
         /// 比正常IKeyInput回调更早触发的回调，调用时可能不在UI线程，但是保证调用过程互斥。
         /// 适合给音频使用，不要在这个回调中用Unity API。
         public interface IKeyInputEarly {
-            void OnKeyInputEarly(KeyCode keyCode, bool isDown, TimeUnit time);
+            void OnKeyInputEarly(KeyCode keyCode, bool isDown, TimeValue time);
         }
         
         /// 比正常ITouchInput回调更早触发的回调，调用时可能不在UI线程，但是保证调用过程互斥。
         /// 适合给音频使用，不要在这个回调中用Unity API。
         public interface ITouchInputEarly {
-            void OnTouchInputEarly(PlayInput.Finger finger, TimeUnit time);
+            void OnTouchInputEarly(PlayInput.Finger finger, TimeValue time);
         }
         
         /// 比正常IIndexedInput回调更早触发的回调，调用时可能不在UI线程，但是保证调用过程互斥。
         /// 适合给音频使用，不要在这个回调中用Unity API。
         public interface IIndexedInputEarly {
-            void OnIndexedInputEarly(int keyIndex, bool isDown, TimeUnit time);
+            void OnIndexedInputEarly(int keyIndex, bool isDown, TimeValue time);
         }
 
         /// 输入回调，在每帧的开始时被调用。
         public interface IKeyInput {
-            void OnKeyInput(KeyCode index, bool isDown, TimeUnit time);
+            void OnKeyInput(KeyCode index, bool isDown, TimeValue time);
         }
 
         /// 输入回调，在每帧的开始时被调用。
         public interface ITouchInput {
-            void OnTouchInput(PlayInput.Finger finger, TimeUnit time);
+            void OnTouchInput(PlayInput.Finger finger, TimeValue time);
         }
     
         /// 输入回调，在每帧的开始时被调用。
         public interface IIndexedInput {
-            void OnIndexedInput(int index, bool isDown, TimeUnit time);
+            void OnIndexedInput(int index, bool isDown, TimeValue time);
         }
         
         /// 输入信息被JudgeLogic分发至某个音符后被调用；NoteBehavior上也会接收到类似的信息。
         public interface INoteHitResult {
-            void OnHitNote(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit time, HitResult result);
-            void OnHitEmpty(JudgeLogicBase.EmptyHitAction action, TimeUnit time);
+            void OnHitNote(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeValue time, HitResult result);
+            void OnHitEmpty(JudgeLogicBase.EmptyHitAction action, TimeValue time);
         }
     
         /// 判定更新成绩时调用。

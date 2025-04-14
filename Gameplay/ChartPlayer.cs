@@ -184,7 +184,7 @@ namespace MaTech.Gameplay {
             if (judgeLogic != null) {
                 judgeLogic.OnLoadChart(playInfo, processor.ResultNoteList);
 
-                judgeLogic.OnHitNote = (IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit time, HitResult result) => {
+                judgeLogic.OnHitNote = (IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeValue time, HitResult result) => {
                     foreach (var layer in noteLayers) {
                         layer.HandleNoteHit(unit, action, time, result);
                     }

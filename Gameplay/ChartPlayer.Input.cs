@@ -23,7 +23,7 @@ namespace MaTech.Gameplay {
             [FieldOffset(4)] public KeyCode keyCode;
             [FieldOffset(8)] public bool isDown;
             [FieldOffset(4)] public int touchIndex;
-            [FieldOffset(12)] public TimeUnit time;
+            [FieldOffset(12)] public TimeValue time;
         }
 
         private readonly List<InputData> listPendingInput = new List<InputData>(32);
@@ -31,7 +31,7 @@ namespace MaTech.Gameplay {
         
         private MetaTable<ScoreType> pendingScoreSnapshot;
         
-        private void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {
+        private void OnKeyInput(KeyCode keyCode, bool isDown, TimeValue time) {
             if (judgeLogic == null) return;
             foreach (var behavior in PlayBehavior.ListKeyInputEarly) {
                 behavior.OnKeyInputEarly(keyCode, isDown, time);
@@ -46,7 +46,7 @@ namespace MaTech.Gameplay {
             }
         }
 
-        private void OnTouchInput(PlayInput.Finger finger, TimeUnit time) {
+        private void OnTouchInput(PlayInput.Finger finger, TimeValue time) {
             if (judgeLogic == null) return;
             foreach (var behavior in PlayBehavior.ListTouchInputEarly) {
                 behavior.OnTouchInputEarly(finger, time);
@@ -60,7 +60,7 @@ namespace MaTech.Gameplay {
             }
         }
 
-        private void OnIndexedInput(int index, bool isDown, TimeUnit time) {
+        private void OnIndexedInput(int index, bool isDown, TimeValue time) {
             if (judgeLogic == null) return;
             foreach (var behavior in PlayBehavior.ListIndexedInputEarly) {
                 behavior.OnIndexedInputEarly(index, isDown, time);
@@ -75,7 +75,7 @@ namespace MaTech.Gameplay {
             }
         }
 
-        private void OnScoreUpdate(MetaTable<ScoreType> scoreSnapshot, TimeUnit time) {
+        private void OnScoreUpdate(MetaTable<ScoreType> scoreSnapshot, TimeValue time) {
             if (judgeLogic == null) return;
             lock (listPendingInput) {
                 pendingScoreSnapshot = scoreSnapshot;

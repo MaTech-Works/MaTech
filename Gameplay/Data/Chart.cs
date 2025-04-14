@@ -20,8 +20,8 @@ namespace MaTech.Gameplay.Data {
 
         public readonly SampleTrack sampleTrack = new();
         
-        public TimeUnit CalculateTimeFromBeat(BeatUnit beat) {
-            if (tempos.Count == 0) return TimeUnit.MinValue;
+        public TimeValue CalculateTimeFromBeat(BeatValue beat) {
+            if (tempos.Count == 0) return TimeValue.MinValue;
             int index = tempos.IndexOfLastMatchedValue(beat, (tempo, beat) => tempo.SafeStart.Beat.CompareTo(beat, true) <= 0);
             return tempos[index == -1 ? 0 : index].CalculateTimeFromBeat(beat);
         }

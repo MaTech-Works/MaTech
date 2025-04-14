@@ -26,7 +26,7 @@ namespace MaTech.Gameplay {
             /// todo: 考虑使用accumulator进行乘积分，并且生成对应的积分系数至effect，最终改为可选的effect生成方法
             public (double roll, double note) scale = (1.0, 1.0);
             
-            public Variant SampleEffect<T>(in T t, DataEnum<EffectType> type, in Variant keyword = default) where T : struct, ITimeUnit<T>
+            public Variant SampleEffect<T>(in T t, DataEnum<EffectType> type, in Variant keyword = default) where T : struct, ITimeValue<T>
                 => SampleEffect(in t, type, Effect.ValueSampler<T>(), in keyword);
             public Variant SampleEffect<T>(in T t, DataEnum<EffectType> type, Effect.Sampler<T> sampler, in Variant keyword = default) where T : struct {
                 var result = Variant.None;
@@ -43,16 +43,16 @@ namespace MaTech.Gameplay {
                 return result;
             }
 
-            public double SampleRoll(in TimeUnit time, in Variant keyword = default) => StartRoll + SampleDeltaRoll((StartTime, time), keyword);
-            public double SampleDeltaRoll(in Range<TimeUnit> range, in Variant keyword = default) {
-                var distance = SampleEffect(range, EffectType.ScrollSpeed, Effect.IntegralSampler<TimeUnit>(), keyword).Double;
-                var offset = SampleEffect(range, EffectType.ScrollOffset, Effect.DeltaSampler<TimeUnit>(), keyword).Double;
+            public double SampleRoll(in TimeValue time, in Variant keyword = default) => StartRoll + SampleDeltaRoll((StartTime, time), keyword);
+            public double SampleDeltaRoll(in Range<TimeValue> range, in Variant keyword = default) {
+                var distance = SampleEffect(range, EffectType.ScrollSpeed, Effect.IntegralSampler<TimeValue>(), keyword).Double;
+                var offset = SampleEffect(range, EffectType.ScrollOffset, Effect.DeltaSampler<TimeValue>(), keyword).Double;
                 return distance * scale.roll + offset;
             }
             
             public double SampleNoteSpeed(ITimePoint timePoint, bool sampleByBeat = true, in Variant keyword = default)
                 => sampleByBeat ? SampleNoteSpeed(timePoint.Beat, keyword) : SampleNoteSpeed(timePoint.Time, keyword);
-            public double SampleNoteSpeed<T>(in T t, in Variant keyword = default) where T : struct, ITimeUnit<T> {
+            public double SampleNoteSpeed<T>(in T t, in Variant keyword = default) where T : struct, ITimeValue<T> {
                 var speed = SampleEffect(t, EffectType.NoteSpeed, Effect.ValueSampler<T>(), keyword).Double;
                 return speed * scale.note;
             }

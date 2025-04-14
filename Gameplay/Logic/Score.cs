@@ -19,7 +19,7 @@ namespace MaTech.Gameplay.Logic {
         void ResetScore(IPlayInfo info);
         void FinishScore(bool isFailed);
         
-        void HandleScoreResult(HitResult result, TimeUnit time);
+        void HandleScoreResult(HitResult result, TimeValue time);
         
         bool IsScoreAuthentic { get; }
     }

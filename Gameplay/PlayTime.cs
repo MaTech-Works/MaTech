@@ -18,10 +18,10 @@ namespace MaTech.Gameplay {
 
         public static double Time => LogicTime.Seconds;
         
-        public static TimeUnit AudioTime { get; private set; }
-        public static TimeUnit LogicTime { get; private set; }
-        public static TimeUnit InputTime { get; private set; }
-        public static TimeUnit VisualTime { get; private set; }
+        public static TimeValue AudioTime { get; private set; }
+        public static TimeValue LogicTime { get; private set; }
+        public static TimeValue InputTime { get; private set; }
+        public static TimeValue VisualTime { get; private set; }
         
         public static double GlobalRoll { get; private set; }
 
@@ -49,16 +49,16 @@ namespace MaTech.Gameplay {
             AudioTime = 10, LogicTime, VisualTime, InputTime, GlobalRoll
         }
 
-        public static TimeUnit Select(TimeSource source) {
+        public static TimeValue Select(TimeSource source) {
             return source switch {
-                TimeSource.UnityTimeScaled => TimeUnit.FromSeconds(timeAsDouble),
-                TimeSource.UnityTimeUnscaled => TimeUnit.FromSeconds(unscaledTimeAsDouble),
+                TimeSource.UnityTimeScaled => Data.TimeValue.FromSeconds(timeAsDouble),
+                TimeSource.UnityTimeUnscaled => Data.TimeValue.FromSeconds(unscaledTimeAsDouble),
                 TimeSource.AudioTime => AudioTime,
                 TimeSource.LogicTime => LogicTime,
                 TimeSource.InputTime => InputTime,
                 TimeSource.VisualTime => VisualTime,
-                TimeSource.GlobalRoll => TimeUnit.FromSeconds(GlobalRoll),
-                _ => TimeUnit.Zero
+                TimeSource.GlobalRoll => Data.TimeValue.FromSeconds(GlobalRoll),
+                _ => Data.TimeValue.Zero
             };
         }
     }

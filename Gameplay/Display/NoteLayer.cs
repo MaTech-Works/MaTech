@@ -9,7 +9,7 @@ using MaTech.Gameplay.Logic;
 
 namespace MaTech.Gameplay.Display {
     public class NoteLayer : ObjectLayer<ChartPlayer.NoteCarrier, NoteLayer> {
-        public int HandleNoteHit(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit time, HitResult result) {
+        public int HandleNoteHit(ChartPlayer.IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeValue time, HitResult result) {
             int count = 0;
             foreach (var carrier in RealizedCarriers) {
                 if (carrier is not ChartPlayer.NoteCarrier noteCarrier) continue;

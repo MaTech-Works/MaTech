@@ -20,13 +20,13 @@ namespace MaTech.Gameplay.Data {
     /// todo: rename to ITimeMarker
     public interface ITimePoint {
         /// <summary> 根据 BPM (Beat Per Minutes) 定义的节拍值，一拍通常是一个四分音符 </summary>
-        public BeatUnit Beat { get; }
+        public BeatValue Beat { get; }
         /// <summary> 音轨时间，若音源在音轨0秒处开始播放，则对应音源的时间 </summary>
-        public TimeUnit Time { get; }
+        public TimeValue Time { get; }
         /// <summary> 按照 Beat 所定位的延迟前时间，Time = TimeOfBeat + Delay </summary>
-        public TimeUnit TimeOfBeat { get; }
+        public TimeValue TimeOfBeat { get; }
         /// <summary> Time 属性相对于 Beat 所定位的时间点的延迟，Time = TimeOfBeat + Delay </summary>
-        public TimeUnit Delay { get; }
+        public TimeValue Delay { get; }
     }
 
     public static class TimePointExtensions {
@@ -36,19 +36,19 @@ namespace MaTech.Gameplay.Data {
     /// <summary> 基于节拍与时间双重定位的乐理时间码 </summary>
     /// todo: rename to TimeMarker
     public class TimePoint : ITimePoint {
-        internal static readonly TimePoint minValue = new() { Beat = BeatUnit.MinValue, Time = TimeUnit.MinValue };
-        internal static readonly TimePoint maxValue = new() { Beat = BeatUnit.MaxValue, Time = TimeUnit.MaxValue };
+        internal static readonly TimePoint minValue = new() { Beat = BeatValue.MinValue, Time = TimeValue.MinValue };
+        internal static readonly TimePoint maxValue = new() { Beat = BeatValue.MaxValue, Time = TimeValue.MaxValue };
         internal static readonly TimePoint zero = new();
         
         public static TimePoint CreateMin() => minValue.Clone();
         public static TimePoint CreateMax() => maxValue.Clone();
         public static TimePoint CreateZero() => zero.Clone();
 
-        public static TimePoint Create(BeatUnit beat, TimeUnit time, TimeUnit? delay) => new() { Beat = beat, Time = time, Delay = delay ?? TimeUnit.Zero };
+        public static TimePoint Create(BeatValue beat, TimeValue time, TimeValue? delay) => new() { Beat = beat, Time = time, Delay = delay ?? TimeValue.Zero };
 
-        private BeatUnit beat = 0;
-        private TimeUnit time = TimeUnit.Zero;
-        private TimeUnit delay;
+        private BeatValue beat = 0;
+        private TimeValue time = Data.TimeValue.Zero;
+        private TimeValue delay;
 
         public TimePoint(ITimePoint? other = null) {
             if (other != null) CopyFrom(other);
@@ -60,27 +60,27 @@ namespace MaTech.Gameplay.Data {
             delay = other.Delay;
         }
 
-        public BeatUnit Beat {
+        public BeatValue Beat {
             get => beat;
             set => beat = value;
         }
 
-        public TimeUnit Time {
+        public TimeValue Time {
             get => time;
             set => time = value;
         }
 
-        public TimeUnit TimeOfBeat {
+        public TimeValue TimeOfBeat {
             get => time.OffsetBy(delay.Negate());
             set => time = value.OffsetBy(delay);
         }
 
-        public TimeUnit Delay {
+        public TimeValue Delay {
             get => delay;
             set => SetDelay(value, keepTimeOfBeat: true);
         }
         
-        public void SetDelay(TimeUnit value, bool keepTimeOfBeat) {
+        public void SetDelay(TimeValue value, bool keepTimeOfBeat) {
             if (keepTimeOfBeat) {
                 SetDelayAndTimeOfBeat(value, TimeOfBeat);
             } else {
@@ -88,12 +88,12 @@ namespace MaTech.Gameplay.Data {
             }
         }
 
-        public void SetDelayAndTime(TimeUnit delay, TimeUnit time) {
+        public void SetDelayAndTime(TimeValue delay, TimeValue time) {
             this.time = time;
             this.delay = delay;
         }
 
-        public void SetDelayAndTimeOfBeat(TimeUnit delay, TimeUnit timeOfBeat) {
+        public void SetDelayAndTimeOfBeat(TimeValue delay, TimeValue timeOfBeat) {
             this.time = timeOfBeat.OffsetBy(delay);
             this.delay = delay;
         }

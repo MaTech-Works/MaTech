@@ -45,7 +45,7 @@ namespace MaTech.Gameplay.Data {
         public static implicit operator FractionMixed(in Property<TDefine> t) => t.To<FractionMixed>();
         public static implicit operator FractionSimple(in Property<TDefine> t) => t.To<FractionSimple>();
 
-        public static implicit operator TimeUnit(in Property<TDefine> t) => TimeUnit.FromMilliseconds(t.To<double>()); // todo: implement with unit adopt
+        public static implicit operator TimeValue(in Property<TDefine> t) => TimeValue.FromMilliseconds(t.To<double>()); // todo: implement with unit adopt
     }
 
     // todo: finish TEnum and original design

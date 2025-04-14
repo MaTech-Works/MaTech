@@ -26,7 +26,7 @@ namespace MaTech.Gameplay.Processor {
     /// 提供一组可以调整的参数，可以改变计算的行为，也提供数个可供派生类重载/实现的虚函数，用于实现模式特有的音符相关计算以及填充填充extra数据供不同模式使用
     /// </summary>
     public abstract partial class ProcessorBasic : Processor {
-        private readonly TimeUnit toleranceTimeOffset = TimeUnit.FromMilliseconds(0.99);
+        private readonly TimeValue toleranceTimeOffset = TimeValue.FromMilliseconds(0.99);
 
         /// <summary> 卷轴方向上所有位置与速度值的整体缩放比例 </summary>
         [SerializeField, ReadOnlyInInspector] protected double scaleY = 1;

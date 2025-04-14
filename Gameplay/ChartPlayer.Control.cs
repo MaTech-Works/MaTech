@@ -38,7 +38,7 @@ namespace MaTech.Gameplay {
         public bool IsPlayerControl => controller != null && controller.IsPlayer;
         public bool IsNonPlayerControl => controller != null && !controller.IsPlayer;
 
-        private TimeUnit lastControllerTime = TimeUnit.MinValue;
+        private TimeValue lastControllerTime = TimeValue.MinValue;
 
         private void EnableController() {
             control?.Attach(this);
@@ -51,13 +51,13 @@ namespace MaTech.Gameplay {
         }
         
         private void ResetController() {
-            TimeUnit time = PlayTime.InputTime;
+            TimeValue time = PlayTime.InputTime;
             controller?.ResetControl(time);
             lastControllerTime = time;
         }
         
         private void UpdateController() {
-            TimeUnit time = PlayTime.InputTime;
+            TimeValue time = PlayTime.InputTime;
             controller?.UpdateControl(lastControllerTime = PlayTime.InputTime);
             lastControllerTime = time;
         }
@@ -71,11 +71,11 @@ namespace MaTech.Gameplay {
             public void Detach() { player = null; }
 
             // ReSharper disable Unity.NoNullPropagation
-            public void PlayKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) => player?.OnKeyInput(keyCode, isDown, time);
-            public void PlayTouchInput(PlayInput.Finger finger, TimeUnit time) => player?.OnTouchInput(finger, time);
-            public void PlayIndexedInput(int index, bool isDown, TimeUnit time) => player?.OnIndexedInput(index, isDown, time);
+            public void PlayKeyInput(KeyCode keyCode, bool isDown, TimeValue time) => player?.OnKeyInput(keyCode, isDown, time);
+            public void PlayTouchInput(PlayInput.Finger finger, TimeValue time) => player?.OnTouchInput(finger, time);
+            public void PlayIndexedInput(int index, bool isDown, TimeValue time) => player?.OnIndexedInput(index, isDown, time);
 
-            public void PlayScoreUpdate(MetaTable<ScoreType> scoreSnapshot, TimeUnit time) => player?.OnScoreUpdate(scoreSnapshot, time);
+            public void PlayScoreUpdate(MetaTable<ScoreType> scoreSnapshot, TimeValue time) => player?.OnScoreUpdate(scoreSnapshot, time);
             // ReSharper restore Unity.NoNullPropagation
         }
         

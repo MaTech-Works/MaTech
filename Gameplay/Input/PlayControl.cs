@@ -11,9 +11,9 @@ namespace MaTech.Gameplay.Input {
     /// 这个接口会传给controller供有限条件下使用。
     /// 可以在多线程环境下使用，输入信息会被缓存到下一次IPlayController.UpdateControl结束后在主线程发出处理。
     public interface IPlayControl {
-        void PlayKeyInput(KeyCode keyCode, bool isDown, TimeUnit time);
-        void PlayTouchInput(PlayInput.Finger finger, TimeUnit time);
-        void PlayIndexedInput(int index, bool isDown, TimeUnit time);
+        void PlayKeyInput(KeyCode keyCode, bool isDown, TimeValue time);
+        void PlayTouchInput(PlayInput.Finger finger, TimeValue time);
+        void PlayIndexedInput(int index, bool isDown, TimeValue time);
     }
     
     /// 实现这个接口，便可以对游戏进行输入控制。
@@ -27,8 +27,8 @@ namespace MaTech.Gameplay.Input {
         void DetachController();
         
         /// 从指定的时间重新开始谱面回放或游玩。
-        void ResetControl(TimeUnit time);
+        void ResetControl(TimeValue time);
         /// 在主线程的按帧更新，对于回放而言应当自上次的记录开始播放到小于等于time的位置。
-        void UpdateControl(TimeUnit time);
+        void UpdateControl(TimeValue time);
     }
 }

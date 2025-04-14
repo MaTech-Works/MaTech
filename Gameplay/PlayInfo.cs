@@ -13,8 +13,8 @@ namespace MaTech.Gameplay {
 
         IMeta<ChartMeta> Meta { get; }
         
-        TimeUnit? TrackStartTime { get; }
-        TimeUnit? FinishCheckTime { get; }
+        TimeValue? TrackStartTime { get; }
+        TimeValue? FinishCheckTime { get; }
         
         int? RandomSeed { get; }
 

@@ -15,9 +15,9 @@ namespace MaTech.Gameplay {
         /// <summary> 图形或判定逻辑元素的三维时间轴位置 </summary>
         public struct CarrierTiming {
             /// <summary> 位于时间轴上的时间，以秒计 </summary>
-            public TimeUnit time;
+            public TimeValue time;
             /// <summary> 位于节拍轴上的拍号，不一定严格对应时间，部分模式可能没有这个数值 </summary>
-            public BeatUnit beat;
+            public BeatValue beat;
             /// <summary> 位于图形卷轴上的位置，由Processor计算而来，由各模式自行定义 </summary>
             public double roll;
 
@@ -28,8 +28,8 @@ namespace MaTech.Gameplay {
             public bool IsMax => beat.IsMax || time.IsMax || double.IsPositiveInfinity(roll);
             public bool IsMin => beat.IsMin || time.IsMin || double.IsNegativeInfinity(roll);
 
-            public static CarrierTiming MaxValue => new() { time = TimeUnit.MaxValue, beat = BeatUnit.MaxValue, roll = double.PositiveInfinity };
-            public static CarrierTiming MinValue => new() { time = TimeUnit.MinValue, beat = BeatUnit.MinValue, roll = double.NegativeInfinity };
+            public static CarrierTiming MaxValue => new() { time = TimeValue.MaxValue, beat = BeatValue.MaxValue, roll = double.PositiveInfinity };
+            public static CarrierTiming MinValue => new() { time = TimeValue.MinValue, beat = BeatValue.MinValue, roll = double.NegativeInfinity };
             
             public override string ToString() => $"Beat {beat}, Time {time}, Roll {roll}";
         }

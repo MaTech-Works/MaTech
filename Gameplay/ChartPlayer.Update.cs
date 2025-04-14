@@ -52,9 +52,9 @@ namespace MaTech.Gameplay {
             Profiler.BeginSample("ChartPlayer.UpdateEarly()", this);
 
             try {
-                TimeUnit timeBeforeInput = PlayTime.InputTime;
+                TimeValue timeBeforeInput = PlayTime.InputTime;
                 UpdateTime();
-                TimeUnit timeAfterInput = PlayTime.InputTime;
+                TimeValue timeAfterInput = PlayTime.InputTime;
                 
                 bool canUpdateJudgeLogic = !finishing && UnityUtil.IsAssigned(judgeLogic);
                 if (canUpdateJudgeLogic) {

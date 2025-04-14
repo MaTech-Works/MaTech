@@ -44,6 +44,6 @@ namespace MaTech.Gameplay.Display {
         }
         void IObjectVisual<NoteCarrier, NoteLayer>.UpdateVisual() => NoteUpdate();
 
-        void INoteVisual.OnHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeUnit time, HitResult result) => NoteHit(new(unit, action, time, result));
+        void INoteVisual.OnHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeValue time, HitResult result) => NoteHit(new(unit, action, time, result));
     }
 }

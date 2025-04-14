@@ -35,13 +35,13 @@ namespace MaTech.Gameplay.Data {
         public ITimePoint SafeStart => Start ?? TimePoint.minValue;
         public ITimePoint SafeEnd => End ?? TimePoint.maxValue;
         
-        public Range<TimeUnit> TimeRange => new(TimeStart, TimeEnd);
-        public TimeUnit TimeStart => SafeStart.Time;
-        public TimeUnit TimeEnd => SafeEnd.Time;
+        public Range<TimeValue> TimeRange => new(TimeStart, TimeEnd);
+        public TimeValue TimeStart => SafeStart.Time;
+        public TimeValue TimeEnd => SafeEnd.Time;
         
-        public Range<BeatUnit> BeatRange => new(BeatStart, BeatEnd);
-        public BeatUnit BeatStart => SafeStart.Beat;
-        public BeatUnit BeatEnd => SafeEnd.Beat;
+        public Range<BeatValue> BeatRange => new(BeatStart, BeatEnd);
+        public BeatValue BeatStart => SafeStart.Beat;
+        public BeatValue BeatEnd => SafeEnd.Beat;
         
         public static IComparer<TimedObject> ComparerAnchorBeat => comparers[0];
         public static IComparer<TimedObject> ComparerAnchorTime => comparers[1];

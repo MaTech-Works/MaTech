@@ -27,7 +27,7 @@ namespace MaTech.Gameplay.Logic {
         // 让activeList里的音符离miss边界远一些。100ms的额外边界暂时足够了。
         // todo: 增加接口处理退出判定范围的IJudgeUnit
         // todo: 检查PlayControl与JudgeInput的操作顺序
-        private readonly TimeUnit activeNoteWindowOffset = TimeUnit.FromMilliseconds(100);
+        private readonly TimeValue activeNoteWindowOffset = TimeValue.FromMilliseconds(100);
         
         protected readonly struct ReadOnlyUnits : IReadOnlyCollection<IJudgeUnit> {
             private readonly Dictionary<IJudgeUnit, HashSet<NoteCarrier>>.KeyCollection inner;
@@ -48,12 +48,12 @@ namespace MaTech.Gameplay.Logic {
         protected abstract IScore CreateScore(IPlayInfo playInfo);
 
         /// 将NoteCarrier加入activeList的时机（相对于PlayTime.InputTime）
-        protected virtual TimeUnit ActiveNoteEarlyWindow => Timing.WindowEarly.OffsetBy(activeNoteWindowOffset);
+        protected virtual TimeValue ActiveNoteEarlyWindow => Timing.WindowEarly.OffsetBy(activeNoteWindowOffset);
         /// 将NoteCarrier移除出activeList的时机（相对于PlayTime.InputTime）
-        protected virtual TimeUnit ActiveNoteLateWindow => Timing.WindowLate.OffsetBy(activeNoteWindowOffset);
+        protected virtual TimeValue ActiveNoteLateWindow => Timing.WindowLate.OffsetBy(activeNoteWindowOffset);
 
         protected abstract void ResetJudge(IPlayInfo playInfo);
-        protected abstract void UpdateJudge(TimeUnit timeStart, TimeUnit timeEnd);
+        protected abstract void UpdateJudge(TimeValue timeStart, TimeValue timeEnd);
 
         public override bool IsFinished => (pendingCarriers == null || !pendingCarriers.HasNext) && activeCarriers.Count == 0;
         public override bool IsFailed {
@@ -84,18 +84,18 @@ namespace MaTech.Gameplay.Logic {
             ResetJudge(playInfo);
         }
         
-        public sealed override void OnUpdateLogicBeforeInput(TimeUnit timeBeforeInput, TimeUnit timeAfterInput) {
+        public sealed override void OnUpdateLogicBeforeInput(TimeValue timeBeforeInput, TimeValue timeAfterInput) {
             PopulateActiveListUntil(timeAfterInput);
         }
-        public sealed override void OnUpdateLogicAfterInput(TimeUnit timeBeforeInput, TimeUnit timeAfterInput) {
+        public sealed override void OnUpdateLogicAfterInput(TimeValue timeBeforeInput, TimeValue timeAfterInput) {
             UpdateJudge(timeBeforeInput, timeAfterInput);
             DepopulateActiveListUntil(timeBeforeInput);
         }
         
         // todo: 提供一种队列进入退出标准的override方法
         // todo: 能不能把区间查找做进一种队列性质的helper容器，而非中间类？
-        protected void DepopulateActiveListUntil(TimeUnit time) {
-            TimeUnit window = time.OffsetBy(ActiveNoteLateWindow.Negate());
+        protected void DepopulateActiveListUntil(TimeValue time) {
+            TimeValue window = time.OffsetBy(ActiveNoteLateWindow.Negate());
             while (activeCarriers.NextIf(window, (carrier, window) => carrier.end.time.CompareTo(window) <= 0) is { } carrier) {
                 foreach (var unit in carrier.UnitsOf<IJudgeUnit>()) {
                     if (!activeUnitsWithCarriers.TryGetValue(unit, out var set)) continue;
@@ -109,8 +109,8 @@ namespace MaTech.Gameplay.Logic {
             activeCarriers.RemovePassed();
         }
 
-        protected void PopulateActiveListUntil(TimeUnit time) {
-            TimeUnit window = time.OffsetBy(ActiveNoteEarlyWindow);
+        protected void PopulateActiveListUntil(TimeValue time) {
+            TimeValue window = time.OffsetBy(ActiveNoteEarlyWindow);
             while (pendingCarriers.NextIf(window, (carrier, window) => carrier.start.time.CompareTo(window) < 0) is { } carrier) {
                 activeCarriers.OrderedInsert(carrier, Carrier.ComparerEndTime());
                 foreach (var unit in carrier.UnitsOf<IJudgeUnit>()) {

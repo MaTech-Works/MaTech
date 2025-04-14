@@ -18,7 +18,7 @@ namespace MaTech.Gameplay.Processor {
             public readonly TimePoint timePoint;
             public readonly bool hidden;
 
-            internal BarInfo(in BeatUnit beat, in TimeUnit time, bool hidden) {
+            internal BarInfo(in BeatValue beat, in TimeValue time, bool hidden) {
                 this.timePoint = new TimePoint { Beat = beat, Time = time };
                 this.hidden = hidden;
             }
@@ -73,7 +73,7 @@ namespace MaTech.Gameplay.Processor {
                     Assert.IsTrue(indexShowBar < listShowBar.Count);
                     nextShowBarBeat = listShowBar[indexShowBar].Item1;
                 }
-                listBar.Add(new BarInfo(currBeat, TimeUnit.Zero, !showBar));
+                listBar.Add(new BarInfo(currBeat, TimeValue.Zero, !showBar));
                 if (listBar.Count >= maxBarCount)
                     return listBar;
             }

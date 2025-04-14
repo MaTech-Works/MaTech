@@ -24,16 +24,16 @@ namespace MaTech.Gameplay.Input {
             playControl = null;
         }
 
-        void IPlayController.ResetControl(TimeUnit time) => ResetInput();
-        void IPlayController.UpdateControl(TimeUnit time) => UpdateInput();
+        void IPlayController.ResetControl(TimeValue time) => ResetInput();
+        void IPlayController.UpdateControl(TimeValue time) => UpdateInput();
 
         private IPlayControl playControl;
 
         // TODO: 令外部送入输入时间码，以便这里根据高精度计时器和平台定义的输入时间码来相对计算InputTime
-        private TimeUnit RealtimeTime => PlayTime.InputTime;
+        private TimeValue RealtimeTime => PlayTime.InputTime;
         
         private void SendKeyInput(KeyCode keyCode, bool isDown) => SendKeyInput(keyCode, isDown, RealtimeTime);
-        private void SendKeyInput(KeyCode keyCode, bool isDown, in TimeUnit time) {
+        private void SendKeyInput(KeyCode keyCode, bool isDown, in TimeValue time) {
             Profiler.BeginSample("PlayInput.OnKeyInput", this);
             try {
                 playControl?.PlayKeyInput(keyCode, isDown, time);
@@ -44,7 +44,7 @@ namespace MaTech.Gameplay.Input {
         }
         
         private void SendTouchInput(Finger finger) => SendTouchInput(finger, RealtimeTime);
-        private void SendTouchInput(Finger finger, in TimeUnit time) {
+        private void SendTouchInput(Finger finger, in TimeValue time) {
             Profiler.BeginSample("PlayInput.OnTouchInput", this);
             try {
                 playControl?.PlayTouchInput(finger, time);
@@ -55,7 +55,7 @@ namespace MaTech.Gameplay.Input {
         }
         
         private void SendIndexedInput(int index, bool isDown) => SendIndexedInput(index, isDown, RealtimeTime);
-        private void SendIndexedInput(int index, bool isDown, in TimeUnit time) {
+        private void SendIndexedInput(int index, bool isDown, in TimeValue time) {
             Profiler.BeginSample("PlayInput.OnIndexedInput", this);
             try {
                 playControl?.PlayIndexedInput(index, isDown, time);

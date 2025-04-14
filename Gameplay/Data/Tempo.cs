@@ -24,8 +24,8 @@ namespace MaTech.Gameplay.Data {
         public override ITimePoint Start => start;
         public override ITimePoint? End => null;
 
-        public TimeUnit CalculateTimeFromBeat(BeatUnit beat) => TimeUnit.FromSeconds(beat.DeltaSince(start.Beat).Value * beatSeconds).OffsetBy(start.Time);
-        public BeatUnit CalculateBeatFromTime(TimeUnit time) => BeatUnit.FromValue(time.DeltaSince(start.Time).Seconds * beatsPerSecond).OffsetBy(start.Beat);
+        public TimeValue CalculateTimeFromBeat(BeatValue beat) => TimeValue.FromSeconds(beat.DeltaSince(start.Beat).Value * beatSeconds).OffsetBy(start.Time);
+        public BeatValue CalculateBeatFromTime(TimeValue time) => BeatValue.FromValue(time.DeltaSince(start.Time).Seconds * beatsPerSecond).OffsetBy(start.Beat);
     }
 
     public static class TempoChangeExtensionMethods {

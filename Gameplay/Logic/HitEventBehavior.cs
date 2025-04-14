@@ -24,7 +24,7 @@ namespace MaTech.Gameplay.Logic {
         #endif
         public HitEvent LastHit { get; private set; }
         
-        public void OnHitNote(IJudgeUnit unit, NoteHitAction action, TimeUnit time, HitResult result) => hitEvents?.InvokeAll(LastHit = new(unit, action, time, result));
-        public void OnHitEmpty(EmptyHitAction action, TimeUnit time) {}
+        public void OnHitNote(IJudgeUnit unit, NoteHitAction action, TimeValue time, HitResult result) => hitEvents?.InvokeAll(LastHit = new(unit, action, time, result));
+        public void OnHitEmpty(EmptyHitAction action, TimeValue time) {}
     }
 }

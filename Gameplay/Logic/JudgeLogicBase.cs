@@ -35,7 +35,7 @@ namespace MaTech.Gameplay.Logic {
             Down, Move, Up, Flick,
         }
 
-        public delegate void ActionHitNote(IJudgeUnit unit, NoteHitAction action, in TimeUnit time, HitResult result);
+        public delegate void ActionHitNote(IJudgeUnit unit, NoteHitAction action, in TimeValue time, HitResult result);
 
         // 以下组件getter在OnLoadChart后应当指向一个有效的实例
         // todo: 有没有更好的方法给这些组件添加工厂函数？是否将这些全部移动到一个ModeRule类，全部从外部传入这里？
@@ -72,15 +72,15 @@ namespace MaTech.Gameplay.Logic {
         /// <summary>
         /// 每帧游戏逻辑更新时被调用，与帧率关联的回调。
         /// </summary>
-        public virtual void OnUpdateLogicBeforeInput(TimeUnit timeBeforeInput, TimeUnit timeAfterInput) {}
-        public virtual void OnUpdateLogicAfterInput(TimeUnit timeBeforeInput, TimeUnit timeAfterInput) {}
+        public virtual void OnUpdateLogicBeforeInput(TimeValue timeBeforeInput, TimeValue timeAfterInput) {}
+        public virtual void OnUpdateLogicAfterInput(TimeValue timeBeforeInput, TimeValue timeAfterInput) {}
 
         /// <summary>
         /// 处理按键或触控输入，详见 PlayInput 类。
         /// </summary>
-        public virtual void OnIndexedInput(int index, bool isDown, TimeUnit time) {}
-        public virtual void OnKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {}
-        public virtual void OnTouchInput(PlayInput.Finger finger, TimeUnit time) {}
+        public virtual void OnIndexedInput(int index, bool isDown, TimeValue time) {}
+        public virtual void OnKeyInput(KeyCode keyCode, bool isDown, TimeValue time) {}
+        public virtual void OnTouchInput(PlayInput.Finger finger, TimeValue time) {}
 
         public override void OnFinish(bool isFailed) => Score.FinishScore(isFailed);
 
@@ -91,14 +91,14 @@ namespace MaTech.Gameplay.Logic {
         /// <summary>
         /// 向判定数值Timing查询给定音符的判定结果。
         /// </summary>
-        protected HitResult JudgeNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit time) {
+        protected HitResult JudgeNoteHit(IJudgeUnit unit, NoteHitAction action, TimeValue time) {
             return Timing?.JudgeNote(unit, action, time) ?? HitResult.None;
         }
         
         /// <summary>
         /// 记录判定结果，并将判定发送至图形。
         /// </summary>
-        protected void HandleNoteHit(IJudgeUnit unit, NoteHitAction action, TimeUnit time, HitResult result) {
+        protected void HandleNoteHit(IJudgeUnit unit, NoteHitAction action, TimeValue time, HitResult result) {
             LogNoteHit(unit, action, time, result);
             
             // Note and Behavior callbacks
@@ -143,7 +143,7 @@ namespace MaTech.Gameplay.Logic {
         /// <summary>
         /// 将空击消息传递给所有子元件上的JudgeResultBehaviour
         /// </summary>
-        protected void HandleEmptyHit(EmptyHitAction action, TimeUnit time) {
+        protected void HandleEmptyHit(EmptyHitAction action, TimeValue time) {
             LogEmptyHit(action, time);
 
             Profiler.BeginSample("JudgeLogicBase.HandleEmptyHit(): PlayBehavior", this);

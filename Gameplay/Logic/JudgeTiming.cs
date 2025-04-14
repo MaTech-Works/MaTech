@@ -13,10 +13,10 @@ namespace MaTech.Gameplay.Logic {
         void ResetScore(IPlayInfo playInfo);
         
         /// <summary> 判定逻辑的起始生效范围，返回正的绝对值（返回负数会让起始位置比音符更晚）。 </summary>
-        TimeUnit WindowEarly { get; }
+        TimeValue WindowEarly { get; }
         /// <summary> 判定逻辑的结束生效范围，返回正的绝对值（返回负数会让结束位置比音符更早）。 </summary>
-        TimeUnit WindowLate { get; }
+        TimeValue WindowLate { get; }
             
-        HitResult JudgeNote(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeUnit time);
+        HitResult JudgeNote(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, TimeValue time);
     }
 }

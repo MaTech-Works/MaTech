@@ -21,15 +21,15 @@ namespace MaTech.Gameplay {
         
         public interface IReplayRecordInput {
             void FlushRecords();
-            void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit time);
-            void RecordTouchInput(PlayInput.Finger finger, TimeUnit time);
-            void RecordIndexedInput(int index, bool isDown, TimeUnit time);
+            void RecordKeyInput(KeyCode keyCode, bool isDown, TimeValue time);
+            void RecordTouchInput(PlayInput.Finger finger, TimeValue time);
+            void RecordIndexedInput(int index, bool isDown, TimeValue time);
         }
         
         public interface IReplayRecordJudgeScore {
-            void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeUnit time, HitResult result);
-            void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeUnit time);
-            void RecordScoreUpdate(IScore score, TimeUnit time);
+            void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeValue time, HitResult result);
+            void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeValue time);
+            void RecordScoreUpdate(IScore score, TimeValue time);
         }
         
         private interface IReplayRecorder : IReplayFileSource, IReplayRecordInput, IReplayRecordJudgeScore {}
@@ -199,13 +199,13 @@ namespace MaTech.Gameplay {
 
             public void FlushRecords() {}
 
-            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {}
-            public void RecordTouchInput(PlayInput.Finger finger, TimeUnit time) {}
-            public void RecordIndexedInput(int index, bool isDown, TimeUnit time) {}
+            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeValue time) {}
+            public void RecordTouchInput(PlayInput.Finger finger, TimeValue time) {}
+            public void RecordIndexedInput(int index, bool isDown, TimeValue time) {}
 
-            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeUnit time, HitResult result) {}
-            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeUnit time) {}
-            public void RecordScoreUpdate(IScore score, TimeUnit time) {}
+            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitAction action, TimeValue time, HitResult result) {}
+            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitAction action, TimeValue time) {}
+            public void RecordScoreUpdate(IScore score, TimeValue time) {}
         }
 
     }

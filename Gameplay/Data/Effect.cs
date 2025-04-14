@@ -73,10 +73,10 @@ namespace MaTech.Gameplay.Data {
         }
 
         public delegate Variant Sampler<T>(in Effect effect, in T value) where T : struct;
-        public static Sampler<T> SpeedSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in T t) => effect.SpeedAt(t);
-        public static Sampler<T> ValueSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in T t) => effect.ValueAt(t);
-        public static Sampler<Range<T>> DeltaSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in Range<T> range) => effect.Delta(range);
-        public static Sampler<Range<T>> IntegralSampler<T>() where T : struct, ITimeUnit<T> => (in Effect effect, in Range<T> range) => effect.Integrate(range);
+        public static Sampler<T> SpeedSampler<T>() where T : struct, ITimeValue<T> => (in Effect effect, in T t) => effect.SpeedAt(t);
+        public static Sampler<T> ValueSampler<T>() where T : struct, ITimeValue<T> => (in Effect effect, in T t) => effect.ValueAt(t);
+        public static Sampler<Range<T>> DeltaSampler<T>() where T : struct, ITimeValue<T> => (in Effect effect, in Range<T> range) => effect.Delta(range);
+        public static Sampler<Range<T>> IntegralSampler<T>() where T : struct, ITimeValue<T> => (in Effect effect, in Range<T> range) => effect.Integrate(range);
         
         public Variant Sample<T>(Sampler<T> sampler, in T t) where T : struct => sampler(this, t);
         
@@ -89,7 +89,7 @@ namespace MaTech.Gameplay.Data {
         public bool Match(in Variant keyword) => this.keyword == keyword;
         public bool Match(in Variant keyword, Func<Variant, Variant, bool> match) => match(this.keyword, keyword);
         
-        public Variant SpeedAt<T>(in T t) where T : struct, ITimeUnit<T> => SpeedAt(ClampedRatioOf(t), BeatRange.Length());
+        public Variant SpeedAt<T>(in T t) where T : struct, ITimeValue<T> => SpeedAt(ClampedRatioOf(t), BeatRange.Length());
         public Variant SpeedAt(double t, double? w = null) {
             if (!value.start.IsNumeral || !value.end.IsNumeral) return Variant.None;
             double k = interpolator?.Derivative(t) ?? 0.0f;
@@ -97,7 +97,7 @@ namespace MaTech.Gameplay.Data {
             return k * (v1 - v0) / (w ?? 1);
         }
 
-        public Variant ValueAt<T>(in T t) where T : struct, ITimeUnit<T> => ValueAt(ClampedRatioOf(t));
+        public Variant ValueAt<T>(in T t) where T : struct, ITimeValue<T> => ValueAt(ClampedRatioOf(t));
         public Variant ValueAt(double t) {
             double k = interpolator?.Map(t) ?? 0.0f;
             if (value.start.IsNumeral && value.end.IsNumeral) {
@@ -106,21 +106,21 @@ namespace MaTech.Gameplay.Data {
             return k >= 0.5 ? value.end : value.start;
         }
         
-        public Variant Delta<T>(in Range<T> range) where T : struct, ITimeUnit<T> => Delta(range.start, range.end);
-        public Variant Delta<T>(in T start, in T end) where T : struct, ITimeUnit<T> => DeltaBetween(ValueAt(end), ValueAt(start));
+        public Variant Delta<T>(in Range<T> range) where T : struct, ITimeValue<T> => Delta(range.start, range.end);
+        public Variant Delta<T>(in T start, in T end) where T : struct, ITimeValue<T> => DeltaBetween(ValueAt(end), ValueAt(start));
         public static Variant DeltaBetween(in Variant start, in Variant end) => start.IsNumeral && end.IsNumeral ? end.Double - start.Double : Variant.None;
         
-        public Variant Integrate<T>(in Range<T> range) where T : struct, ITimeUnit<T> => Integrate(range.start, range.end);
-        public Variant Integrate<T>(in T start, in T end) where T : struct, ITimeUnit<T> => Integrate(ClampedRatioOf(start), ClampedRatioOf(end), ClampedLength<T>((start, end)));
+        public Variant Integrate<T>(in Range<T> range) where T : struct, ITimeValue<T> => Integrate(range.start, range.end);
+        public Variant Integrate<T>(in T start, in T end) where T : struct, ITimeValue<T> => Integrate(ClampedRatioOf(start), ClampedRatioOf(end), ClampedLength<T>((start, end)));
         public Variant Integrate(double t0, double t1, double? tw = null) {
             if (!value.start.IsNumeral || !value.end.IsNumeral) return Variant.None;
             double v0 = value.start.Double, v1 = value.end.Double; // todo: generic vector scaling math support
             return (v0 + (v1 - v0) * (interpolator?.Average(t0, t1) ?? 0.0)) * (tw ?? t1 - t0); // use Average since it handles divide by 0
         }
         
-        private Range<T> Range<T>() where T : struct, ITimeUnit<T> => propertyRange.Get<Range<T>>(this).ValueOrDefault();
-        private double ClampedRatioOf<T>(in T t) where T : struct, ITimeUnit<T> => Range<T>().RatioOf(t, clamped: true);
-        private double ClampedLength<T>(in Range<T> range) where T : struct, ITimeUnit<T> => Range<T>().Clamp(range).Length().Value;
+        private Range<T> Range<T>() where T : struct, ITimeValue<T> => propertyRange.Get<Range<T>>(this).ValueOrDefault();
+        private double ClampedRatioOf<T>(in T t) where T : struct, ITimeValue<T> => Range<T>().RatioOf(t, clamped: true);
+        private double ClampedLength<T>(in Range<T> range) where T : struct, ITimeValue<T> => Range<T>().Clamp(range).Length().Value;
 
         private static readonly GenericProperty<Effect> propertyRange = new(property => property.Define(effect => effect.TimeRange).Define(effect => effect.BeatRange));
         

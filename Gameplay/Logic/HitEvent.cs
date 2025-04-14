@@ -58,12 +58,12 @@ namespace MaTech.Gameplay.Logic {
     [Serializable]
     public readonly struct HitEvent {
         [DisplayAsString]
-        public readonly TimeUnit time;
+        public readonly TimeValue time;
         public readonly NoteHitAction action;
         public readonly HitResult result;
         public readonly IJudgeUnit unit;
 
-        public HitEvent(IJudgeUnit unit, NoteHitAction action, TimeUnit time, HitResult result) {
+        public HitEvent(IJudgeUnit unit, NoteHitAction action, TimeValue time, HitResult result) {
             this.time = time;
             this.action = action;
             this.result = result;
