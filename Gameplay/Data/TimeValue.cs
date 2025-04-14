@@ -58,7 +58,6 @@ namespace MaTech.Gameplay.Data {
             this = this.ClampBetween(MinValue, MaxValue);
         }
 
-        // todo: arithmetic operators
         public readonly BeatValue Negate() => new(fraction.Negated, -Value);
         public readonly BeatValue ScaleBy(double scale) => new(Value * scale);
         public readonly BeatValue OffsetBy(in BeatValue offset) => new(this, offset);
@@ -88,6 +87,12 @@ namespace MaTech.Gameplay.Data {
 
         public static bool operator==(in BeatValue a, in BeatValue b) => a.fraction == b.fraction;
         public static bool operator!=(in BeatValue a, in BeatValue b) => a.fraction != b.fraction;
+        
+        public static BeatValue operator+(in BeatValue a, in BeatValue b) => a.OffsetBy(b);
+        public static BeatValue operator-(in BeatValue a, in BeatValue b) => a.DeltaSince(b);
+        public static BeatValue operator*(in BeatValue a, double b) => a.ScaleBy(b);
+        public static BeatValue operator*(double b, in BeatValue a) => a.ScaleBy(b);
+        public static BeatValue operator/(in BeatValue a, in BeatValue b) => a.RatioTo(b);
 
         public readonly int CompareTo(BeatValue other) => CompareTo(other, false);
         public readonly int CompareTo(in BeatValue other, bool alignToFraction) {
@@ -146,7 +151,6 @@ namespace MaTech.Gameplay.Data {
             this = this.ClampBetween(MinValue, MaxValue);
         }
 
-        // todo: arithmetic operators (notice that TimeUnit/TimeUnit results in casting to int)
         public readonly TimeValue Negate() => new(-integer, -decimals);
         public readonly TimeValue ScaleBy(double rate) => FromMilliseconds(integer * rate).OffsetBy(FromMilliseconds(decimals * rate));
         public readonly TimeValue OffsetBy(in TimeValue offset) => new(this, offset);
@@ -170,6 +174,12 @@ namespace MaTech.Gameplay.Data {
         
         public static bool operator==(in TimeValue a, in TimeValue b) => a.integer == b.integer;
         public static bool operator!=(in TimeValue a, in TimeValue b) => a.integer != b.integer;
+        
+        public static TimeValue operator+(in TimeValue a, in TimeValue b) => a.OffsetBy(b);
+        public static TimeValue operator-(in TimeValue a, in TimeValue b) => a.DeltaSince(b);
+        public static TimeValue operator*(in TimeValue a, double b) => a.ScaleBy(b);
+        public static TimeValue operator*(double b, in TimeValue a) => a.ScaleBy(b);
+        public static TimeValue operator/(in TimeValue a, in TimeValue b) => a.RatioTo(b);
 
         public readonly int CompareTo(TimeValue other) => CompareTo(other, false);
         public readonly int CompareTo(in TimeValue other, bool alignToMilliseconds) {
@@ -190,7 +200,76 @@ namespace MaTech.Gameplay.Data {
         private const int MaxInteger = 1000000000;
     }
     
-    
+    // todo: after Rational, make this serializable or implement IMeta
+    // ReSharper disable once StructCanBeMadeReadOnly
+    public struct RollValue : ITimeValue<RollValue> {
+        public readonly int integer;
+        public readonly float decimals;
+
+        public readonly double Value => IsMax ? double.PositiveInfinity : IsMin ? double.NegativeInfinity : integer + decimals;
+        
+        public readonly bool IsMax => integer >= MaxInteger;
+        public readonly bool IsMin => integer <= -MaxInteger;
+        
+        private RollValue(double value) {
+            value = MathUtil.Clamp(value, -MaxInteger, MaxInteger);
+            integer = MathUtil.RoundToInt(value);
+            decimals = (float)(value - integer);
+        }
+        private RollValue(int i, float d = 0) {
+            integer = MathUtil.Clamp(i, -MaxInteger, MaxInteger);
+            decimals = d;
+        }
+        private RollValue(in RollValue other, in RollValue offset) {
+            var decimalsWithOffset = other.decimals + offset.decimals;
+            var decimalsWithOffsetInInteger = MathUtil.RoundToInt(decimalsWithOffset);
+            integer = decimalsWithOffsetInInteger + other.integer + offset.integer;
+            decimals = decimalsWithOffset - decimalsWithOffsetInInteger;
+            this = this.ClampBetween(MinValue, MaxValue);
+        }
+
+        public readonly RollValue Negate() => new(-integer, -decimals);
+        public readonly RollValue ScaleBy(double rate) => FromValue(integer * rate).OffsetBy(FromValue(decimals * rate));
+        public readonly RollValue OffsetBy(in RollValue offset) => new(this, offset);
+        public readonly RollValue DeltaSince(in RollValue smaller) => new(this, smaller.Negate());
+        public readonly double RatioTo(in RollValue divisor) => Value / divisor.Value;
+        
+        public static implicit operator double(in RollValue obj) => obj.Value;
+        public static implicit operator RollValue(double value) => FromValue(value);
+
+        public static RollValue Zero => new(0);
+        public static RollValue MaxValue => new(MaxInteger);
+        public static RollValue MinValue => new(-MaxInteger);
+        
+        public static RollValue FromValue(double value) => new(value);
+        
+        public static bool operator==(in RollValue a, in RollValue b) => a.integer == b.integer;
+        public static bool operator!=(in RollValue a, in RollValue b) => a.integer != b.integer;
+        
+        public static RollValue operator+(in RollValue a, in RollValue b) => a.OffsetBy(b);
+        public static RollValue operator-(in RollValue a, in RollValue b) => a.DeltaSince(b);
+        public static RollValue operator*(in RollValue a, double b) => a.ScaleBy(b);
+        public static RollValue operator*(double b, in RollValue a) => a.ScaleBy(b);
+        public static RollValue operator/(in RollValue a, in RollValue b) => a.RatioTo(b);
+
+        public readonly int CompareTo(RollValue other) => CompareTo(other, false);
+        public readonly int CompareTo(in RollValue other, bool alignToMilliseconds) {
+            if (CompareUtil.TryCompareTo(integer, other.integer, out var result)) return result;
+            return alignToMilliseconds ? 0 : decimals.CompareTo(other.decimals);
+        }
+        
+        public bool Equals(RollValue other) => CompareTo(other, true) == 0;
+        public override bool Equals(object? obj) => obj is RollValue other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(integer, decimals);
+        
+        public override readonly string ToString() {
+            if (IsMax) return "Max";
+            if (IsMin) return "Min";
+            return $"{integer}ms";
+        }
+
+        private const int MaxInteger = 1000000000;
+    }
 
     // todo: make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
