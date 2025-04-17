@@ -108,7 +108,7 @@ namespace MaTech.Gameplay {
             /// <summary>
             /// 将一个cell放到time相同的record内，保证不会放到最近一次flush操作前已有的record中。
             /// </summary>
-            private void AddCellToRecord(ReplayFile.Types.Cell cell, TimeUnit time) {
+            private void AddCellToRecord(ReplayFile.Types.Cell cell, TimeValue time) {
                 Assert.IsNotNull(cell, "null cells not supported by default. what do you want to do?");
 
                 ReplayFile.Types.Record activeRecord = null;
@@ -134,7 +134,7 @@ namespace MaTech.Gameplay {
                 }
             }
 
-            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeUnit time) {
+            public void RecordKeyInput(KeyCode keyCode, bool isDown, TimeValue time) {
                 if (isDown) {
                     AddCellToRecord(new ReplayFile.Types.Cell {InputKeyDown = (uint)keyCode}, time);
                 } else {
@@ -142,7 +142,7 @@ namespace MaTech.Gameplay {
                 }
             }
 
-            public void RecordTouchInput(PlayInput.Finger finger, TimeUnit time) {
+            public void RecordTouchInput(PlayInput.Finger finger, TimeValue time) {
                 var cell = new ReplayFile.Types.CellInputTouch {
                     Id = finger.ID,
                     Phase = (int)finger.Phase,
@@ -154,7 +154,7 @@ namespace MaTech.Gameplay {
                 AddCellToRecord(new ReplayFile.Types.Cell {InputTouch = cell}, time);
             }
 
-            public void RecordIndexedInput(int index, bool isDown, TimeUnit time) {
+            public void RecordIndexedInput(int index, bool isDown, TimeValue time) {
                 if (index < 0) return;
                 if (isDown) {
                     AddCellToRecord(new ReplayFile.Types.Cell {InputIndexedDown = (uint)index}, time);
@@ -163,7 +163,7 @@ namespace MaTech.Gameplay {
                 }
             }
 
-            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitResult result, int index, TimeUnit time, HitResult result) {
+            public void RecordJudgeNoteHit(JudgeLogicBase.NoteHitResult result, int index, TimeValue time, HitResult result) {
                 var cell = new ReplayFile.Types.CellHitNote {
                     Index = index,
                     Result = (int)result,
@@ -173,7 +173,7 @@ namespace MaTech.Gameplay {
                 AddCellToRecord(new ReplayFile.Types.Cell {HitNote = cell}, time);
             }
 
-            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitResult result, int index, TimeUnit time) {
+            public void RecordJudgeEmptyHit(JudgeLogicBase.EmptyHitResult result, int index, TimeValue time) {
                 var cell = new ReplayFile.Types.CellHitEmpty {
                     Index = index,
                     Result = (int)result,
@@ -182,7 +182,7 @@ namespace MaTech.Gameplay {
                 AddCellToRecord(new ReplayFile.Types.Cell {HitEmpty = cell}, time);
             }
 
-            public void RecordScoreUpdate(Score score, TimeUnit time) {
+            public void RecordScoreUpdate(Score score, TimeValue time) {
                 AddCellToRecord(new ReplayFile.Types.Cell {Score = score.FinalScore}, time);
                 AddCellToRecord(new ReplayFile.Types.Cell {Combo = score.FinalCombo}, time);
                 AddCellToRecord(new ReplayFile.Types.Cell {Acc = score.FinalAcc}, time);

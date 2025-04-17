@@ -44,17 +44,17 @@ namespace MaTech.Gameplay.Processor {
         
         private static readonly FuncAfterCarrier<TimeValue> funcAfterCarrierByTime = (Carrier carrier, in TimeValue time) => carrier.StartTime + ToleranceFindTimeOffset > time;
         private static readonly FuncAfterCarrier<BeatValue> funcAfterCarrierByBeat = (Carrier carrier, in BeatValue beat) => carrier.StartBeat > beat;
-        private static readonly FuncAfterCarrier<double> funcAfterCarrierByRoll = (Carrier carrier, in double roll) => carrier.StartRoll > roll;
+        private static readonly FuncAfterCarrier<RollValue> funcAfterCarrierByRoll = (Carrier carrier, in RollValue roll) => carrier.StartRoll > roll;
         
         private static readonly GenericMapping<ProcessorBasic, TimeCarrier> mappingFindTimeCarrier = new(mapping => mapping
             .Define((ProcessorBasic self, in TimeValue time) => self.FindTimeCarrierByTime(time))
             .Define((ProcessorBasic self, in BeatValue beat) => self.FindTimeCarrierByBeat(beat))
-            .Define((ProcessorBasic self, in double roll) => self.FindTimeCarrierByRoll(roll)) // todo: roll should be a ITimeUnit to be here
+            .Define((ProcessorBasic self, in RollValue roll) => self.FindTimeCarrierByRoll(roll)) // todo: roll should be a ITimeValue to be here
         );
         
         public TimeCarrier FindTimeCarrierByTime(in TimeValue time) => FindTimeCarrierByFunc(timeListByTime, funcAfterCarrierByTime, time);
         public TimeCarrier FindTimeCarrierByBeat(in BeatValue beat) => FindTimeCarrierByFunc(timeListByBeat, funcAfterCarrierByBeat, beat);
-        public TimeCarrier FindTimeCarrierByRoll(in double roll) => FindTimeCarrierByFunc(timeListByRoll, funcAfterCarrierByRoll, roll);
+        public TimeCarrier FindTimeCarrierByRoll(in RollValue roll) => FindTimeCarrierByFunc(timeListByRoll, funcAfterCarrierByRoll, roll);
 
         public TimeCarrier FindTimeCarrier<T>(in T t) where T : struct, ITimeValue<T> => mappingFindTimeCarrier.Map(this, t).ValueOrFailure();
 
@@ -66,17 +66,17 @@ namespace MaTech.Gameplay.Processor {
         
         public CarrierTiming SampleTiming(ITimePoint timePoint, bool findByBeat = true, in Variant keyword = default) => CreateTiming(timePoint, FindTimeCarrier(timePoint, findByBeat), keyword);
         
-        public double SampleRoll(ITimePoint timePoint, bool findByBeat = true, in Variant keyword = default) => FindTimeCarrier(timePoint, findByBeat).SampleRoll(timePoint.Time, keyword); 
-        public double SampleRoll(in TimeValue time, in Variant keyword = default) => FindTimeCarrierByTime(time).SampleRoll(time, keyword);
+        public RollValue SampleRoll(ITimePoint timePoint, bool findByBeat = true, in Variant keyword = default) => FindTimeCarrier(timePoint, findByBeat).SampleRoll(timePoint.Time, keyword); 
+        public RollValue SampleRoll(in TimeValue time, in Variant keyword = default) => FindTimeCarrierByTime(time).SampleRoll(time, keyword);
 
-        public override double CurrentRoll => SampleRoll(PlayTime.VisualTime);
-        
         public double SampleNoteSpeed(ITimePoint timePoint, bool findByBeat = true, bool sampleByBeat = true, in Variant keyword = default)
             => FindTimeCarrier(timePoint, findByBeat).SampleNoteSpeed(timePoint, sampleByBeat, keyword);
         
         public Variant SampleEffect<T>(in T t, DataEnum<EffectType> type, in Variant keyword = default) where T : struct, ITimeValue<T>
             => FindTimeCarrier(t).SampleEffect(t, type, Effect.ValueSampler<T>(), keyword);
         
+        public override RollValue TimeToRoll(in TimeValue time, in Variant keyword = default) => SampleRoll(PlayTime.VisualTime, keyword);
+
         // todo: roll is current always based on time; probably there can be an effect as mapping from beat to roll
         // todo: SampleEffect with range t (need query on all TimeCarriers in between)
         

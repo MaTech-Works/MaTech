@@ -11,10 +11,10 @@ namespace MaTech.Gameplay {
     public static class PlayTime {
         public static bool IsPlaying { get; private set; }
         
-        // todo: consider to use TimeUnit struct here
+        // todo: consider to use TimeValue struct here
         // todo: rename JudgeTime -> InputTime, ChartTime -> LogicTime, DisplayTime -> VisualTime
         // todo: use LogicTime instead of InputTime for judge logic
-        // todo: remove GlobalRoll support, separate Roll on each layer, and switch to RollUnit
+        // todo: remove GlobalRoll support, separate Roll on each layer, and switch to RollValue
 
         public static double Time => LogicTime.Seconds;
         

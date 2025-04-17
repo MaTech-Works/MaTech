@@ -5,11 +5,11 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using MaTech.Common.Utils;
 using MaTech.Gameplay.Data;
 using MaTech.Gameplay.Display;
-using MaTech.Gameplay.Processor;
 using UnityEngine;
 using UnityEngine.Profiling;
 
@@ -130,7 +130,8 @@ namespace MaTech.Gameplay {
             }
 
             if (rewinding || playing) {
-                timeSetter.UpdateGlobalRoll(processor.CurrentRoll);
+                var roll = processor.TimeToRoll(PlayTime.VisualTime);
+                timeSetter.UpdateGlobalRoll(roll);
             }
         }
 

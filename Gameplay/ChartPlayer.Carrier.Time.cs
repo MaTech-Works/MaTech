@@ -43,8 +43,8 @@ namespace MaTech.Gameplay {
                 return result;
             }
 
-            public double SampleRoll(in TimeValue time, in Variant keyword = default) => StartRoll + SampleDeltaRoll((StartTime, time), keyword);
-            public double SampleDeltaRoll(in Range<TimeValue> range, in Variant keyword = default) {
+            public RollValue SampleRoll(in TimeValue time, in Variant keyword = default) => StartRoll + SampleDeltaRoll((StartTime, time), keyword);
+            public RollValue SampleDeltaRoll(in Range<TimeValue> range, in Variant keyword = default) {
                 var distance = SampleEffect(range, EffectType.ScrollSpeed, Effect.IntegralSampler<TimeValue>(), keyword).Double;
                 var offset = SampleEffect(range, EffectType.ScrollOffset, Effect.DeltaSampler<TimeValue>(), keyword).Double;
                 return distance * scale.roll + offset;

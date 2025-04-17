@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using MaTech.Common.Algorithm;
+using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
 using UnityEngine;
 using static MaTech.Gameplay.ChartPlayer;
@@ -39,6 +40,6 @@ namespace MaTech.Gameplay.Processor {
         /// </summary>
         public abstract bool Process();
 
-        public virtual double CurrentRoll => PlayTime.VisualTime;
+        public virtual RollValue TimeToRoll(in TimeValue time, in Variant keyword = default) => PlayTime.VisualTime.Value;
     }
 }

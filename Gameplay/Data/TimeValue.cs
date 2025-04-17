@@ -30,8 +30,8 @@ namespace MaTech.Gameplay.Data {
     // todo: after Rational, make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
     public struct BeatValue : ITimeValue<BeatValue> {
-        public readonly FractionMixed fraction;
-        public readonly float decimals; // todo: not caching the decimals when fraction is used, so no precision loss is accumulated throughout calculation
+        private readonly FractionMixed fraction;
+        private readonly float decimals; // todo: not caching the decimals when fraction is used, so no precision loss is accumulated throughout calculation
         
         public readonly FractionMixed Fraction => IsMax ? FractionMixed.maxValue : IsMin ? FractionMixed.minValue : fraction;
         public readonly double Value => IsMax ? double.PositiveInfinity : IsMin ? double.NegativeInfinity : fraction.Integer + decimals;
@@ -119,8 +119,8 @@ namespace MaTech.Gameplay.Data {
     // todo: after Rational, make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
     public struct TimeValue : ITimeValue<TimeValue> {
-        public readonly int integer;
-        public readonly float decimals;
+        private readonly int integer;
+        private readonly float decimals;
 
         public readonly double Value => IsMax ? double.PositiveInfinity : IsMin ? double.NegativeInfinity : Seconds;
 
@@ -203,8 +203,8 @@ namespace MaTech.Gameplay.Data {
     // todo: after Rational, make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
     public struct RollValue : ITimeValue<RollValue> {
-        public readonly int integer;
-        public readonly float decimals;
+        private readonly int integer;
+        private readonly float decimals;
 
         public readonly double Value => IsMax ? double.PositiveInfinity : IsMin ? double.NegativeInfinity : integer + decimals;
         
@@ -288,13 +288,13 @@ namespace MaTech.Gameplay.Data {
         public static implicit operator Range<T>(in (T start, T end) tuple) => new(tuple.start, tuple.end);
     }
 
-    public static class TimeUnitComparers<T> where T : struct, ITimeValue<T> {
+    public static class TimeValueComparers<T> where T : struct, ITimeValue<T> {
         private class Comparer : IComparer<T> { public bool aligned; public int Compare(T x, T y) => x.CompareTo(y, aligned); }
         public static readonly IComparer<T> precise = new Comparer() { aligned = true };
         public static readonly IComparer<T> aligned = new Comparer() { aligned = false };
     }
     
-    public static class TimeUnitExtensions {
+    public static class TimeValueExtensions {
         // todo: Min and Max
         
         // ReSharper disable PossiblyImpureMethodCallOnReadonlyVariable

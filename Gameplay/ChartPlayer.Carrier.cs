@@ -50,7 +50,7 @@ namespace MaTech.Gameplay {
             public double LengthRoll => end.roll - start.roll;
             public FractionMixed LengthBeat => end.beat.Fraction - start.beat.Fraction;
             
-            // todo: Range<U> and RollUnit (notice that multi-dimension roll can be supported as multiple tracks)
+            // todo: Range<U> and RollValue (notice that multi-dimension roll can be supported as multiple tracks)
             // todo: reverse word order for naming, such as StartTime
             
             public override string ToString() => $"{start} == {end}";
