@@ -10,10 +10,16 @@ using System.Collections.Generic;
 using System.Linq;
 using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
+using MaTech.Gameplay.Display;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace MaTech.Gameplay.Processor {
     public static class BarUtil {
+        public static bool IsBarObject(this GameObject o) {
+            return o.GetComponentInChildren<BarBehavior>() is not null || o.GetComponentInChildren<BarEvents>() is not null;
+        }
+        
         public readonly struct BarInfo {
             public readonly TimePoint timePoint;
             public readonly bool hidden;

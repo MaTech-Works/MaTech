@@ -31,7 +31,7 @@ namespace MaTech.Gameplay.Processor {
         // todo: 输出的list无法确定排序规则；重构时增加输出排序后版本的方法，参数可以使用Carrier上的若干Comparer
         public QueueList<TimeCarrier> ResultTimeList { get; protected set; }
         public QueueList<NoteCarrier> ResultNoteList { get; protected set; }
-        public QueueList<BarCarrier> ResultBarList { get; protected set; }
+        public QueueList<NoteCarrier> ResultBarList { get; protected set; }
 
         // Generate timeList and noteList, possibly barList.
         /// <summary>

@@ -43,7 +43,7 @@ namespace MaTech.Gameplay {
         [SerializeField] private bool collectLayersOnLoad = true;
 
         [SerializeField, DisableIf("collectLayersOnLoad")] private NoteLayer[] noteLayers;
-        [SerializeField, DisableIf("collectLayersOnLoad")] private BarLayer[] barLayers;
+        [SerializeField, DisableIf("collectLayersOnLoad")] private NoteLayer[] barLayers;
 
         [Space]
         [Header("Gameplay Options")]

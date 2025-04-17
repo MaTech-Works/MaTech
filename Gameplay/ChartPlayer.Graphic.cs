@@ -11,11 +11,9 @@ using MaTech.Gameplay.Logic;
 namespace MaTech.Gameplay {
     public partial class ChartPlayer {
         // todo: 支持同个prefab上存在多个behavior，在prefab中任意位置接受回调，并且分开事件、状态和Hit接口
-        public interface IObjectVisual<in TCarrier, in TLayer>
-            where TCarrier : ObjectCarrier<TCarrier, TLayer>
-            where TLayer : ObjectLayer<TCarrier, TLayer> {
+        public interface INoteVisual {
             /// <summary> 元件作为新音符被显示时调用 </summary>
-            void StartVisual(TCarrier carrier, TLayer layer);
+            void StartVisual(NoteCarrier carrier, NoteLayer layer);
             /// <summary> 元件所代表的音符结束显示时调用 </summary>
             void FinishVisual();
             /// <summary> 元件所代表的音符仍在显示时的每帧被调用 </summary>
@@ -26,12 +24,9 @@ namespace MaTech.Gameplay {
             bool IgnoreDisplayWindow { get; }
         }
 
-        public interface INoteVisual : IObjectVisual<NoteCarrier, NoteLayer> {
+        public interface INoteHitEvent {
             /// <summary> 接受JudgeLogic传递的判定消息 </summary>
             void OnHit(IJudgeUnit judgeUnit, JudgeLogicBase.NoteHitAction action, in TimeValue time, HitResult result);
         }
-
-        public interface IBarVisual : IObjectVisual<BarCarrier, BarLayer> {}
-        
     }
 }

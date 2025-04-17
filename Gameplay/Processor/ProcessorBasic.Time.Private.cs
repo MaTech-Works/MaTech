@@ -10,7 +10,6 @@ using System.Linq;
 using MaTech.Common.Algorithm;
 using MaTech.Common.Data;
 using MaTech.Gameplay.Data;
-using MaTech.Gameplay.Display;
 using UnityEngine.Assertions;
 using static MaTech.Gameplay.ChartPlayer;
 
@@ -78,19 +77,17 @@ namespace MaTech.Gameplay.Processor {
         /// <param name="list"> 被排序的列表 </param>
         /// <param name="byStart"> 按照开始还是结束边界排序 </param>
         /// <param name="windowDeltaRoll"> 为每个Carrier计入的排序提前量，排序的结果会在计入hs超车影响的情况下，在相对判定点的这个位置是有序的 </param>
-        public static void SortCarriersByRoll<TCarrier, TLayer>(IList<TCarrier> list, bool byStart, double? windowDeltaRoll = null)
-            where TCarrier : ObjectCarrier<TCarrier, TLayer>
-            where TLayer : ObjectLayer<TCarrier, TLayer> {
+        public static void SortCarriersByRoll(IList<NoteCarrier> list, bool byStart, double? windowDeltaRoll = null) {
             if (list == null) return;
 
             // 计算提前量，并与Carrier成对放入数据列表
             int n = list.Count, i;
-            List<SortData<TCarrier, TLayer>> sortList = new List<SortData<TCarrier, TLayer>>(n);
+            List<SortData> sortList = new List<SortData>(n);
             for (i = 0; i < n; ++i) {
                 var o = list[i];
-                sortList.Add(new SortData<TCarrier, TLayer> {
+                sortList.Add(new SortData {
                     // ReSharper disable once CompareOfFloatsByEqualityOperator
-                    sortY = windowDeltaRoll is null ? o.StartRoll : o.TargetRoll(windowDeltaRoll.Value, byStart),
+                    sortRoll = windowDeltaRoll is null ? o.StartRoll : o.TargetRoll(windowDeltaRoll.Value, byStart),
                     carrier = o
                 });
             }
@@ -104,15 +101,10 @@ namespace MaTech.Gameplay.Processor {
             }
         }
 
-        private struct SortData<TCarrier, TLayer> : IComparable<SortData<TCarrier, TLayer>> 
-            where TCarrier : ObjectCarrier<TCarrier, TLayer>
-            where TLayer : ObjectLayer<TCarrier, TLayer> {
-            public double sortY;
-            public TCarrier carrier;
-            public int CompareTo(SortData<TCarrier, TLayer> other) {
-                return sortY.CompareTo(other.sortY);
-            }
+        private struct SortData : IComparable<SortData> {
+            public NoteCarrier carrier;
+            public double sortRoll;
+            public int CompareTo(SortData other) => sortRoll.CompareTo(other.sortRoll);
         }
-
     }
 }

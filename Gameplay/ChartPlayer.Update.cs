@@ -186,8 +186,9 @@ namespace MaTech.Gameplay {
         }
         
         private void CollectLayersFromScene() {
-            noteLayers = FindObjectsByType<NoteLayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            barLayers = FindObjectsByType<BarLayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var layers = FindObjectsByType<NoteLayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            noteLayers = layers.Where(layer => !layer.IsPossiblyBarLayer).ToArray();
+            barLayers = layers.Where(layer => layer.IsPossiblyBarLayer).ToArray();
             foreach (var layer in noteLayers) layer.updateSelf = false;
             foreach (var layer in barLayers) layer.updateSelf = false;
         }

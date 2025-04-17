@@ -12,14 +12,13 @@ using Sirenix.OdinInspector;
 #endif
 
 namespace MaTech.Gameplay.Display {
-    // TODO: remove this class and always use NoteBehavior. see comments on BarCarrier
-    public abstract class BarBehavior : MonoBehaviour, IBarVisual {
+    public abstract class BarBehavior : MonoBehaviour, INoteVisual {
         #if ODIN_INSPECTOR
         [ShowInInspector, ReadOnly, HideLabel, InlineProperty]
         [FoldoutGroup("Carrier", Expanded = false, VisibleIf = "@Carrier!=null")]
         #endif
-        public BarCarrier Carrier { get; private set; }
-        public BarLayer Layer { get; private set; }
+        public NoteCarrier Carrier { get; private set; }
+        public NoteLayer Layer { get; private set; }
         
         [field: SerializeField, ReadOnlyInInspector] public bool IsVisualFinished { get; set; } = false;
         [field: SerializeField, ReadOnlyInInspector] public bool IgnoreDisplayWindow { get; set; } = false;
@@ -31,15 +30,15 @@ namespace MaTech.Gameplay.Display {
 
         void Awake() => BarInit();
         
-        void IObjectVisual<BarCarrier, BarLayer>.StartVisual(BarCarrier carrier, BarLayer layer) {
+        void INoteVisual.StartVisual(NoteCarrier carrier, NoteLayer layer) {
             Carrier = carrier;
             Layer = layer;
             BarStart();
         }
-        void IObjectVisual<BarCarrier, BarLayer>.FinishVisual() {
+        void INoteVisual.FinishVisual() {
             BarFinish();
             Carrier = null;
         }
-        void IObjectVisual<BarCarrier, BarLayer>.UpdateVisual() => BarUpdate();
+        void INoteVisual.UpdateVisual() => BarUpdate();
     }
 }

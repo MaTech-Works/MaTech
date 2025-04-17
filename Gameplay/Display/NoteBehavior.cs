@@ -14,7 +14,7 @@ using Sirenix.OdinInspector;
 #endif
 
 namespace MaTech.Gameplay.Display {
-    public abstract class NoteBehavior : MonoBehaviour, INoteVisual {
+    public abstract class NoteBehavior : MonoBehaviour, INoteVisual, INoteHitEvent {
         #if ODIN_INSPECTOR
         [ShowInInspector, ReadOnly, HideLabel, InlineProperty]
         [FoldoutGroup("Carrier", Expanded = false, VisibleIf = "@Carrier!=null")]
@@ -33,17 +33,17 @@ namespace MaTech.Gameplay.Display {
 
         void Awake() => NoteInit();
 
-        void IObjectVisual<NoteCarrier, NoteLayer>.StartVisual(NoteCarrier carrier, NoteLayer layer) {
+        void INoteVisual.StartVisual(NoteCarrier carrier, NoteLayer layer) {
             Carrier = carrier;
             Layer = layer;
             NoteStart();
         }
-        void IObjectVisual<NoteCarrier, NoteLayer>.FinishVisual() {
+        void INoteVisual.FinishVisual() {
             NoteFinish();
             Carrier = null;
         }
-        void IObjectVisual<NoteCarrier, NoteLayer>.UpdateVisual() => NoteUpdate();
+        void INoteVisual.UpdateVisual() => NoteUpdate();
 
-        void INoteVisual.OnHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeValue time, HitResult result) => NoteHit(new(unit, action, time, result));
+        void INoteHitEvent.OnHit(IJudgeUnit unit, JudgeLogicBase.NoteHitAction action, in TimeValue time, HitResult result) => NoteHit(new(unit, action, time, result));
     }
 }

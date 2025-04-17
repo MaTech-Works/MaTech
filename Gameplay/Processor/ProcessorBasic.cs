@@ -62,7 +62,7 @@ namespace MaTech.Gameplay.Processor {
         // Process结果，未排序
         protected QueueList<TimeCarrier> timeList;
         protected QueueList<NoteCarrier> noteList;
-        protected QueueList<BarCarrier> barList;
+        protected QueueList<NoteCarrier> barList;
         
         public sealed override bool Process() {
             ResultTimeList = null;
@@ -171,7 +171,7 @@ namespace MaTech.Gameplay.Processor {
         }
 
         private void ProcessBars() {
-            // todo: 合并NoteLayer和BarLayer后，提供方法完成BarUtil.CreateBars到ObjectCarrier的自动转换，令派生类自行调用
+            // todo: 考虑封装进BarUtil.CreateBars，并拆出预封装好的拆出ProcessorBar类
             
             if (!barEnabled) return;
             if (Tempos == null || Effects == null) {
@@ -180,18 +180,18 @@ namespace MaTech.Gameplay.Processor {
             }
 
             if (Objects == null || Objects.Count == 0) {
-                barList = new QueueList<BarCarrier>();
+                barList = new QueueList<NoteCarrier>();
                 return;
             }
 
             var endBeat = Objects.Select(o => (o.End ?? o.SafeStart).Beat).Max();
             var bars = BarUtil.GenerateBars(Tempos, Effects, endBeat);
             
-            barList = new QueueList<BarCarrier>(bars.Count);
+            barList = new QueueList<NoteCarrier>(bars.Count);
             foreach (var bar in bars) {
                 if (bar.hidden) continue;
                 var timing = SampleTiming(bar.timePoint);
-                barList.Add(new BarCarrier() {
+                barList.Add(new NoteCarrier() {
                     start = timing,
                     end = timing,
                     scale = SampleNoteSpeed(bar.timePoint),

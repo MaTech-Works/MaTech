@@ -26,8 +26,8 @@ namespace MaTech.Gameplay.Display {
         #endif
         [Serializable]
         public struct Events {
-            [Serializable] public class LayerEvent : UnityEvent<BarLayer> { }
-            [Serializable] public class CarrierEvent : UnityEvent<BarCarrier> { }
+            [Serializable] public class LayerEvent : UnityEvent<NoteLayer> { }
+            [Serializable] public class CarrierEvent : UnityEvent<NoteCarrier> { }
             
             [FormerlySerializedAs("onInstantiate")]
             [FoldoutGroup("Lifetime Events")] public UnityEvent onInit;
