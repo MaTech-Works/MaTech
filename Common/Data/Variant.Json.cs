@@ -33,10 +33,10 @@ namespace MaTech.Common.Data {
                     writer.WriteValue(variant.Double);
                     break;
                 case VariantType.Fraction:
-                    serializer.Serialize(writer, variant.Fraction);
+                    serializer.Serialize(writer, variant.Mixed);
                     break;
                 case VariantType.FractionSimple:
-                    serializer.Serialize(writer, variant.FractionSimple);
+                    serializer.Serialize(writer, variant.Improper);
                     break;
                 case VariantType.String:
                     writer.WriteValue(variant.String);
@@ -76,7 +76,7 @@ namespace MaTech.Common.Data {
                     var arr = FractionJsonConverter.ReadIntArrayForFraction(reader);
                     switch (arr.Count) {
                     case 2:
-                        variant = new FractionSimple(arr[0], arr[1]);
+                        variant = new FractionImproper(arr[0], arr[1]);
                         break;
                     case 3:
                         variant = new FractionMixed(arr[0], arr[1], arr[2]);

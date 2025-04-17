@@ -33,17 +33,17 @@ namespace MaTech.Common.Data {
         public int Denominator { readonly get => b; set => b = value; }
 
         public readonly bool IsZero => n == 0 && a == 0;
-        public readonly bool IsValid => b != 0 && n != int.MaxValue;
-        public readonly bool IsInvalid => b == 0 || n == int.MaxValue;
+        public readonly bool IsValid => b != 0 && n != int.MinValue;
+        public readonly bool IsInvalid => b == 0 || n == int.MinValue;
 
         public readonly float Float => n + (float)a / b;
         public readonly double Double => n + (double)a / b;
 
-        public readonly FractionSimple Decimal => new(a, b);
+        public readonly FractionImproper Decimal => new(a, b);
         public readonly float DecimalFloat => (float)a / b;
         public readonly double DecimalDouble => (double)a / b;
         
-        public readonly FractionSimple Improper => new(a + n * b, b);
+        public readonly FractionImproper Improper => new(a + n * b, b);
         
         public static bool operator true(FractionMixed fraction) => fraction.IsValid;
         public static bool operator false(FractionMixed fraction) => fraction.IsInvalid;
@@ -51,8 +51,8 @@ namespace MaTech.Common.Data {
         public static explicit operator float(FractionMixed fraction) => fraction.Float;
         public static explicit operator double(FractionMixed fraction) => fraction.Double;
 
-        public static implicit operator FractionSimple(FractionMixed fraction) => fraction.Improper;
-        public static implicit operator FractionMixed(FractionSimple fraction) => fraction.Mixed;
+        public static implicit operator FractionImproper(FractionMixed fraction) => fraction.Improper;
+        public static implicit operator FractionMixed(FractionImproper fraction) => fraction.Mixed;
 
         public static implicit operator FractionMixed(int integer) => new(integer);
         public static implicit operator FractionMixed((int integer, int numerator, int denominator) t) => new(t.integer, t.numerator, t.denominator);
@@ -134,7 +134,7 @@ namespace MaTech.Common.Data {
         /// </summary>
         /// <param name="value"> The float-point value </param>
         /// <param name="maxDenominator"> Maximum denominator that can be produced </param>
-        public static FractionMixed FromFloat(double value, int maxDenominator = 1000) => FractionSimple.FromFloat(value, maxDenominator);
+        public static FractionMixed FromFloat(double value, int maxDenominator = 1000) => FractionImproper.FromFloat(value, maxDenominator);
 
         /// <summary>
         /// Get a normalized fraction from float-point values rounded to the denominator.
@@ -143,7 +143,7 @@ namespace MaTech.Common.Data {
         /// <param name="denominator"> Denominator for rounding </param>
         /// <param name="mode"> Rounding mode as used in MathUtil.RoundToInt </param>
         public static FractionMixed FromFloatRounded(double value, int denominator, MathUtil.RoundingMode mode = MathUtil.RoundingMode.Round) {
-            return FractionSimple.FromFloatRounded(value, denominator, mode);
+            return FractionImproper.FromFloatRounded(value, denominator, mode);
         }
 
         /// <summary>

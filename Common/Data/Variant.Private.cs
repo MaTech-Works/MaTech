@@ -11,31 +11,31 @@ namespace MaTech.Common.Data {
     public partial struct Variant {
         private Variant(bool value) {
             Type = VariantType.Bool;
-            f = new FractionSimple(value ? 1 : 0);
+            f = new FractionImproper(value ? 1 : 0);
             d = f.Numerator;
             o = null;
         }
         private Variant(int value) {
             Type = VariantType.Int;
-            f = new FractionSimple(value);
+            f = new FractionImproper(value);
             d = f.Numerator;
             o = null;
         }
         private Variant(float value) {
             Type = VariantType.Float;
-            f = FractionSimple.FromFloat(value);
+            f = FractionImproper.FromFloat(value);
             d = value;
             o = null;
         }
         private Variant(double value) {
             Type = VariantType.Double;
-            f = FractionSimple.FromFloat(value);
+            f = FractionImproper.FromFloat(value);
             d = value;
             o = null;
         }
         private Variant(MetaEnum value) {
             Type = VariantType.Enum;
-            f = new FractionSimple(value.Value);
+            f = new FractionImproper(value.Value);
             d = f.Numerator;
             o = value.Name;
         }
@@ -45,7 +45,7 @@ namespace MaTech.Common.Data {
             d = f.Double;
             o = null;
         }
-        private Variant(FractionSimple value) {
+        private Variant(FractionImproper value) {
             Type = VariantType.FractionSimple;
             f = value;
             d = f.Double;
@@ -55,7 +55,7 @@ namespace MaTech.Common.Data {
             if (value == null) this = None;
             else {
                 Type = VariantType.String;
-                f = FractionSimple.invalid;
+                f = FractionImproper.invalid;
                 d = Double.NaN;
                 o = value;
             }
@@ -65,14 +65,14 @@ namespace MaTech.Common.Data {
             else {
                 // no type infer, object in object out
                 Type = VariantType.Object;
-                f = FractionSimple.invalid;
+                f = FractionImproper.invalid;
                 d = Double.NaN;
                 o = value;
             }
         }
         
         private static readonly Type typeFraction = typeof(FractionMixed);
-        private static readonly Type typeFractionSimple = typeof(FractionSimple);
+        private static readonly Type typeFractionSimple = typeof(FractionImproper);
         
         private static readonly HashSet<Type> typesConvertible = new HashSet<Type>() {
             typeof(bool),

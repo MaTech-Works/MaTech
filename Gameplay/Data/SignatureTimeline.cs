@@ -23,8 +23,8 @@ namespace MaTech.Gameplay.Data {
         public struct SignatureChange : IComparable<SignatureChange> {
             public int barAtChange;
             public FractionMixed beatAtChange;
-            public FractionSimple beatsPerBar;
-            public FractionSimple quarterNotesPerBeat;
+            public FractionImproper beatsPerBar;
+            public FractionImproper quarterNotesPerBeat;
             public FractionMixed BeatAt(int bar) => beatAtChange + (FractionMixed)beatsPerBar * (bar - barAtChange);
             public FractionMixed BeatAt(FractionMixed barPlusSubPosition) => beatAtChange + (FractionMixed)beatsPerBar * (barPlusSubPosition - barAtChange);
             public int CompareTo(SignatureChange other) => barAtChange.CompareTo(other.barAtChange);
@@ -34,23 +34,23 @@ namespace MaTech.Gameplay.Data {
 
         public IEnumerable<SignatureChange> SignatureChanges => signatures;
 
-        public SignatureTimeline() : this(new FractionSimple(4)) { }
-        public SignatureTimeline(FractionSimple defaultBeatPerBar, FractionSimple? defaultQuarterNotesPerBeat = null) {
+        public SignatureTimeline() : this(new FractionImproper(4)) { }
+        public SignatureTimeline(FractionImproper defaultBeatPerBar, FractionImproper? defaultQuarterNotesPerBeat = null) {
             signatures.Add(new SignatureChange {
                 barAtChange = 0,
                 beatAtChange = FractionMixed.zero,
                 beatsPerBar = defaultBeatPerBar,
-                quarterNotesPerBeat = defaultQuarterNotesPerBeat ?? new FractionSimple(1),
+                quarterNotesPerBeat = defaultQuarterNotesPerBeat ?? new FractionImproper(1),
             });
         }
 
-        public SignatureChange? SetSignatureChangeAt(int bar, FractionSimple beatsPerBar, FractionSimple? quarterNotesPerBeat = null) {
+        public SignatureChange? SetSignatureChangeAt(int bar, FractionImproper beatsPerBar, FractionImproper? quarterNotesPerBeat = null) {
             if (bar < 0) return null;
             
             int indexInserted = signatures.OrderedInsert(new SignatureChange {
                 barAtChange = bar,
                 beatsPerBar = beatsPerBar,
-                quarterNotesPerBeat = quarterNotesPerBeat ?? new FractionSimple(1),
+                quarterNotesPerBeat = quarterNotesPerBeat ?? new FractionImproper(1),
             }, CollectionsExtension.ResolveEqual.ReplaceFirstEqual);
 
             var referenceSignature = signatures[indexInserted == 0 ? 0 : indexInserted - 1];
@@ -91,8 +91,8 @@ namespace MaTech.Gameplay.Data {
             if (signatures.Count == 0) {
                 signatures.Add(new SignatureChange {
                     barAtChange = 0,
-                    beatsPerBar = new FractionSimple(4),
-                    quarterNotesPerBeat = new FractionSimple(1),
+                    beatsPerBar = new FractionImproper(4),
+                    quarterNotesPerBeat = new FractionImproper(1),
                 });
             } else {
                 ShellSort.Hibbard(signatures);

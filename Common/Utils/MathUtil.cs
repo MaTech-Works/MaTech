@@ -49,7 +49,7 @@ namespace MaTech.Common.Utils {
         public static float Clamp(float value, float min, float max) => value < min ? min : value > max ? max : value;
         public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
         public static FractionMixed Clamp(FractionMixed value, FractionMixed min, FractionMixed max) => value < min ? min : value > max ? max : value;
-        public static FractionSimple Clamp(FractionSimple value, FractionSimple min, FractionSimple max) => value < min ? min : value > max ? max : value;
+        public static FractionImproper Clamp(FractionImproper value, FractionImproper min, FractionImproper max) => value < min ? min : value > max ? max : value;
 
         public static float Saturate(float value) => value < 0 ? 0 : value > 1 ? 1 : value;
         public static double Saturate(double value) => value < 0 ? 0 : value > 1 ? 1 : value;

@@ -71,7 +71,7 @@ namespace MaTech.Gameplay.Data {
         public static implicit operator BeatValue(int value) => new(value);
         public static implicit operator BeatValue(double value) => new(value);
         public static implicit operator BeatValue(FractionMixed value) => new(value);
-        public static implicit operator BeatValue(FractionSimple value) => new(value);
+        public static implicit operator BeatValue(FractionImproper value) => new(value);
         public static implicit operator BeatValue((int a, int b) t) => FromFraction(t.a, t.b);
         public static implicit operator BeatValue((int n, int a, int b) t) => FromFraction(t.n, t.a, t.b);
         
@@ -80,7 +80,7 @@ namespace MaTech.Gameplay.Data {
         public static BeatValue MinValue => minFraction;
         
         public static BeatValue FromCount(int count) => new(count);
-        public static BeatValue FromFraction(int a, int b) => new(FractionSimple.Simple(a, b));
+        public static BeatValue FromFraction(int a, int b) => new(FractionImproper.Simple(a, b));
         public static BeatValue FromFraction(int n, int a, int b) => new(FractionMixed.Simple(n, a, b));
         public static BeatValue FromValue(double value) => new(value);
         public static BeatValue FromValueRounded(double value, int denominator) => new(value, denominator);

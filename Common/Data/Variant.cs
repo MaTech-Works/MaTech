@@ -40,7 +40,7 @@ namespace MaTech.Common.Data {
     public partial struct Variant : IEquatable<Variant>, IConvertible, IBoxlessConvertible, IFormattable {
         public VariantType Type { get; private set; }
 
-        private FractionSimple f;
+        private FractionImproper f;
         private double d;
         private object o;
 
@@ -66,8 +66,8 @@ namespace MaTech.Common.Data {
         public readonly float Float => (float)d;
         public readonly double Double => d;
         public readonly MetaEnum Enum => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
-        public readonly FractionMixed Fraction => f;
-        public readonly FractionSimple FractionSimple => f;
+        public readonly FractionMixed Mixed => f;
+        public readonly FractionImproper Improper => f;
         public readonly string String => o as string;
         public readonly object Object => o;
 
@@ -76,8 +76,8 @@ namespace MaTech.Common.Data {
         public readonly Option<float> TryFloat => Type == VariantType.Float ? Option.Some((float)d) : Option.None<float>();
         public readonly Option<double> TryDouble => Type == VariantType.Double ? Option.Some(d) : Option.None<double>();
         public readonly Option<MetaEnum> TryEnum => Type == VariantType.Enum ? Option.Some(ToEnum()) : Option.None<MetaEnum>();
-        public readonly Option<FractionMixed> TryFraction => Type == VariantType.Fraction ? Option.Some((FractionMixed)f) : Option.None<FractionMixed>();
-        public readonly Option<FractionSimple> TryFractionSimple => Type == VariantType.FractionSimple ? Option.Some(f) : Option.None<FractionSimple>();
+        public readonly Option<FractionMixed> TryMixed => Type == VariantType.Fraction ? Option.Some(f.Mixed) : Option.None<FractionMixed>();
+        public readonly Option<FractionImproper> TryImproper => Type == VariantType.FractionSimple ? Option.Some(f) : Option.None<FractionImproper>();
         public readonly Option<string> TryString => Type == VariantType.String ? Option.Some((string)o) : Option.None<string>();
         public readonly Option<object> TryObject => Type == VariantType.Object ? Option.Some(o) : Option.None<object>();
 
@@ -127,7 +127,7 @@ namespace MaTech.Common.Data {
         public static implicit operator Variant(double value) => new(value);
         public static implicit operator Variant(MetaEnum value) => new(value);
         public static implicit operator Variant(FractionMixed value) => new(value);
-        public static implicit operator Variant(FractionSimple value) => new(value);
+        public static implicit operator Variant(FractionImproper value) => new(value);
         public static implicit operator Variant(string value) => new(value); // note: also handles null
 
         readonly bool IConvertible.ToBoolean(IFormatProvider provider) => Bool;
@@ -152,8 +152,8 @@ namespace MaTech.Common.Data {
         readonly DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException("Variant: Conversion to DateTime is undefined. Try a string or a numeric timecode; choose wisely.");
 
         readonly object IConvertible.ToType(Type type, IFormatProvider provider) {
-            if (type == typeFraction) return Fraction;
-            if (type == typeFractionSimple) return FractionSimple;
+            if (type == typeFraction) return Mixed;
+            if (type == typeFractionSimple) return Improper;
             // TODO: 支持enum
             if (IsObject) return Convert.ChangeType(o, type, provider);
             throw new InvalidCastException($"Variant: Conversion to type {type} is unsupported.");
@@ -164,8 +164,8 @@ namespace MaTech.Common.Data {
         
         readonly T IBoxlessConvertible.ToType<T>(IFormatProvider provider) {
             var type = typeof(T);
-            if (type == typeFraction) return BoxlessConvert.Identity<FractionMixed, T>(Fraction);
-            if (type == typeFractionSimple) return BoxlessConvert.Identity<FractionSimple, T>(FractionSimple);
+            if (type == typeFraction) return BoxlessConvert.Identity<FractionMixed, T>(Mixed);
+            if (type == typeFractionSimple) return BoxlessConvert.Identity<FractionImproper, T>(Improper);
             // TODO: 支持enum
             if (IsObject) return (T)Convert.ChangeType(o, type, provider);
             return BoxlessConvert.To<T>.FromIConvertible(this, provider); // fallback to IConvertible
@@ -209,8 +209,8 @@ namespace MaTech.Common.Data {
             case VariantType.Float: return Float.ToString(format, formatProvider);
             case VariantType.Double: return Double.ToString(format, formatProvider);
             case VariantType.Enum: return Enum.ToString(format, formatProvider);
-            case VariantType.Fraction: return Fraction.ToString();
-            case VariantType.FractionSimple: return FractionSimple.ToString();
+            case VariantType.Fraction: return Mixed.ToString();
+            case VariantType.FractionSimple: return Improper.ToString();
             case VariantType.String: return (string)o;
             case VariantType.Object: return o is IFormattable of ? of.ToString(format, formatProvider) : o is IConvertible oc ? oc.ToString(formatProvider) : o.ToString();
             default: return "<Undefined Variant>";
@@ -225,8 +225,8 @@ namespace MaTech.Common.Data {
             case VariantType.Float: return Float;
             case VariantType.Double: return Double;
             case VariantType.Enum: return Enum;
-            case VariantType.Fraction: return Fraction;
-            case VariantType.FractionSimple: return FractionSimple;
+            case VariantType.Fraction: return Mixed;
+            case VariantType.FractionSimple: return Improper;
             default: return o; // String and Object
             }
         }
@@ -240,8 +240,8 @@ namespace MaTech.Common.Data {
             case VariantType.Float: return Float.Equals(other.Float);
             case VariantType.Double: return Double.Equals(other.Double);
             case VariantType.Enum: return Enum.Equals(other.Enum);
-            case VariantType.Fraction: return Fraction.Equals(other.Fraction);
-            case VariantType.FractionSimple: return FractionSimple.Equals(other.FractionSimple);
+            case VariantType.Fraction: return Mixed.Equals(other.Mixed);
+            case VariantType.FractionSimple: return Improper.Equals(other.Improper);
             case VariantType.String:
             case VariantType.Object: return Equals(o, other.o);
             default: return false;
@@ -261,8 +261,8 @@ namespace MaTech.Common.Data {
             case VariantType.Float: return Float.GetHashCode();
             case VariantType.Double: return Double.GetHashCode();
             case VariantType.Enum: return Enum.GetHashCode();
-            case VariantType.Fraction: return Fraction.GetHashCode();
-            case VariantType.FractionSimple: return FractionSimple.GetHashCode();
+            case VariantType.Fraction: return Mixed.GetHashCode();
+            case VariantType.FractionSimple: return Improper.GetHashCode();
             case VariantType.String:
             case VariantType.Object: return o.GetHashCode();
             default: return 0; // None

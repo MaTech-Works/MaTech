@@ -46,9 +46,9 @@ namespace MaTech.Gameplay.Processor {
             var listShowBar = new List<(FractionMixed, bool)>();
             foreach (var effect in effects) {
                 switch (effect.type.Value) {
-                case EffectType.Signature when effect.Start == null: barLength = effect.value.start.Fraction; break;
+                case EffectType.Signature when effect.Start == null: barLength = effect.value.start.Mixed; break;
                 case EffectType.ShowBar when effect.Start == null: showBar = effect.value.start.Bool; break;
-                case EffectType.Signature: listSign.Add((effect.Start.Beat, effect.value.start.Fraction)); break;
+                case EffectType.Signature: listSign.Add((effect.Start.Beat, effect.value.start.Mixed)); break;
                 case EffectType.ShowBar: listShowBar.Add((effect.Start.Beat, effect.value.start.Bool)); break;
                 }
             }
