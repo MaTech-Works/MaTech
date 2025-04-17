@@ -21,10 +21,10 @@ namespace MaTech.Gameplay.Data {
         private static readonly IPropertyDefine define = new TDefine();
         
         //public readonly DataEnum<TEnum> key; // todo: this is for PropertySheet
-        public readonly Value<ScalarUnit> scalar;
+        public readonly MetaValue<ScalarUnit> scalar;
 
         private Property(in Variant value, in ScalarUnit? unit = null) {
-            scalar = new Value<ScalarUnit>(value, unit ?? ScalarUnit.one);
+            scalar = new MetaValue<ScalarUnit>(value, unit ?? ScalarUnit.one);
         }
         
         public Option<T> As<T>() => scalar.As<T>();
