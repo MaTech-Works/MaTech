@@ -26,8 +26,7 @@ namespace MaTech.Gameplay.Data {
         public double RatioTo(in T divisor);
     }
     
-    // todo: implement Rational struct and replace with it here
-    // todo: after Rational, make this serializable or implement IMeta
+    // todo: make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
     public struct BeatValue : ITimeValue<BeatValue> {
         private readonly FractionMixed fraction;
@@ -115,8 +114,7 @@ namespace MaTech.Gameplay.Data {
         private static readonly FractionMixed minFraction = new(-MaxInteger);
     }
 
-    // todo: implement Rational struct and replace with it here
-    // todo: after Rational, make this serializable or implement IMeta
+    // todo: make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
     public struct TimeValue : ITimeValue<TimeValue> {
         private readonly int integer;
@@ -200,7 +198,7 @@ namespace MaTech.Gameplay.Data {
         private const int MaxInteger = 1000000000;
     }
     
-    // todo: after Rational, make this serializable or implement IMeta
+    // todo: after Scalar, make this serializable or implement IMeta
     // ReSharper disable once StructCanBeMadeReadOnly
     public struct RollValue : ITimeValue<RollValue> {
         private readonly int integer;

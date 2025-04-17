@@ -29,7 +29,7 @@ namespace MaTech.Common.Data {
     /// 
     /// <!--
     /// todo: 是否支持常见类型的反向转型？
-    /// todo: 提取一个Rational结构（Fraction + fixed point decimal），将数字转型方法移动过去并支持转型至各标量类型
+    /// todo: 提取一个Scalar结构（Fraction + fixed point decimal），将数字转型方法移动过去并支持转型至各标量类型
     /// todo: 支持16字节内任意类型的unmanaged类型，用object成员记录类型，并用IBoxlessConvert支持可扩展的默认转型
     /// todo: 支持IMeta/IMetaVisitable接口，提取类型信息与相应转型后数据
     /// todo: 实现序列化与编辑器支持（思考：在需要readonly struct的地方提供基于Variant的额外编辑器支持）
