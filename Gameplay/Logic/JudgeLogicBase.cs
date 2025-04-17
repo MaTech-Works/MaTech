@@ -107,7 +107,7 @@ namespace MaTech.Gameplay.Logic {
             Profiler.EndSample();
             
             Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): PlayBehavior.OnHitNote", this);
-            foreach (var behavior in PlayBehavior.ListNoteHitResult) {
+            foreach (var behavior in ListNoteHitResult) {
                 behavior.OnHitNote(unit, action, time, result);
             }
             Profiler.EndSample();
@@ -119,10 +119,10 @@ namespace MaTech.Gameplay.Logic {
                 Profiler.EndSample();
 
                 Profiler.BeginSample("JudgeLogicBase.HandleNoteHit(): ScoreSnapshot", this);
-                using var listLock = PlayBehavior.ListScoreUpdate.LockRAII();
-                if (!PlayBehavior.ListScoreUpdate.IsEmpty) {
+                using var listLock = ListScoreUpdate.LockRAII();
+                if (!ListScoreUpdate.IsEmpty) {
                     var scoreSnapshot = UpdateScoreSnapshot();
-                    foreach (var behavior in PlayBehavior.ListScoreUpdate) {
+                    foreach (var behavior in ListScoreUpdate) {
                         behavior.OnUpdateScore(scoreSnapshot);
                     }
                 }
@@ -147,7 +147,7 @@ namespace MaTech.Gameplay.Logic {
             LogEmptyHit(action, time);
 
             Profiler.BeginSample("JudgeLogicBase.HandleEmptyHit(): PlayBehavior", this);
-            foreach (var behavior in PlayBehavior.ListNoteHitResult) {
+            foreach (var behavior in ListNoteHitResult) {
                 behavior.OnHitEmpty(action, time);
             }
             Profiler.EndSample();
