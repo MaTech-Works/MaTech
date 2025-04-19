@@ -5,7 +5,6 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using MaTech.Common.Algorithm;
 using MaTech.Common.Utils;
 using UnityEngine;
 
@@ -15,43 +14,62 @@ namespace MaTech.Common.Data {
         [SerializeField] private FractionMixed fraction;
         [SerializeField] private float tails;
         
+        public readonly int Floored => tails == 0 ? fraction.Floored : (int)Math.Floor(Double);
+        public readonly int Rounded => tails == 0 ? fraction.Rounded : (int)Math.Round(Double);
+        public readonly int Ceiling => tails == 0 ? fraction.Ceiling : (int)Math.Ceiling(Double);
+        
         public readonly float Float => Clamp(fraction.Float + tails);
         public readonly double Double => Clamp(fraction.Double + tails);
         public readonly FractionMixed Fraction => Clamp(fraction);
 
         public readonly bool IsMax => fraction >= maxFraction;
         public readonly bool IsMin => fraction <= minFraction;
+        
+        public readonly bool IsZero => fraction.IsZero && tails == 0;
+        public readonly bool IsValid => fraction.IsValid;
+        public readonly bool IsInvalid => fraction.IsInvalid;
 
+        public static implicit operator int(in Scalar obj) => obj.Fraction.Integer;
         public static implicit operator float(in Scalar obj) => obj.Float;
         public static implicit operator double(in Scalar obj) => obj.Double;
         public static implicit operator FractionMixed(in Scalar obj) => obj.fraction;
         public static implicit operator FractionImproper(in Scalar obj) => obj.fraction.Improper;
         public static implicit operator Scalar(int value) => new(value);
-        public static implicit operator Scalar(float value) => Approximate(value);
-        public static implicit operator Scalar(double value) => Approximate(value);
+        public static implicit operator Scalar(float value) => Fractionate(value);
+        public static implicit operator Scalar(double value) => Fractionate(value);
         public static implicit operator Scalar(FractionMixed value) => new(value, tails: null);
         public static implicit operator Scalar(FractionImproper value) => new(value, tails: null);
         public static implicit operator Scalar((int a, int b) t) => Improper(t.a, t.b);
         public static implicit operator Scalar((int n, int a, int b) t) => Mixed(t.n, t.a, t.b);
         
         public static Scalar Zero => new(0);
+        public static Scalar Invalid => default;
         public static Scalar MaxValue => maxFraction;
         public static Scalar MinValue => minFraction;
         
         public static Scalar Integer(int count) => new(count);
         public static Scalar Mixed(int n, int a, int b) => new(FractionMixed.Simple(n, a, b), tails: null);
         public static Scalar Improper(int a, int b) => new(FractionImproper.Simple(a, b), tails: null);
-        public static Scalar Rounded(double value, int denominator) => new(FractionMixed.FromFloatRounded(value, denominator), value);
-        public static Scalar Approximate(double value, int maxDenominator = 1000) => new(FractionMixed.FromFloat(value, maxDenominator), value);
-
+        public static Scalar Fractionate(double value, FractionStrategy strategy = FractionStrategy.Approximate, int maxDenominator = 1000)
+            => new(strategy switch {
+                FractionStrategy.Approximate => FractionMixed.FromFloat(value, maxDenominator),
+                FractionStrategy.Round => FractionMixed.FromFloatRounded(value, maxDenominator),
+                _ => FractionMixed.invalid
+            }, value);
+        
+        public enum FractionStrategy { Approximate, Round }
+        
         private Scalar(in Scalar value, in Scalar offset) {
             try {
                 fraction = value.fraction + offset.fraction;
                 tails = value.tails + offset.tails;
             } catch (OverflowException) {
-                this = Approximate(value.Double + offset.Double);
+                this = Fractionate(value.Double + offset.Double);
             }
         }
+
+        public static bool operator true(in Scalar a) => a.IsValid;
+        public static bool operator false(in Scalar a) => a.IsInvalid;
         
         public static bool operator==(in Scalar a, in Scalar b) => a.fraction == b.fraction;
         public static bool operator!=(in Scalar a, in Scalar b) => a.fraction != b.fraction;
@@ -62,8 +80,8 @@ namespace MaTech.Common.Data {
         public static Scalar operator-(in Scalar x, in Scalar y) => new(x, -y);
 
         public static Scalar operator*(in Scalar x, in Scalar y) => new(x.fraction * y.fraction, total: x.Double * y.Double);
-        public static Scalar operator*(in Scalar x, double y) => Approximate(x.fraction.Double * y);
-        public static Scalar operator*(double x, in Scalar y) => Approximate(x * y.fraction.Double);
+        public static Scalar operator*(in Scalar x, double y) => Fractionate(x.fraction.Double * y);
+        public static Scalar operator*(double x, in Scalar y) => Fractionate(x * y.fraction.Double);
         
         public static Scalar operator/(in Scalar x, in Scalar y) => new(x.fraction / y.fraction, total: x.Double / y.Double);
 
