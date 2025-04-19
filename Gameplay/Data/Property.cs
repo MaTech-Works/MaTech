@@ -33,6 +33,7 @@ namespace MaTech.Gameplay.Data {
         public static implicit operator Property<TDefine>(int number) => new(number, define.UnitForInt);
         public static implicit operator Property<TDefine>(float value) => new(value);
         public static implicit operator Property<TDefine>(double value) => new(value);
+        public static implicit operator Property<TDefine>(in Scalar value) => new(value);
         public static implicit operator Property<TDefine>((int a, int b) x) => new(FractionImproper.Valid(x.a, x.b));
         public static implicit operator Property<TDefine>((int n, int a, int b) x) => new(FractionMixed.Valid(x.n, x.a, x.b));
 
@@ -42,6 +43,7 @@ namespace MaTech.Gameplay.Data {
         public static implicit operator float(in Property<TDefine> t) => t.To<float>();
         public static implicit operator double(in Property<TDefine> t) => t.To<double>();
         
+        public static implicit operator Scalar(in Property<TDefine> t) => t.To<Scalar>();
         public static implicit operator FractionMixed(in Property<TDefine> t) => t.To<FractionMixed>();
         public static implicit operator FractionImproper(in Property<TDefine> t) => t.To<FractionImproper>();
 

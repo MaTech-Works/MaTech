@@ -13,17 +13,10 @@ namespace MaTech.Common.Data {
             AdopterTo<int>() = (in ScalarUnit unit, in Variant value) => unit.scale.Int * value.Int;
             AdopterTo<float>() = (in ScalarUnit unit, in Variant value) => unit.scale.Float * value.Float;
             AdopterTo<double>() = (in ScalarUnit unit, in Variant value) => unit.scale.Double * value.Double;
+            AdopterTo<Scalar>() = (in ScalarUnit unit, in Variant value) => unit.scale.Scalar * value.Scalar;
             AdopterTo<FractionMixed>() = (in ScalarUnit unit, in Variant value) => unit.scale.Mixed * value.Mixed;
             AdopterTo<FractionImproper>() = (in ScalarUnit unit, in Variant value) => unit.scale.Improper * value.Improper;
-            AdopterTo<Variant>() = (in ScalarUnit unit, in Variant value) => value.Type switch {
-                VariantType.Int => unit.scale.IsFloatPoint ? unit.scale.Double * value.Int : unit.scale.Mixed * value.Int,
-                VariantType.Float when value.IsFloat => unit.scale.Float * value.Float,
-                VariantType.Float => unit.scale.Double * value.Float,
-                VariantType.Double => unit.scale.Double * value.Double,
-                VariantType.Fraction => unit.scale.Mixed * value.Mixed,
-                VariantType.FractionSimple => unit.scale.Improper * value.Improper,
-                _ => Variant.None
-            };
+            AdopterTo<Variant>() = (in ScalarUnit unit, in Variant value) => unit.scale.Scalar * value.Scalar;
         }
         
         public ScalarUnit() => scale = 1;
