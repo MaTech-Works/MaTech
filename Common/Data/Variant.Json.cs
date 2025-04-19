@@ -15,43 +15,21 @@ namespace MaTech.Common.Data {
             public override bool CanConvert(Type objectType) => objectType == typeof(Variant);
 
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
-                var variant = (Variant)value;
-                switch (variant.Type) {
-                case VariantType.None:
-                    writer.WriteNull();
-                    break;
-                case VariantType.Bool:
-                    writer.WriteValue(variant.Bool);
-                    break;
-                case VariantType.Int:
-                    writer.WriteValue(variant.Int);
-                    break;
-                case VariantType.Float:
-                    writer.WriteValue(variant.Float);
-                    break;
-                case VariantType.Double:
-                    writer.WriteValue(variant.Double);
-                    break;
-                case VariantType.Fraction:
-                    serializer.Serialize(writer, variant.Mixed);
-                    break;
-                case VariantType.FractionSimple:
-                    serializer.Serialize(writer, variant.Improper);
-                    break;
-                case VariantType.String:
-                    writer.WriteValue(variant.String);
-                    break;
-                case VariantType.Object:
-                    writer.WriteValue(variant.Object);
-                    break;
-                default:
-                    writer.WriteNull();
-                    break;
-                }
+                var variant = value as Variant? ?? None;
+                if (variant.IsNone) writer.WriteNull();
+                else if (variant.IsBoolean) writer.WriteValue(variant.Bool);
+                else if (variant.IsInteger) writer.WriteValue(variant.Int);
+                else if (variant.IsFloat) writer.WriteValue(variant.Float);
+                else if (variant.IsDouble) writer.WriteValue(variant.Double);
+                else if (variant.IsMixed) serializer.Serialize(writer, variant.Mixed);
+                else if (variant.IsImproper) serializer.Serialize(writer, variant.Improper);
+                else if (variant.IsString) writer.WriteValue(variant.String);
+                else if (variant.IsObject) writer.WriteValue(variant.Object);
+                else writer.WriteNull();
             }
 
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
-                var variant = (Variant?)existingValue ?? Variant.None;
+                var variant = (Variant?)existingValue ?? None;
                 switch (reader.TokenType) {
                 case JsonToken.Boolean:
                     variant = serializer.Deserialize<bool>(reader);
@@ -82,7 +60,7 @@ namespace MaTech.Common.Data {
                         variant = new FractionMixed(arr[0], arr[1], arr[2]);
                         break;
                     default:
-                        variant = Variant.None;
+                        variant = None;
                         break;
                     }
                     break;

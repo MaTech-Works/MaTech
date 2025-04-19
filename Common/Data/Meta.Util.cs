@@ -20,7 +20,7 @@ namespace MaTech.Common.Data {
             public IMetaTableMethods<TKey> target;
             public int depth;
             public Variant Visit(in TKey key, in Variant value) {
-                var nested = value.As<IMetaVisitableMethods<TKey>>();
+                var nested = value.To<IMetaVisitableMethods<TKey>>();
                 if (nested != null) {
                     if (depth <= 1) return value;
                     var visitor = new DeepCopyVisitor<TKey, TTable> { target = new TTable(), depth = depth - 1 };

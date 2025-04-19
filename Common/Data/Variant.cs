@@ -5,18 +5,26 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
 using MaTech.Common.Algorithm;
 using Newtonsoft.Json;
 using Optional;
-using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Scripting;
 
 namespace MaTech.Common.Data {
-    public enum VariantType {
-        None = 0, Bool, Int, Float, Double, Enum, Fraction, FractionSimple, String, Object
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public static class VariantType {
+        public static readonly Type None = null;
+        public static readonly Type Bool = typeof(bool);
+        public static readonly Type Int = typeof(int);
+        public static readonly Type Float = typeof(float);
+        public static readonly Type Double = typeof(double);
+        public static readonly Type Scalar = typeof(Scalar);
+        public static readonly Type Enum = typeof(MetaEnum);
+        public static readonly Type Mixed = typeof(FractionMixed);
+        public static readonly Type Improper = typeof(FractionImproper);
+        public static readonly Type String = typeof(string);
+        public static readonly Type Object = typeof(object);
     }
 
     /// A boolean, an integer, a float-point, a fraction, a string, an object, or nothing ("None" type).
@@ -29,105 +37,104 @@ namespace MaTech.Common.Data {
     /// 
     /// <!--
     /// todo: 是否支持常见类型的反向转型？
-    /// todo: 提取一个Scalar结构（Fraction + fixed point decimal），将数字转型方法移动过去并支持转型至各标量类型
     /// todo: 支持16字节内任意类型的unmanaged类型，用object成员记录类型，并用IBoxlessConvert支持可扩展的默认转型
     /// todo: 支持IMeta/IMetaVisitable接口，提取类型信息与相应转型后数据
-    /// todo: 实现序列化与编辑器支持（思考：在需要readonly struct的地方提供基于Variant的额外编辑器支持）
-    /// todo: 实现Box<T>与静态类Boxer<T>重用箱子，缓存每种类型的装箱拆箱过程（参数传入整个Variant，无箱struct给一个全局类型信息，object原样传出）
+    /// todo: 实现序列化与编辑器支持（先行决定是否实现unmanaged支持）
+    /// todo: 在需要readonly struct的地方提供基于Variant的额外编辑器支持
     /// -->
     [Serializable]
     [JsonConverter(typeof(JsonConverter))]
     public partial struct Variant : IEquatable<Variant>, IConvertible, IBoxlessConvertible, IFormattable {
-        public VariantType Type { get; private set; }
+        public readonly Type Type => o as Type ?? o.GetType();
 
-        private FractionImproper f;
-        private double d;
+        private Scalar s; // todo: 与UnmanagedMemory合并
         private object o;
 
-        [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 16)]
+        /*
+        [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 16), Serializable]
         private struct UnmanagedMemory {
-            static UnmanagedMemory() => Assert.IsTrue(Marshal.SizeOf<UnmanagedMemory>() <= 4);
+            static UnmanagedMemory() => Assert.IsTrue(Marshal.SizeOf<UnmanagedMemory>() <= 16);
+            
+            // todo: implement with actual unsafe to avoid issues in Unity 2021
 
             public const int MaxSize = 16;
             public static bool Fit<T>() => Unsafe.SizeOf<T>() <= MaxSize && !RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
-            public T? As<T>() where T : unmanaged => Fit<T>() ? Unsafe.As<UnmanagedMemory, T>(ref this) : null;
+            public readonly T? As<T>() where T : unmanaged => Fit<T>() ? Unsafe.As<UnmanagedMemory, T>(readonly ref this) : null;
             public void Set<T>(in T value) where T : unmanaged { if (Fit<T>()) Unsafe.As<UnmanagedMemory, T>(ref this) = value; }
-            
-            // todo: make serializable (add hidden fields) and apply to Variant
+
+            [SerializeField, HideInInspector, FieldOffset(0)] private int pack0;
+            [SerializeField, HideInInspector, FieldOffset(4)] private int pack1;
+            [SerializeField, HideInInspector, FieldOffset(8)] private int pack2;
+            [SerializeField, HideInInspector, FieldOffset(12)] private int pack3;
         }
+        */
 
         public static Variant None => default;
-        
-        // todo: rename getters to ToXX and remove try- prefix on optional getters
 
-        public readonly bool Bool => IsNumeralOrBoolean ? !f.IsZero : (o != null);
-        public readonly int Int => f.Rounded;
-        public readonly float Float => (float)d;
-        public readonly double Double => d;
-        public readonly MetaEnum Enum => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
-        public readonly FractionMixed Mixed => f;
-        public readonly FractionImproper Improper => f;
+        public readonly bool Bool => IsNumeralOrBoolean ? !s.IsZero : (o != null);
+        public readonly int Int => s;
+        public readonly float Float => s;
+        public readonly double Double => s;
+        public readonly Scalar Scalar => s;
+        public readonly FractionMixed Mixed => s;
+        public readonly FractionImproper Improper => s;
         public readonly string String => o as string;
         public readonly object Object => o;
 
-        public readonly Option<bool> TryBool => Type == VariantType.Bool ? Option.Some(!f.IsZero) : Option.None<bool>();
-        public readonly Option<int> TryInt => Type == VariantType.Int ? Option.Some(f.Numerator) : Option.None<int>();
-        public readonly Option<float> TryFloat => Type == VariantType.Float ? Option.Some((float)d) : Option.None<float>();
-        public readonly Option<double> TryDouble => Type == VariantType.Double ? Option.Some(d) : Option.None<double>();
-        public readonly Option<MetaEnum> TryEnum => Type == VariantType.Enum ? Option.Some(ToEnum()) : Option.None<MetaEnum>();
-        public readonly Option<FractionMixed> TryMixed => Type == VariantType.Fraction ? Option.Some(f.Mixed) : Option.None<FractionMixed>();
-        public readonly Option<FractionImproper> TryImproper => Type == VariantType.FractionSimple ? Option.Some(f) : Option.None<FractionImproper>();
-        public readonly Option<string> TryString => Type == VariantType.String ? Option.Some((string)o) : Option.None<string>();
-        public readonly Option<object> TryObject => Type == VariantType.Object ? Option.Some(o) : Option.None<object>();
+        public readonly Option<bool> AsBool => Type == VariantType.Bool ? Option.Some(!s.IsZero) : Option.None<bool>();
+        public readonly Option<int> AsInt => Type == VariantType.Int ? Option.Some(Int) : Option.None<int>();
+        public readonly Option<float> AsFloat => Type == VariantType.Float ? Option.Some(Float) : Option.None<float>();
+        public readonly Option<double> AsDouble => Type == VariantType.Double ? Option.Some(Double) : Option.None<double>();
+        public readonly Option<MetaEnum> AsEnum => Type == VariantType.Enum ? Option.Some(ToEnum()) : Option.None<MetaEnum>();
+        public readonly Option<FractionMixed> AsMixed => Type == VariantType.Mixed ? Option.Some(Mixed) : Option.None<FractionMixed>();
+        public readonly Option<FractionImproper> AsImproper => Type == VariantType.Improper ? Option.Some(Improper) : Option.None<FractionImproper>();
+        public readonly Option<string> AsString => Type == VariantType.String ? Option.Some((string)o) : Option.None<string>();
+        public readonly Option<object> AsObject => Type == VariantType.Object ? Option.Some(o) : Option.None<object>();
 
-        public readonly bool IsNone => Type is VariantType.None;
-        public readonly bool IsSome => Type is not VariantType.None;
-        public readonly bool IsBoolean => Type is VariantType.Bool;
-        public readonly bool IsInteger => Type is VariantType.Int;
-        public readonly bool IsFloat => Type is VariantType.Float;
-        public readonly bool IsDouble => Type is VariantType.Double;
-        public readonly bool IsFloatPoint => Type is VariantType.Float or VariantType.Double;
-        public readonly bool IsEnum => Type is VariantType.Enum;
-        public readonly bool IsFraction => Type is VariantType.Fraction or VariantType.FractionSimple;
-        public readonly bool IsNumeral => IsInteger || IsFloatPoint || IsFraction;
+        public readonly bool IsNone => o is null; // o is either valid object or a Type
+        public readonly bool IsSome => o is not null;
+        public readonly bool IsScalar => Type == VariantType.Scalar;
+        public readonly bool IsBoolean => Type == VariantType.Bool;
+        public readonly bool IsInteger => Type == VariantType.Int;
+        public readonly bool IsFloat => Type == VariantType.Float;
+        public readonly bool IsDouble => Type == VariantType.Double;
+        public readonly bool IsFloatPoint => Type == VariantType.Float || Type ==  VariantType.Double;
+        public readonly bool IsEnum => Type == VariantType.Enum;
+        public readonly bool IsMixed => Type == VariantType.Mixed;
+        public readonly bool IsImproper => Type == VariantType.Improper;
+        public readonly bool IsFraction => Type == VariantType.Mixed || Type ==  VariantType.Improper;
+        public readonly bool IsNumeral => IsScalar || IsInteger || IsFloatPoint || IsFraction;
         public readonly bool IsNumeralOrBoolean => IsNumeral || IsBoolean;
-        public readonly bool IsString => Type is VariantType.String;
+        public readonly bool IsString => Type == VariantType.String;
         public readonly bool IsStringEmpty => IsString && string.IsNullOrEmpty((string)o);
         public readonly bool IsStringWhiteSpace => IsString && string.IsNullOrWhiteSpace((string)o);
-        public readonly bool IsObject => Type is VariantType.Object;
+        public readonly bool IsObject => Type == VariantType.Object;
 
         public readonly override string ToString() => ToString(null, null);
-
+        
         public static Variant FromEnum(MetaEnum value) => new(value);
         public static Variant FromEnum<TEnum>(DataEnum<TEnum> value) where TEnum : unmanaged, Enum, IConvertible => new(MetaEnum.FromEnum(value));
         public static Variant FromEnum<TEnum>(TEnum value) where TEnum : unmanaged, Enum, IConvertible => new(MetaEnum.FromEnum(value));
-        public readonly MetaEnum ToEnum() => IsEnum ? MetaEnum.FromValue((string)o, f.Numerator) : MetaEnum.Empty;
+        public readonly MetaEnum ToEnum() => IsEnum ? MetaEnum.FromValue((string)o, Int) : MetaEnum.Empty;
         public readonly DataEnum<TEnum>? ToEnum<TEnum>() where TEnum : unmanaged, Enum, IConvertible => ToEnum().As<TEnum>();
         
         public static Variant From(object value) => new(value); // note: null resolves into Variant.None
         public static Variant Box<T>(T value) => new(value); // note: Nullable<T> is also boxed; can be handled with To<T> conversion
-        public readonly T As<T>() => o is T t ? t : default;
         
-        // todo: recycled boxes and cached boxer delegates for each type hiding boxing process
-        // todo: recycle the box upon Unbox<T> or possibly a member method Box<T> to replace the box on the existing variant
-        //public readonly T Unbox<T>() where T : struct => o is T t ? t : default;
-
         public readonly bool Is<T>() => o is T;
         
-        // todo: a ref method, how to do it for class, mixed struct, 16-byte unmanaged struct, and trivial types all?
-        //public ref T Ref<T>() { } 
-        
-        // todo: a To<T> method with BoxlessConvert
-        //public Option<T> To<T>() { } 
+        public readonly Option<T> As<T>() => o is T t ? t.Some() : Option.None<T>();
+        public readonly T To<T>() => o is T t ? t : default;
 
-        public static implicit operator Variant(bool value) => new(value);
-        public static implicit operator Variant(int value) => new(value);
-        public static implicit operator Variant(float value) => new(value);
-        public static implicit operator Variant(double value) => new(value);
-        public static implicit operator Variant(MetaEnum value) => new(value);
-        public static implicit operator Variant(FractionMixed value) => new(value);
-        public static implicit operator Variant(FractionImproper value) => new(value);
+        public static implicit operator Variant(bool value) => new(value ? 0 : 1, typeBool);
+        public static implicit operator Variant(int value) => new(value, typeInt);
+        public static implicit operator Variant(float value) => new(value, typeFloat);
+        public static implicit operator Variant(double value) => new(value, typeDouble);
+        public static implicit operator Variant(Scalar value) => new(value, typeScalar);
+        public static implicit operator Variant(MetaEnum value) => new(value.ID, typeEnum);
+        public static implicit operator Variant(FractionMixed value) => new(value, typeMixed);
+        public static implicit operator Variant(FractionImproper value) => new(value, typeImproper);
         public static implicit operator Variant(string value) => new(value); // note: also handles null
 
         readonly bool IConvertible.ToBoolean(IFormatProvider provider) => Bool;
@@ -152,9 +159,10 @@ namespace MaTech.Common.Data {
         readonly DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException("Variant: Conversion to DateTime is undefined. Try a string or a numeric timecode; choose wisely.");
 
         readonly object IConvertible.ToType(Type type, IFormatProvider provider) {
-            if (type == typeFraction) return Mixed;
-            if (type == typeFractionSimple) return Improper;
-            // TODO: 支持enum
+            if (type == typeMixed) return Mixed;
+            if (type == typeImproper) return Improper;
+            if (type == typeScalar) return Scalar;
+            if (type == typeEnum) return ToEnum();
             if (IsObject) return Convert.ChangeType(o, type, provider);
             throw new InvalidCastException($"Variant: Conversion to type {type} is unsupported.");
         }
@@ -164,88 +172,69 @@ namespace MaTech.Common.Data {
         
         readonly T IBoxlessConvertible.ToType<T>(IFormatProvider provider) {
             var type = typeof(T);
-            if (type == typeFraction) return BoxlessConvert.Identity<FractionMixed, T>(Mixed);
-            if (type == typeFractionSimple) return BoxlessConvert.Identity<FractionImproper, T>(Improper);
-            // TODO: 支持enum
-            if (IsObject) return (T)Convert.ChangeType(o, type, provider);
+            if (type == typeMixed) return BoxlessConvert.Identity<FractionMixed, T>(Mixed);
+            if (type == typeImproper) return BoxlessConvert.Identity<FractionImproper, T>(Improper);
+            if (type == typeScalar) return BoxlessConvert.Identity<Scalar, T>(Scalar);
+            if (type == typeEnum) return BoxlessConvert.Identity<MetaEnum, T>(ToEnum());
+            // todo: 如何支持DataEnum<T>？是否在BoxlessConvert中实现这一操作？
             return BoxlessConvert.To<T>.FromIConvertible(this, provider); // fallback to IConvertible
         }
-
+        
         public readonly TypeCode GetTypeCode() {
-            switch (Type) {
-            case VariantType.None: return TypeCode.Empty;
-            case VariantType.Bool: return TypeCode.Boolean;
-            case VariantType.Int: return TypeCode.Int32;
-            case VariantType.Float: return TypeCode.Single;
-            case VariantType.Double: return TypeCode.Double;
-            case VariantType.Enum: return TypeCode.Int32; // same as MetaEnum
-            case VariantType.String: return TypeCode.String;
-            default: return TypeCode.Object; // Fraction, FractionSimple, Object
-            }
-        }
-
-        public readonly bool HasValueOfType(VariantType targetType, bool allowConversion = false) {
-            if (Type == targetType) return true;
-            if (Type == VariantType.None) return true; // false, 0, 0.0, "<None Variant>", null
-            switch (targetType) {
-            case VariantType.None: return false;
-            case VariantType.Bool: return true; // != 0, != null
-            case VariantType.Int:
-            case VariantType.Float:
-            case VariantType.Double:
-            case VariantType.Fraction:
-            case VariantType.FractionSimple: return IsNumeralOrBoolean;
-            case VariantType.String: return allowConversion;
-            case VariantType.Object: return allowConversion;
-            default: return false;
-            }
+            var type = Type;
+            if (type == typeBool) return TypeCode.Boolean;
+            if (type == typeInt) return TypeCode.Int32;
+            if (type == typeFloat) return TypeCode.Single;
+            if (type == typeDouble) return TypeCode.Double;
+            if (type == typeEnum) return TypeCode.Int32; // same as MetaEnum
+            if (o is not System.Type) return o is string ? TypeCode.String : TypeCode.Object;
+            return TypeCode.Empty; // all other non-IConvertible-trivial types
         }
 
         public readonly string ToString(string format, IFormatProvider formatProvider) {
-            switch (Type) {
-            case VariantType.None: return "<None Variant>";
-            case VariantType.Bool: return Bool.ToString(formatProvider);
-            case VariantType.Int: return Int.ToString(format, formatProvider);
-            case VariantType.Float: return Float.ToString(format, formatProvider);
-            case VariantType.Double: return Double.ToString(format, formatProvider);
-            case VariantType.Enum: return Enum.ToString(format, formatProvider);
-            case VariantType.Fraction: return Mixed.ToString();
-            case VariantType.FractionSimple: return Improper.ToString();
-            case VariantType.String: return (string)o;
-            case VariantType.Object: return o is IFormattable of ? of.ToString(format, formatProvider) : o is IConvertible oc ? oc.ToString(formatProvider) : o.ToString();
-            default: return "<Undefined Variant>";
-            }
+            var type = Type;
+            if (type == VariantType.None) return "<None Variant>";
+            if (type == VariantType.Bool) return Bool.ToString(formatProvider);
+            if (type == VariantType.Int) return Int.ToString(format, formatProvider);
+            if (type == VariantType.Float) return Float.ToString(format, formatProvider);
+            if (type == VariantType.Double) return Double.ToString(format, formatProvider);
+            if (type == VariantType.Enum) return ToEnum().ToString();
+            if (type == VariantType.Mixed) return Mixed.ToString();
+            if (type == VariantType.Improper) return Improper.ToString();
+            if (type == VariantType.String) return (string)o;
+            if (type == VariantType.Object) return o switch {
+                IFormattable formattable => formattable.ToString(format, formatProvider),
+                IConvertible oc => oc.ToString(formatProvider),
+                _ => o.ToString()
+            };
+            return "<Undefined Variant>";
         }
 
         public readonly object ToObject(bool avoidValueTypes = false) {
             if (avoidValueTypes) return o;
-            switch (Type) {
-            case VariantType.Bool: return Bool;
-            case VariantType.Int: return Int;
-            case VariantType.Float: return Float;
-            case VariantType.Double: return Double;
-            case VariantType.Enum: return Enum;
-            case VariantType.Fraction: return Mixed;
-            case VariantType.FractionSimple: return Improper;
-            default: return o; // String and Object
-            }
+            var type = Type;
+            if (type == VariantType.Bool) return Bool;
+            if (type == VariantType.Int) return Int;
+            if (type == VariantType.Float) return Float;
+            if (type == VariantType.Double) return Double;
+            if (type == VariantType.Enum) return ToEnum();
+            if (type == VariantType.Mixed) return Mixed;
+            if (type == VariantType.Improper) return Improper;
+            return o; // String and Object
         }
 
         public readonly bool Equals(Variant other) {
-            if (Type != other.Type) return false;
-            switch (Type) {
-            case VariantType.None: return true;
-            case VariantType.Bool: return Bool.Equals(other.Bool);
-            case VariantType.Int: return Int.Equals(other.Int);
-            case VariantType.Float: return Float.Equals(other.Float);
-            case VariantType.Double: return Double.Equals(other.Double);
-            case VariantType.Enum: return Enum.Equals(other.Enum);
-            case VariantType.Fraction: return Mixed.Equals(other.Mixed);
-            case VariantType.FractionSimple: return Improper.Equals(other.Improper);
-            case VariantType.String:
-            case VariantType.Object: return Equals(o, other.o);
-            default: return false;
-            }
+            var type = Type;
+            if (type != other.Type) return false;
+            if (type == VariantType.None) return true;
+            if (type == VariantType.Bool) return Bool.Equals(other.Bool);
+            if (type == VariantType.Int) return Int.Equals(other.Int);
+            if (type == VariantType.Float) return Float.Equals(other.Float);
+            if (type == VariantType.Double) return Double.Equals(other.Double);
+            if (type == VariantType.Enum) return ToEnum().Equals(other.ToEnum());
+            if (type == VariantType.Mixed) return Mixed.Equals(other.Mixed);
+            if (type == VariantType.Improper) return Improper.Equals(other.Improper);
+            return Equals(o, other.o);
         }
 
         public override readonly bool Equals(object obj) {
@@ -254,19 +243,16 @@ namespace MaTech.Common.Data {
 
         public override readonly int GetHashCode() => GetHashCode(true);
         public readonly int GetHashCode(bool withVariantType) {
-            if (withVariantType) return HashCode.Combine(GetHashCode(false), (int)Type);
-            switch (Type) {
-            case VariantType.Bool: return Bool.GetHashCode();
-            case VariantType.Int: return Int.GetHashCode();
-            case VariantType.Float: return Float.GetHashCode();
-            case VariantType.Double: return Double.GetHashCode();
-            case VariantType.Enum: return Enum.GetHashCode();
-            case VariantType.Fraction: return Mixed.GetHashCode();
-            case VariantType.FractionSimple: return Improper.GetHashCode();
-            case VariantType.String:
-            case VariantType.Object: return o.GetHashCode();
-            default: return 0; // None
-            }
+            if (withVariantType) return HashCode.Combine(GetHashCode(false), Type);
+            var type = Type;
+            if (type == VariantType.Bool) return Bool.GetHashCode();
+            if (type == VariantType.Int) return Int.GetHashCode();
+            if (type == VariantType.Float) return Float.GetHashCode();
+            if (type == VariantType.Double) return Double.GetHashCode();
+            if (type == VariantType.Enum) return ToEnum().GetHashCode();
+            if (type == VariantType.Mixed) return Mixed.GetHashCode();
+            if (type == VariantType.Improper) return Improper.GetHashCode();
+            return o?.GetHashCode() ?? 0; // None
         }
 
         public static bool operator==(Variant left, Variant right) => left.Equals(right);

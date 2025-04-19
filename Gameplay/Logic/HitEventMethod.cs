@@ -39,8 +39,8 @@ namespace MaTech.Gameplay.Logic {
         public void Invoke(in HitEvent hit) => hitEvents?.InvokeAll(LastHit = hit);
 
         public void Invoke(Variant data) {
-            if (data.As<IHitEventSource>() is {} results) Invoke(results);
-            else if (data.Is<HitEvent>()) Invoke(data.As<HitEvent>());
+            if (data.To<IHitEventSource>() is {} results) Invoke(results);
+            else if (data.Is<HitEvent>()) Invoke(data.To<HitEvent>());
         }
     }
 }

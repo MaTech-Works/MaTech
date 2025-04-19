@@ -9,70 +9,24 @@ using System.Collections.Generic;
 
 namespace MaTech.Common.Data {
     public partial struct Variant {
-        private Variant(bool value) {
-            Type = VariantType.Bool;
-            f = new FractionImproper(value ? 1 : 0);
-            d = f.Numerator;
-            o = null;
-        }
-        private Variant(int value) {
-            Type = VariantType.Int;
-            f = new FractionImproper(value);
-            d = f.Numerator;
-            o = null;
-        }
-        private Variant(float value) {
-            Type = VariantType.Float;
-            f = FractionImproper.FromFloat(value);
-            d = value;
-            o = null;
-        }
-        private Variant(double value) {
-            Type = VariantType.Double;
-            f = FractionImproper.FromFloat(value);
-            d = value;
-            o = null;
-        }
-        private Variant(MetaEnum value) {
-            Type = VariantType.Enum;
-            f = new FractionImproper(value.Value);
-            d = f.Numerator;
-            o = value.Name;
-        }
-        private Variant(FractionMixed value) {
-            Type = VariantType.Fraction;
-            f = value;
-            d = f.Double;
-            o = null;
-        }
-        private Variant(FractionImproper value) {
-            Type = VariantType.FractionSimple;
-            f = value;
-            d = f.Double;
-            o = null;
-        }
-        private Variant(string value) {
-            if (value == null) this = None;
-            else {
-                Type = VariantType.String;
-                f = FractionImproper.invalid;
-                d = Double.NaN;
-                o = value;
-            }
+        private Variant(Scalar value, Type type) {
+            s = value;
+            o = type;
         }
         private Variant(object value) {
-            if (value == null) this = None;
-            else {
-                // no type infer, object in object out
-                Type = VariantType.Object;
-                f = FractionImproper.invalid;
-                d = Double.NaN;
-                o = value;
-            }
+            s = Scalar.Invalid;
+            o = value;
         }
-        
-        private static readonly Type typeFraction = typeof(FractionMixed);
-        private static readonly Type typeFractionSimple = typeof(FractionImproper);
+
+        internal static readonly Type typeNone = null;
+        internal static readonly Type typeBool = typeof(bool);
+        internal static readonly Type typeInt = typeof(int);
+        internal static readonly Type typeFloat = typeof(float);
+        internal static readonly Type typeDouble = typeof(double);
+        internal static readonly Type typeScalar = typeof(Scalar);
+        internal static readonly Type typeEnum = typeof(MetaEnum);
+        internal static readonly Type typeMixed = typeof(FractionMixed);
+        internal static readonly Type typeImproper = typeof(FractionImproper);
         
         private static readonly HashSet<Type> typesConvertible = new HashSet<Type>() {
             typeof(bool),
@@ -88,8 +42,8 @@ namespace MaTech.Common.Data {
             typeof(double),
             typeof(decimal),
             typeof(string),
-            typeFraction,
-            typeFractionSimple,
+            typeMixed,
+            typeImproper,
         };
     }
 }
